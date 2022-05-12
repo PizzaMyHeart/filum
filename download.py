@@ -1,4 +1,3 @@
-from contextlib import nullcontext
 import requests
 from datetime import datetime
 import pprint
