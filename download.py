@@ -27,13 +27,28 @@ def get_thread(content):
     response_comments = content[1]['data']['children']
     
     comments = {}
-
-    def get_comments(comments_dict):
-
+    
+    def get_comments(comments_dict, path=[], depth_tracker=[]):
         for comment in comments_dict:
             id = comment['data']['name']
             replies = comment['data']['replies']
+            parent_id = comment['data']['parent_id']
+            depth = comment['data']['depth']
+            depth_tracker.append(depth)
+            print(depth_tracker)
+            if len(depth_tracker) >= 2 and depth_tracker[-1] == depth_tracker[-2]:
+                path[-1] = id
+            elif len(depth_tracker) >= 2 and depth_tracker[-1] < depth_tracker[-2]:
+                path = path[:depth+1]
+            else:
+                path.append(id)
             
+            '''
+            if parent_id in comments.keys():
+                path = comments[parent_id]['parent_id'] + '/' + path
+            if parent_id not in comments.keys():
+                path = comment['data']['parent_id'] + '/' + id
+            '''
             comments.update({
                 id: {
                     'author': comment['data']['author'],
@@ -43,24 +58,25 @@ def get_thread(content):
                     'upvotes': comment['data']['ups'],
                     'downvotes': comment['data']['downs'],
                     'score': comment['data']['score'],
-                    'parent_id': comment['data']['parent_id'],
+                    'parent_id': parent_id,
                     'is_submitter': comment['data']['is_submitter'],
-                    'depth': comment['data']['depth']
+                    'depth': comment['data']['depth'],
+                    'path': path
                     }
                 })
             if 'author_fullname' in comment['data'].keys():
                 comments[id]['author_id'] = comment['data']['author_fullname']
             else:
                 comments[id]['author_id'] = None
-                
-
-            
+            print(f'Path: {path}')
+            print(f"Depth: {comment['data']['depth']}")
+            print(f'{"="*comments[id]["depth"]}>{id}: \n{comments[id]["text"]}\n\n')
             
             if len(replies) == 0:
                 continue
             else:
-                get_comments(replies['data']['children'])
-            
+                get_comments(replies['data']['children'], path, depth_tracker)
+          
     get_comments(response_comments)
 
     parent_metadata = {
@@ -89,11 +105,11 @@ def get_thread(content):
     }
     return thread
 
-input = 'https://www.reddit.com/r/learnpython/comments/g1a88p/tk_vs_pyqtpyside_for_building_desktop_gui/'
+input = 'https://www.reddit.com/r/JuniorDoctorsUK/comments/uqzzz9/is_this_a_justified_reason_to_bleep_anaesthetic/'
 
 
 try:
     thread = get_thread(get_raw_content(process_url(input)))
-    pprint.pprint(thread)
-except KeyError as err:
+    #pprint.pprint(thread)
+except Exception as err:
     print(err)

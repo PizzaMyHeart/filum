@@ -1,7 +1,7 @@
 from typing import Text
 from textual.app import App
 from textual.widget import Widget
-from textual.widgets import Placeholder
+from textual.widgets import Placeholder, Button
 from textual.reactive import Reactive
 from textual import events
 from rich.panel import Panel
@@ -35,9 +35,8 @@ class InputText(Widget):
 
 class Filum(App):
     async def on_mount(self) -> None:
-        await self.view.dock(Placeholder(), edge='top', size=5)
-        await self.view.dock(InputText('url'),edge='bottom')
-        
+        await self.view.dock(Button(label='url', name='url'), edge='left', size=3)
+        await self.view.dock(InputText('url'), edge='left')
         
         
 
