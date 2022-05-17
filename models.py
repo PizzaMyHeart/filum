@@ -42,7 +42,7 @@ def disconnect_from_db(db=None, conn=None):
 def create_table_ancestors(conn):
     sql = '''CREATE TABLE IF NOT EXISTS ancestors 
             (row_id INTEGER PRIMARY KEY AUTOINCREMENT, 
-            parent_id TEXT, title TEXT, timestamp INTEGER, permalink TEXT UNIQUE, num_comments INTEGER, author TEXT, source TEXT)'''
+            parent_id TEXT, title TEXT, timestamp INTEGER, permalink TEXT UNIQUE, num_comments INTEGER, author TEXT, source TEXT);'''
     # TODO: Add timestamp at time of saving the thread
     try:
         conn.execute(sql)
@@ -59,7 +59,7 @@ def create_table_descendants(conn):
             parent_id TEXT, descendant_id TEXT, text TEXT, permalink TEXT, 
             author TEXT, author_id TEXT, is_submitter INTEGER,
             upvotes INTEGER, downvotes INTEGER, score INTEGER, timestamp INTEGER,
-            depth INTEGER, path TEXT)'''
+            depth INTEGER, path TEXT);'''
     try:
         conn.execute(sql)
     except OperationalError as err:
@@ -70,7 +70,7 @@ def insert_row(conn, values, table_name):
     if table_name == 'ancestors':
         to_insert = '''
                     ("parent_id", "title", "timestamp", "permalink", "num_comments", "author", "source") 
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?);
                     '''
 
     elif table_name == 'descendants':
@@ -78,7 +78,7 @@ def insert_row(conn, values, table_name):
                     ("ancestor_id", "author", "author_id", "depth", "downvotes", 
                     "is_submitter", "parent_id", "path", "permalink", "score",
                     "text", "timestamp", "upvotes")
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                     '''
 
     sql = f'''INSERT INTO {table_name}''' + to_insert
@@ -91,6 +91,11 @@ def insert_row(conn, values, table_name):
         if 'UNIQUE' in str(err):
             print('This item already exists in your database.')
 
+@connect
+def select_all_ancestors(conn):
+    sql = 'SELECT * FROM ancestors;'
+    results = conn.execute(sql).fetchall()
+    return results
 
 
 def main():
@@ -110,6 +115,9 @@ class Model_db(object):
     
     def insert_row(self, values, table_name):
         return insert_row(self._connection, values, table_name)
+
+    def select_all_ancestors(self):
+        return select_all_ancestors(self._connection)
 
 if __name__ == '__main__':
     main()
