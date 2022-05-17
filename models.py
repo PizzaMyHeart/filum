@@ -3,6 +3,10 @@ from sqlite3 import OperationalError, IntegrityError, ProgrammingError
 
 db_name = 'filum'
 
+
+class ItemAlreadyExistsError(Exception):
+    pass
+
 def connect_to_db(db=None):
     if db is None:
         my_db = ':memory:'
@@ -38,7 +42,7 @@ def disconnect_from_db(db=None, conn=None):
 def create_table_ancestors(conn):
     sql = '''CREATE TABLE IF NOT EXISTS ancestors 
             (row_id INTEGER PRIMARY KEY AUTOINCREMENT, 
-            parent_id TEXT, title TEXT, timestamp INTEGER, permalink TEXT, num_comments INTEGER, author TEXT, source TEXT)'''
+            parent_id TEXT, title TEXT, timestamp INTEGER, permalink TEXT UNIQUE, num_comments INTEGER, author TEXT, source TEXT)'''
     # TODO: Add timestamp at time of saving the thread
     try:
         conn.execute(sql)
@@ -84,6 +88,8 @@ def insert_row(conn, values, table_name):
         conn.commit()
     except IntegrityError as err:
         print(err)
+        if 'UNIQUE' in str(err):
+            print('This item already exists in your database.')
 
 
 

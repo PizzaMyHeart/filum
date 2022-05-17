@@ -2,7 +2,18 @@ from models import Model_db
 from download import Download
 import pprint
 import traceback
-url = 'https://www.reddit.com/r/JuniorDoctorsUK/comments/urj5fk/for_those_looking_at_positions_abroad_new_zealand/'
+
+import argparse
+
+parser = argparse.ArgumentParser(description='Archive discussion threads')
+
+parser.add_argument('--add', dest='url', help='add a URL')
+
+args = parser.parse_args()
+
+print(args.url)
+
+url = args.url
 
 class Controller(object):
     def __init__(self, model):
