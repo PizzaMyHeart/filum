@@ -9,6 +9,7 @@ parser = argparse.ArgumentParser(description='Archive discussion threads')
 
 parser.add_argument('--add', dest='url', help='add a URL')
 parser.add_argument('--list', action='store_true', help='show all saved posts')
+parser.add_argument('--list-descendants', dest='ancestor')
 args = parser.parse_args()
 
 print(args)
@@ -30,6 +31,10 @@ class Controller(object):
 
     def show_all_ancestors(self):
         results = self.model.select_all_ancestors()
+        print(results)
+
+    def show_all_descendants(self, ancestor):
+        results = self.model.select_all_descendants(ancestor)
         print(results)
 
 
@@ -69,6 +74,10 @@ def main():
 
     elif args.list:
         c.show_all_ancestors()
+
+
+    elif args.ancestor:
+        c.show_all_descendants(args.ancestor)
         
 
 if __name__ == '__main__':

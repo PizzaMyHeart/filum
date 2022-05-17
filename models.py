@@ -97,6 +97,24 @@ def select_all_ancestors(conn):
     results = conn.execute(sql).fetchall()
     return results
 
+@connect
+def select_all_descendants(conn, ancestor):
+    sql = f'''
+        WITH RECURSIVE comment_tree AS (
+            SELECT text, ancestor_id, depth
+            FROM descendants
+            WHERE ancestor_id = (?)
+            UNION ALL
+            SELECT c.text, c.ancestor_id, c.depth 
+            FROM descendants p
+                JOIN comment_tree c ON p.text = c.ancestor_id
+        )
+        SELECT * FROM comment_tree;
+        
+    '''
+    results = conn.execute(sql, (ancestor,)).fetchall()
+    return results
+
 
 def main():
 
@@ -118,6 +136,9 @@ class Model_db(object):
 
     def select_all_ancestors(self):
         return select_all_ancestors(self._connection)
+
+    def select_all_descendants(self, ancestor):
+        return select_all_descendants(self._connection, ancestor)
 
 if __name__ == '__main__':
     main()
