@@ -53,9 +53,10 @@ def main():
             )
         c.add_thread([values], 'ancestors')
         comments = []
-        for comment in thread['comments'].values():
+        for id, comment in thread['comments'].items():
             comments.append((
                 comment['ancestor_id'],
+                id,
                 comment['author'],
                 comment['author_id'],
                 comment['depth'],

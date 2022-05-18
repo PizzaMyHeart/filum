@@ -56,7 +56,7 @@ def create_table_descendants(conn):
     sql = '''CREATE TABLE IF NOT EXISTS descendants 
             (row_id INTEGER PRIMARY KEY AUTOINCREMENT, 
             ancestor_id INTEGER REFERENCES ancestors(parent_id), 
-            parent_id TEXT, descendant_id TEXT, text TEXT, permalink TEXT, 
+            parent_id TEXT, id TEXT, text TEXT, permalink TEXT, 
             author TEXT, author_id TEXT, is_submitter INTEGER,
             upvotes INTEGER, downvotes INTEGER, score INTEGER, timestamp INTEGER,
             depth INTEGER, path TEXT);'''
@@ -75,10 +75,10 @@ def insert_row(conn, values, table_name):
 
     elif table_name == 'descendants':
         to_insert = '''
-                    ("ancestor_id", "author", "author_id", "depth", "downvotes", 
+                    ("ancestor_id", "id", "author", "author_id", "depth", "downvotes", 
                     "is_submitter", "parent_id", "path", "permalink", "score",
                     "text", "timestamp", "upvotes")
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                     '''
 
     sql = f'''INSERT INTO {table_name}''' + to_insert
