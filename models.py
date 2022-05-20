@@ -42,7 +42,10 @@ def disconnect_from_db(db=None, conn=None):
 def create_table_ancestors(conn):
     sql = '''CREATE TABLE IF NOT EXISTS ancestors 
             (row_id INTEGER PRIMARY KEY AUTOINCREMENT, 
-            parent_id TEXT, title TEXT, timestamp INTEGER, permalink TEXT UNIQUE, num_comments INTEGER, author TEXT, source TEXT);'''
+            parent_id TEXT, title TEXT, timestamp INTEGER, 
+            permalink TEXT UNIQUE, num_comments INTEGER, author TEXT, source TEXT,
+            tags TEXT
+            );'''
     # TODO: Add timestamp at time of saving the thread
     try:
         conn.execute(sql)
@@ -56,10 +59,13 @@ def create_table_descendants(conn):
     sql = '''CREATE TABLE IF NOT EXISTS descendants 
             (row_id INTEGER PRIMARY KEY AUTOINCREMENT, 
             ancestor_id INTEGER REFERENCES ancestors(parent_id), 
-            parent_id TEXT, id TEXT, text TEXT, permalink TEXT, 
+            id TEXT,
+            parent_id TEXT,
+            text TEXT, permalink TEXT, 
             author TEXT, author_id TEXT, is_submitter INTEGER,
             upvotes INTEGER, downvotes INTEGER, score INTEGER, timestamp INTEGER,
-            depth INTEGER, path TEXT);'''
+            depth INTEGER, path TEXT,
+            FOREIGN KEY (parent_id) REFERENCES descendants(id));'''
     try:
         conn.execute(sql)
     except OperationalError as err:
@@ -99,20 +105,25 @@ def select_all_ancestors(conn):
 
 @connect
 def select_all_descendants(conn, ancestor):
-    sql = f'''
-        WITH RECURSIVE comment_tree AS (
-            SELECT text, ancestor_id, depth
+    sql_r = f'''
+        WITH RECURSIVE comment_tree (depth, id, parent_id, text, author) AS (
+            SELECT 0, id, parent_id, text, author
             FROM descendants
-            WHERE ancestor_id = (?)
+            WHERE ancestor_id = (?) AND parent_id = (?)
             UNION ALL
-            SELECT c.text, c.ancestor_id, c.depth 
-            FROM descendants p
-                JOIN comment_tree c ON p.text = c.ancestor_id
+            SELECT c.depth + 1, c.id, d.parent_id, c.text, c.author
+                FROM comment_tree c
+                    JOIN descendants d ON c.id = d.parent_id
         )
-        SELECT * FROM comment_tree;
+        SELECT * FROM comment_tree ORDER BY parent_id, depth, id;
         
     '''
-    results = conn.execute(sql, (ancestor,)).fetchall()
+    sql = f'''
+        SELECT depth, id, parent_id, text, author
+        FROM descendants
+        WHERE ancestor_id = (?);
+    '''
+    results = conn.execute(sql, (ancestor, )).fetchall()
     return results
 
 

@@ -1,18 +1,25 @@
 import requests
+import re
 from datetime import datetime
 import pprint
+from bs4 import BeautifulSoup
+import traceback
 
 class Download:
     def __init__(self, url):
-        self.input = url
+        self.url = url
+        return
 
-
-    def process_url(self, url):
+    def process_url(self):
         # Reddit's unofficial API - add a '.json' suffix to any url
-        if 'reddit.com' in url:
-            return (url + '.json')
+        if 'reddit.com' in self.url:
+            self.url += '.json'
+            self.site = 'reddit'
+        elif 'news.ycombinator.com' in self.url:
+            self.site = 'hn'
+        return self
 
-    def get_raw_content(self, url):
+    def get_response(self):
         headers = {
             'user-agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:100.0) Gecko/20100101 Firefox/100.0',
             'dnt': '1',
@@ -20,13 +27,28 @@ class Download:
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
             'accept-language': 'en-US,en;q=0.5'
             }
-        r = requests.get(url, headers=headers)
-        return r.json()
+        self.r = requests.get(self.url, headers=headers)
+        return self
+
+    def parse_html(self, raw):
+        self.soup = BeautifulSoup(raw, 'html.parser')
+        return self
+    
+    def prepare_response(self):
+        if self.site == 'reddit':
+            self.r = self.r.json()
+        else:
+            self.r = self.parse_html(self.r.text)
+        return self
 
     def current_timestamp(self):
         return datetime.timestamp(datetime.now())
 
-    def get_thread(self, content):
+    
+        
+
+    def parse_reddit(self):
+        content = self.r
         response_parent = content[0]['data']['children'][0]['data']
         response_comments = content[1]['data']['children']
         
@@ -48,12 +70,7 @@ class Download:
                 else:
                     path.append(id)
                 
-                '''
-                if parent_id in comments.keys():
-                    path = comments[parent_id]['parent_id'] + '/' + path
-                if parent_id not in comments.keys():
-                    path = comment['data']['parent_id'] + '/' + id
-                '''
+
                 comments.update({
                     id: {
                         'author': comment['data']['author'],
@@ -97,7 +114,7 @@ class Download:
             'downvotes': response_parent['downs'],
             'score': response_parent['score'],
             'id': response_parent['name'],
-            'source': 'reddit'
+            'source': self.site
         }
 
         if 'author_fullname' in response_parent.keys():
@@ -111,19 +128,42 @@ class Download:
             'comments': comments
         }
         return thread
+    
+    def parse_hn(self):
+        soup = self.soup
+        comments = soup.find_all('tr', class_='athing comtr')
+        for comment in comments:
+            depth = comment.find('td', class_='ind').attrs['indent']
+            author = comment.find('a', class_='hnuser').contents[0]
+            permalink = comment.find('span', class_='age').find('a').attrs['href']
+            comment_field = comment.find('div', class_='comment')
+            reply_span = comment_field.find('div', class_='reply')
+            reply_span.decompose()
+            text = [string for string in comment_field.strings]
+            print(depth, author, permalink)
+            print(' '.join(text))
+            print('------')
+    
+    def get_thread(self):
+        if self.site == 'reddit':
+            self.parse_reddit()
+        elif self.site == 'hn':
+            self.parse_hn()
 
-    def main(self):
-        return self.get_thread(self.get_raw_content(self.process_url(self.input)))
+    def run(self):
+        self.process_url().get_response().prepare_response().get_thread()
+        
 
-url = 'https://www.reddit.com/r/JuniorDoctorsUK/comments/uqzzz9/is_this_a_justified_reason_to_bleep_anaesthetic/'
+url = 'https://www.reddit.com/r/printSF/comments/usthvg/just_finished_kingdoms_of_death_book_4_of_the/'
+
 def main():
-    thread = Download(url).main()
-    pprint.pprint(thread)
+    soup = Download(url).process_url().get_response().prepare_response().get_thread()
+    
 
 if __name__ == '__main__':
     try:
         main()
     except Exception as err:
-        print(err)
+        traceback.print_exc()
 
 

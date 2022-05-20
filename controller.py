@@ -2,8 +2,9 @@ from models import Model_db
 from download import Download
 import pprint
 import traceback
-
+from rich.pretty import pprint
 import argparse
+from view import CommentView
 
 parser = argparse.ArgumentParser(description='Archive discussion threads')
 
@@ -16,8 +17,9 @@ print(args)
 
 
 class Controller(object):
-    def __init__(self, model):
+    def __init__(self, model, view):
         self.model = model
+        self.view = view
         
 
     def download_thread(self, url):
@@ -31,15 +33,20 @@ class Controller(object):
 
     def show_all_ancestors(self):
         results = self.model.select_all_ancestors()
-        print(results)
+        for result in results:
+            self.view.display_table(result)
 
     def show_all_descendants(self, ancestor):
         results = self.model.select_all_descendants(ancestor)
-        print(results)
-
+        '''
+        for item in results:
+            pprint('|'*(item[2] + 1) + item[0])
+        '''
+        for result in results:
+            self.view.display_indented(result)
 
 def main():
-    c = Controller(Model_db())
+    c = Controller(Model_db(), CommentView())
     if args.url:
         thread = c.download_thread(args.url)
         values = (
