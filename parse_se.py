@@ -1,7 +1,7 @@
 '''Parses the BeautifulSoup object from a Stack Exchange page.
 '''
 from markdownify import markdownify as md
-from helpers import root_url, current_timestamp
+from helpers import root_url, current_timestamp, bs4_to_md
 
 def parse_se(obj):
     soup = obj.soup.find(id='content')
@@ -21,9 +21,7 @@ def parse_se(obj):
         
     def get_body(item):
         body = item.find('div', class_='s-prose js-post-body')
-        body = md(str(body))
-        body = body.replace('\n', '')
-        return body
+        return bs4_to_md(body)
     def get_author(item):
         # The SE question author is last in the list of users on a question footer
         if item.find_all('div', class_='user-details')[-1].a:
@@ -94,7 +92,7 @@ def parse_se(obj):
 
         children.update({
             answer_id:{
-                'author': question_author,
+                'author': answer_author,
                 'text': answer_body,
                 'ancestor_id': question_id,
                 'depth': 1,

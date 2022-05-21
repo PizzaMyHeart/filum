@@ -3,7 +3,7 @@ Hacker News item.
 
 '''
 
-from helpers import current_timestamp
+from helpers import current_timestamp, bs4_to_md
 
 def parse_hn(obj):
     soup = obj.soup
@@ -15,11 +15,10 @@ def parse_hn(obj):
     comment_data = {}
 
     def get_comment_text(item):
-        comment_field = item.find('div', class_='comment')
-        reply_span = comment_field.find('div', class_='reply')
-        reply_span.decompose()
-        text = [string for string in comment_field.strings]
-        return ' '.join(text)
+        comment_field = item.find('span', class_='commtext')
+        #reply_span = comment_field.find('div', class_='reply')
+        #reply_span.decompose()
+        return bs4_to_md(comment_field)
 
     if title:            
         title = title.contents[0]

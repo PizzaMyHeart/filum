@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 import traceback
 from parse_hn import parse_hn
 from parse_se import parse_se
-from helpers import current_timestamp
+from helpers import current_timestamp, html_to_md
 
 class Download:
     def __init__(self, url):
@@ -21,6 +21,7 @@ class Download:
             self.site = 'hn'
         elif 'stackexchange.com' in self.url or 'stackoverflow.com' in self.url:
             self.site = 'se'
+        print(self.site)
         return self
 
     def get_response(self):
@@ -39,6 +40,7 @@ class Download:
         return self
     
     def prepare_response(self):
+        print(self.site)
         if self.site == 'reddit':
             self.r = self.r.json()
         else:
@@ -50,6 +52,7 @@ class Download:
 
     def parse_reddit(self):
         content = self.r
+        print(content)
         response_parent = content[0]['data']['children'][0]['data']
         response_comments = content[1]['data']['children']
         
@@ -75,7 +78,7 @@ class Download:
                 comments.update({
                     id: {
                         'author': comment['data']['author'],
-                        'text': comment['data']['body'],
+                        'text': html_to_md(comment['data']['body_html']),
                         'timestamp': comment['data']['created_utc'],
                         'permalink': comment['data']['permalink'],
                         'upvotes': comment['data']['ups'],
@@ -92,9 +95,6 @@ class Download:
                     comments[id]['author_id'] = comment['data']['author_fullname']
                 else:
                     comments[id]['author_id'] = None
-                #print(f'Path: {path}')
-                #print(f"Depth: {comment['data']['depth']}")
-                #print(f'{"="*comments[id]["depth"]}>{id}: \n{comments[id]["text"]}\n\n')
                 
                 if len(replies) == 0:
                     continue
@@ -102,10 +102,10 @@ class Download:
                     get_comments(replies['data']['children'], path, depth_tracker)
             
         get_comments(response_comments)
-        body = response_parent['selftext'] if response_parent['selftext'] else None
+        body = response_parent['selftext_html'] if response_parent['selftext_html'] else None
         parent_metadata = {
             'title': response_parent['title'],
-            'body': body,
+            'body': html_to_md(body),
             'timestamp': response_parent['created_utc'],
             'permalink': response_parent['permalink'],
             'num_comments': response_parent['num_comments'],
@@ -140,9 +140,10 @@ hn_url_root = 'https://news.ycombinator.com/item?id=31447804'
 hn_url_comment = 'https://news.ycombinator.com/item?id=31451536'
 se_url_root = 'https://stats.stackexchange.com/questions/6/the-two-cultures-statistics-vs-machine-learning'
 se_url_answer = 'https://stackoverflow.com/questions/15340582/python-extract-pattern-matches/15340666#15340666'
+reddit_url_root = 'https://www.reddit.com/r/boardgames/comments/utkslk/tiny_epic_which_one_would_you_recommend/'
 
 def main():
-    Download(se_url_root).process_url().get_response().prepare_response().get_thread()
+    Download(reddit_url_root).process_url().get_response().prepare_response().get_thread()
     
 
 if __name__ == '__main__':
