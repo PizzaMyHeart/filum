@@ -4,6 +4,7 @@ import pprint
 from bs4 import BeautifulSoup
 import traceback
 from parse_hn import parse_hn
+from parse_se import parse_se
 from helpers import current_timestamp
 
 class Download:
@@ -18,6 +19,8 @@ class Download:
             self.site = 'reddit'
         elif 'news.ycombinator.com' in self.url:
             self.site = 'hn'
+        elif 'stackexchange.com' in self.url or 'stackoverflow.com' in self.url:
+            self.site = 'se'
         return self
 
     def get_response(self):
@@ -126,6 +129,8 @@ class Download:
             return self.parse_reddit()
         elif self.site == 'hn':
             return parse_hn(self)
+        elif self.site == 'se':
+            return parse_se(self)
 
     def run(self):
         return self.process_url().get_response().prepare_response().get_thread()
@@ -133,9 +138,10 @@ class Download:
 
 hn_url_root = 'https://news.ycombinator.com/item?id=31447804'
 hn_url_comment = 'https://news.ycombinator.com/item?id=31451536'
+se_url_root = 'https://stats.stackexchange.com/questions/6/the-two-cultures-statistics-vs-machine-learning'
 
 def main():
-    Download(hn_url_comment).process_url().get_response().prepare_response().get_thread()
+    Download(se_url_root).process_url().get_response().prepare_response().get_thread()
     
 
 if __name__ == '__main__':

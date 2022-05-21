@@ -1,3 +1,8 @@
+'''Parses the BeautifulSoup object created from the response from 
+Hacker News.
+
+'''
+
 from helpers import current_timestamp
 
 def parse_hn(obj):
@@ -54,6 +59,7 @@ def parse_hn(obj):
         'body': body,
         'author': parent_author,
         'id': parent_id,
+        'score': score,
         'source': obj.site
     }
 
