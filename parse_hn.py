@@ -1,5 +1,5 @@
-'''Parses the BeautifulSoup object created from the response from 
-Hacker News.
+'''Parses the BeautifulSoup object created from the response from a
+Hacker News item.
 
 '''
 

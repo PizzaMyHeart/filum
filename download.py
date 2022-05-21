@@ -139,9 +139,10 @@ class Download:
 hn_url_root = 'https://news.ycombinator.com/item?id=31447804'
 hn_url_comment = 'https://news.ycombinator.com/item?id=31451536'
 se_url_root = 'https://stats.stackexchange.com/questions/6/the-two-cultures-statistics-vs-machine-learning'
+se_url_answer = 'https://stackoverflow.com/questions/15340582/python-extract-pattern-matches/15340666#15340666'
 
 def main():
-    Download(se_url_root).process_url().get_response().prepare_response().get_thread()
+    Download(se_url_answer).process_url().get_response().prepare_response().get_thread()
     
 
 if __name__ == '__main__':
