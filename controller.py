@@ -23,11 +23,13 @@ class Controller(object):
         
 
     def download_thread(self, url):
-        return Download(url).main()
+        return Download(url).run()
 
-    def add_thread(self, values, table_name):
+    def add_thread(self, thread):
         try:
-            self.model.insert_row(values, table_name)
+            self.model.insert_row(thread['parent_data'], 'ancestors')
+            for comment in thread['comment_data']:
+                self.model.insert_row(thread['comment_data'][comment], 'descendants')
         except Exception as err:
             traceback.print_exc()
 
@@ -49,36 +51,8 @@ def main():
     c = Controller(Model_db(), CommentView())
     if args.url:
         thread = c.download_thread(args.url)
-        values = (
-            thread['parent_metadata']['id'], 
-            thread['parent_metadata']['title'],
-            thread['parent_metadata']['timestamp'],
-            thread['parent_metadata']['permalink'],
-            thread['parent_metadata']['num_comments'],
-            thread['parent_metadata']['author'],
-            thread['parent_metadata']['source']
-            )
-        c.add_thread([values], 'ancestors')
-        comments = []
-        for id, comment in thread['comments'].items():
-            comments.append((
-                comment['ancestor_id'],
-                id,
-                comment['author'],
-                comment['author_id'],
-                comment['depth'],
-                comment['downvotes'],
-                comment['is_submitter'],
-                comment['parent_id'],
-                comment['path'],
-                comment['permalink'],
-                comment['score'],
-                comment['text'],
-                comment['timestamp'],
-                comment['upvotes']
-            ))
-        #pprint.pprint(comments)
-        c.add_thread(comments, 'descendants')      
+        c.add_thread(thread)
+            
 
     elif args.list:
         c.show_all_ancestors()

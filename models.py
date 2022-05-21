@@ -42,7 +42,7 @@ def disconnect_from_db(db=None, conn=None):
 def create_table_ancestors(conn):
     sql = '''CREATE TABLE IF NOT EXISTS ancestors 
             (row_id INTEGER PRIMARY KEY AUTOINCREMENT, 
-            parent_id TEXT, title TEXT, timestamp INTEGER, 
+            id TEXT, title TEXT, body TEXT, timestamp INTEGER, score INTEGER,
             permalink TEXT UNIQUE, num_comments INTEGER, author TEXT, source TEXT,
             tags TEXT
             );'''
@@ -72,25 +72,16 @@ def create_table_descendants(conn):
         print(err)
 
 @connect
-def insert_row(conn, values, table_name):
-    if table_name == 'ancestors':
-        to_insert = '''
-                    ("parent_id", "title", "timestamp", "permalink", "num_comments", "author", "source") 
-                    VALUES (?, ?, ?, ?, ?, ?, ?);
-                    '''
-
-    elif table_name == 'descendants':
-        to_insert = '''
-                    ("ancestor_id", "id", "author", "author_id", "depth", "downvotes", 
-                    "is_submitter", "parent_id", "path", "permalink", "score",
-                    "text", "timestamp", "upvotes")
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-                    '''
-
-    sql = f'''INSERT INTO {table_name}''' + to_insert
+def insert_row(conn, thread:dict, table_name):
+    columns = thread.keys()
+    values = tuple(thread.values())
+    print(values)
+    to_insert = f'''({', '.join(columns)}) VALUES ({', '.join(['?']*len(columns))})'''
+    sql = f'''INSERT INTO {table_name} ''' + to_insert
+    print(sql)
     # TODO: Skip insert if already exists
     try:
-        conn.executemany(sql, values)
+        conn.executemany(sql, (values,))
         conn.commit()
     except IntegrityError as err:
         print(err)
@@ -142,8 +133,8 @@ class Model_db(object):
         create_table_ancestors(self._connection)
         create_table_descendants(self._connection)
     
-    def insert_row(self, values, table_name):
-        return insert_row(self._connection, values, table_name)
+    def insert_row(self, thread, table_name):
+        return insert_row(self._connection, thread, table_name)
 
     def select_all_ancestors(self):
         return select_all_ancestors(self._connection)
