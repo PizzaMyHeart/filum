@@ -5,6 +5,7 @@ from helpers import root_url, current_timestamp
 
 def parse_se(obj):
     soup = obj.soup.find(id='content')
+    root_is_answer = False
     if '#' in obj.url:
         print(obj.url)
         root_is_answer = True
@@ -33,10 +34,34 @@ def parse_se(obj):
         else:
             author = item.find_all('div', class_='user-details')[-1].span.string
         return author.strip()
+
+    def get_comments(comments):
+            for comment in comments:
+                comment_id = comment.get('data-comment-id')
+                comment_score = comment.get('data-comment-score')
+                comment_body = md(str(comment.find('span', class_='comment-copy'))).replace('\n', '')
+                comment_author = comment.select('.comment-user')[0].string
+                comment_timestamp = comment.find('span', class_='relativetime-clean').attrs['title'].split('Z')[0]
+                print(comment_id, comment_author, comment_score)
+                print(comment_body, comment_timestamp)
+
+                children.update({
+                    comment_id:{
+                        'author': comment_author,
+                        'text': comment_body,
+                        'ancestor_id': question_id,
+                        'depth': 2,
+                        'score': comment_score
+                    }
+                })
     question_body = get_body(question)
     question_author = get_author(question)
     
     question_timestamp = soup.time.attrs['datetime']
+    if not root_is_answer:
+        # Don't bother extracting comments if the user wants to save a specific answer
+        question_comments = question.find('div', class_='comments').find_all('li', class_='comment')
+        get_comments(question_comments)
     print(title, question_timestamp, question_score)
     print(question_body)
 
@@ -79,28 +104,12 @@ def parse_se(obj):
             }
         })
 
-        comments = answer.find_all('li', class_='comment')
+        answer_comments = answer.find_all('li', class_='comment')
+        if len(answer_comments) == 0:
+                continue
         
-        if len(comments) == 0:
-            continue
-        for comment in comments:
-            comment_id = comment.get('data-comment-id')
-            comment_score = comment.get('data-comment-score')
-            comment_body = md(str(comment.find('span', class_='comment-copy'))).replace('\n', '')
-            comment_author = comment.select('.comment-user')[0].string
-            comment_timestamp = comment.find('span', class_='relativetime-clean').attrs['title'].split('Z')[0]
-            print(comment_id, comment_author, comment_score)
-            print(comment_body, comment_timestamp)
+        get_comments(answer_comments)
 
-            children.update({
-                comment_id:{
-                    'author': comment_author,
-                    'text': comment_body,
-                    'ancestor_id': question_id,
-                    'depth': 2,
-                    'score': comment_score
-                }
-            })
     thread = {
         'parent_data': parent_data,
         'comment_data': children,
