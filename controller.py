@@ -42,16 +42,19 @@ class Controller(object):
     def show_all_ancestors(self):
         results = self.model.select_all_ancestors()
         self.view.display_table(results)
+    
+    def show_one_ancestor(self, id):
+        columns = ('row_id','permalink', 'author', 'posted_timestamp', 'score', 'body')
+        results = self.model.select_row(columns, 'ancestor', id)
+        self.view.display_top_level(results)
 
     def show_all_descendants(self, ancestor):
         results = self.model.select_all_descendants(ancestor)
-        '''
-        for item in results:
-            pprint('|'*(item[2] + 1) + item[0])
+        self.view.display_indented(results)
         '''
         for result in results:
             self.view.display_indented(result)
-
+        '''
 def main():
     c = Controller(Model_db(), CommentView())
     if args.url:
@@ -64,7 +67,9 @@ def main():
 
 
     elif args.ancestor:
+        #c.show_one_ancestor(args.ancestor)
         c.show_all_descendants(args.ancestor)
+
         
 
 if __name__ == '__main__':
