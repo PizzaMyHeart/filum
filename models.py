@@ -1,8 +1,8 @@
 import sqlite3
 from sqlite3 import OperationalError, IntegrityError, ProgrammingError
+import pprint
 
 db_name = 'filum'
-
 
 class ItemAlreadyExistsError(Exception):
     pass
@@ -42,8 +42,8 @@ def disconnect_from_db(db=None, conn=None):
 def create_table_ancestors(conn):
     sql = '''CREATE TABLE IF NOT EXISTS ancestors 
             (row_id INTEGER PRIMARY KEY AUTOINCREMENT, 
-            id TEXT, title TEXT, body TEXT, timestamp INTEGER, score INTEGER,
-            permalink TEXT UNIQUE, num_comments INTEGER, author TEXT, source TEXT,
+            id TEXT, title TEXT, body TEXT, posted_timestamp INTEGER, saved_timestamp INTEGER, 
+            score INTEGER, permalink TEXT UNIQUE, num_comments INTEGER, author TEXT, source TEXT,
             tags TEXT
             );'''
     # TODO: Add timestamp at time of saving the thread
@@ -58,7 +58,7 @@ def create_table_ancestors(conn):
 def create_table_descendants(conn):
     sql = '''CREATE TABLE IF NOT EXISTS descendants 
             (row_id INTEGER PRIMARY KEY AUTOINCREMENT, 
-            ancestor_id INTEGER REFERENCES ancestors(parent_id), 
+            ancestor_id INTEGER REFERENCES ancestors(row_id), 
             id TEXT,
             parent_id TEXT,
             text TEXT, permalink TEXT, 
@@ -75,46 +75,36 @@ def create_table_descendants(conn):
 def insert_row(conn, thread:dict, table_name):
     columns = thread.keys()
     values = tuple(thread.values())
-    print(values)
+    #pprint.pprint(thread)
     to_insert = f'''({', '.join(columns)}) VALUES ({', '.join(['?']*len(columns))})'''
     sql = f'''INSERT INTO {table_name} ''' + to_insert
-    print(sql)
-    # TODO: Skip insert if already exists
+    #print(sql)
     try:
         conn.executemany(sql, (values,))
         conn.commit()
     except IntegrityError as err:
         print(err)
         if 'UNIQUE' in str(err):
-            print('This item already exists in your database.')
+            raise ItemAlreadyExistsError
 
 @connect
 def select_all_ancestors(conn):
-    sql = 'SELECT * FROM ancestors;'
+    sql = 'SELECT row_id, title, posted_timestamp, saved_timestamp, score, source, tags FROM ancestors;'
     results = conn.execute(sql).fetchall()
     return results
 
 @connect
-def select_all_descendants(conn, ancestor):
-    sql_r = f'''
-        WITH RECURSIVE comment_tree (depth, id, parent_id, text, author) AS (
-            SELECT 0, id, parent_id, text, author
-            FROM descendants
-            WHERE ancestor_id = (?) AND parent_id = (?)
-            UNION ALL
-            SELECT c.depth + 1, c.id, d.parent_id, c.text, c.author
-                FROM comment_tree c
-                    JOIN descendants d ON c.id = d.parent_id
-        )
-        SELECT * FROM comment_tree ORDER BY parent_id, depth, id;
-        
-    '''
+def select_all_descendants(conn, id):
     sql = f'''
-        SELECT depth, id, parent_id, text, author
-        FROM descendants
-        WHERE ancestor_id = (?);
+        WITH joined AS (
+            SELECT d.depth, d.row_id, a.id, d.text, d.author, a.row_id AS key 
+            FROM descendants d 
+            JOIN ancestors a 
+            ON d.ancestor_id = a.id
+            ) 
+        SELECT * FROM joined WHERE key = (?)
     '''
-    results = conn.execute(sql, (ancestor, )).fetchall()
+    results = conn.execute(sql, (id,)).fetchall()
     return results
 
 

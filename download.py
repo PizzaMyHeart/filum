@@ -52,7 +52,6 @@ class Download:
 
     def parse_reddit(self):
         content = self.r
-        print(content)
         response_parent = content[0]['data']['children'][0]['data']
         response_comments = content[1]['data']['children']
         
@@ -61,12 +60,12 @@ class Download:
         def get_comments(comments_dict, path=[], depth_tracker=[]):
             for comment in comments_dict:
                 id = comment['data']['name']
+                #print('replies: ', comment['data']['replies'])
                 replies = comment['data']['replies']
                 parent_id = comment['data']['parent_id']
                 is_submitter = 1 if comment['data']['is_submitter'] else 0
                 depth = comment['data']['depth']
                 depth_tracker.append(depth)
-                #print(depth_tracker)
                 if len(depth_tracker) >= 2 and depth_tracker[-1] == depth_tracker[-2]:
                     path[-1] = id
                 elif len(depth_tracker) >= 2 and depth_tracker[-1] < depth_tracker[-2]:
@@ -74,11 +73,12 @@ class Download:
                 else:
                     path.append(id)
                 
-
+                comment_body = comment['data']['body_html']
+                comment_body = html_to_md(comment_body)
                 comments.update({
                     id: {
                         'author': comment['data']['author'],
-                        'text': html_to_md(comment['data']['body_html']),
+                        'text': comment_body,
                         'timestamp': comment['data']['created_utc'],
                         'permalink': comment['data']['permalink'],
                         'upvotes': comment['data']['ups'],
@@ -91,6 +91,7 @@ class Download:
                         'path': '/'.join(path)
                         }
                     })
+                print(html_to_md(comment['data']['body_html']))
                 if 'author_fullname' in comment['data'].keys():
                     comments[id]['author_id'] = comment['data']['author_fullname']
                 else:
@@ -106,18 +107,18 @@ class Download:
         parent_metadata = {
             'title': response_parent['title'],
             'body': html_to_md(body),
-            'timestamp': response_parent['created_utc'],
             'permalink': response_parent['permalink'],
             'num_comments': response_parent['num_comments'],
             'author': response_parent['author'],
             'score': response_parent['score'],
             'id': response_parent['name'],
-            'source': self.site
+            'source': self.site,
+            'posted_timestamp': response_parent['created_utc'],
+            'saved_timestamp': current_timestamp()
         }
 
         thread = {
             'parent_data': parent_metadata,
-            'timestamp': current_timestamp(),
             'comment_data': comments
         }
         return thread

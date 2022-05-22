@@ -1,7 +1,7 @@
 '''Parses the BeautifulSoup object from a Stack Exchange page.
 '''
 from markdownify import markdownify as md
-from helpers import root_url, current_timestamp, bs4_to_md
+from helpers import root_url, current_timestamp, bs4_to_md, iso_to_timestamp
 
 def parse_se(obj):
     soup = obj.soup.find(id='content')
@@ -56,6 +56,7 @@ def parse_se(obj):
     question_author = get_author(question)
     
     question_timestamp = soup.time.attrs['datetime']
+    question_timestamp = iso_to_timestamp(question_timestamp)
     if not root_is_answer:
         # Don't bother extracting comments if the user wants to save a specific answer
         question_comments = question.find('div', class_='comments').find_all('li', class_='comment')
@@ -70,7 +71,9 @@ def parse_se(obj):
     'id': question_id,
     'score': question_score,
     'permalink': question_permalink,
-    'source': obj.site
+    'source': obj.site,
+    'posted_timestamp': question_timestamp,
+    'saved_timestamp': current_timestamp()
     }
 
     if root_is_answer:
@@ -110,8 +113,7 @@ def parse_se(obj):
 
     thread = {
         'parent_data': parent_data,
-        'comment_data': children,
-        'timestamp': current_timestamp()
+        'comment_data': children
     }
 
     return thread

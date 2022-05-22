@@ -3,7 +3,7 @@ Hacker News item.
 
 '''
 
-from helpers import current_timestamp, bs4_to_md
+from helpers import current_timestamp, bs4_to_md, iso_to_timestamp
 
 def parse_hn(obj):
     soup = obj.soup
@@ -31,8 +31,8 @@ def parse_hn(obj):
         title = parent.find('span', class_='onstory').a.contents[0]
         body = get_comment_text(parent)
         parent_author = parent.find('a', class_='hnuser').contents[0]
-    timestamp = parent.find('span', class_='age').attrs['title']
-    print(parent_id, parent_author, title, score, body, timestamp)
+    parent_timestamp = parent.find('span', class_='age').attrs['title']
+    parent_timestamp = iso_to_timestamp(parent_timestamp)
     
     for comment in comments:
         depth = comment.find('td', class_='ind').attrs['indent']
@@ -59,13 +59,14 @@ def parse_hn(obj):
         'author': parent_author,
         'id': parent_id,
         'score': score,
-        'source': obj.site
+        'source': obj.site,
+        'posted_timestamp': parent_timestamp,
+        'saved_timestamp': current_timestamp()
     }
 
     thread = {
         'parent_data': parent_data,
-        'comment_data': comment_data,
-        'timestamp': current_timestamp()
+        'comment_data': comment_data
     }
 
     return thread
