@@ -14,7 +14,7 @@ parser.add_argument('--list', action='store_true', help='show all saved posts')
 parser.add_argument('--list-descendants', dest='ancestor')
 args = parser.parse_args()
 
-print(args)
+#print(args)
 
 
 class Controller(object):

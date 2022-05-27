@@ -14,6 +14,8 @@ def connect_to_db(db=None):
     else:
         my_db = f'{db}.db'
     conn = sqlite3.connect(my_db)
+    # Return Row object from queries to allow accessing columns by name
+    conn.row_factory = sqlite3.Row
     return conn
 
 def connect(func):
@@ -46,7 +48,6 @@ def create_table_ancestors(conn):
             score INTEGER, permalink TEXT UNIQUE, num_comments INTEGER, author TEXT, source TEXT,
             tags TEXT
             );'''
-    # TODO: Add timestamp at time of saving the thread
     try:
         conn.execute(sql)
     except OperationalError as err:
@@ -90,7 +91,6 @@ def insert_row(conn, thread:dict, table_name):
 @connect
 def select_one_ancestor(conn, columns, id):
     columns = ', '.join(columns)
-    print(columns)
     sql = f'''SELECT {columns} FROM ancestors WHERE row_id = ?'''
     results = conn.execute(sql, (id,)).fetchall()
     # TODO: Rewrite this to return a dict

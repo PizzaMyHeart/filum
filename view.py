@@ -6,8 +6,9 @@ from rich.panel import Panel
 from rich import box
 from rich.pretty import pprint
 from helpers import html_to_md
+from rich.prompt import Prompt
 
-console = Console()
+console = Console(color_system='standard')
 
 
 class CommentView():
@@ -33,9 +34,8 @@ class CommentView():
         console.print(table)
     
     def display_top_level(self, item):
-        print(item)
-        (row_id, permalink, author, posted_timestamp, score, body) = item[0]
-        to_print = f'{author} {score} {permalink}\n{body}'
+        item = item[0]
+        to_print = f'{item["author"]} {item["score"]} {item["permalink"]}\n{item["body"]}'
         
         console.print(to_print)
     
@@ -45,9 +45,8 @@ class CommentView():
         @group()
         def make_panels(results: list):
             for result in results:
-                (depth, id, parent_id, text, author, key) = result
-                item = f'\n[red]{author}[/red] [[green]{id}[/green]]\n{text}\n\n'
-                yield Padding(item, (0, 0, 0, depth))
+                item = f'[red]{result["author"]}[/red] [[green]{result["id"]}[/green]]\n{result["text"]}\n\n'
+                yield Padding(item, (0, 0, 0, result["depth"]))
 
         self.console.print(make_panels(results))
         '''

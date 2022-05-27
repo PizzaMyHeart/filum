@@ -9,6 +9,7 @@ def parse_hn(obj):
     soup = obj.soup
     parent = soup.find('table', class_='fatitem')
     parent_id = parent.find('tr', class_='athing').attrs['id']
+    parent_permalink = 'https://news.ycombinator.com/item?id=' + parent_id
     title = parent.find('a', class_='titlelink')
     score = None
     comments = soup.find_all('tr', class_='athing comtr')
@@ -60,6 +61,7 @@ def parse_hn(obj):
         'id': parent_id,
         'score': score,
         'source': obj.site,
+        'permalink': parent_permalink,
         'posted_timestamp': parent_timestamp,
         'saved_timestamp': current_timestamp()
     }
