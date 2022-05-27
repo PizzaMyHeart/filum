@@ -44,7 +44,7 @@ class Controller(object):
         self.view.display_table(results)
     
     def show_one_ancestor(self, id):
-        columns = ('row_id','permalink', 'author', 'posted_timestamp', 'score', 'body')
+        columns = ('row_id','permalink', 'author', 'posted_timestamp', 'score', 'body', 'title')
         results = self.model.select_one_ancestor(columns, id)
         self.view.display_top_level(results)
 

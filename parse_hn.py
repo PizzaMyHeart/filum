@@ -24,13 +24,13 @@ def parse_hn(obj):
     if title:            
         title = title.contents[0]
         score = parent.find('span', class_='score').contents[0]
-        body = None
+        parent_body = None
         parent_author = parent.find('td', class_='subtext').find('a', class_='hnuser').contents[0]
     else:
         # If the root item doesn't have a title element, then
         # it's a comment
         title = parent.find('span', class_='onstory').a.contents[0]
-        body = get_comment_text(parent)
+        parent_body = get_comment_text(parent)
         parent_author = parent.find('a', class_='hnuser').contents[0]
     parent_timestamp = parent.find('span', class_='age').attrs['title']
     parent_timestamp = iso_to_timestamp(parent_timestamp)
@@ -40,14 +40,14 @@ def parse_hn(obj):
         author = comment.find('a', class_='hnuser').contents[0]
         comment_id = comment.attrs['id']
         permalink = 'https://news.ycombinator.com/item?id=' + comment_id
-        body = get_comment_text(comment)
+        comment_body = get_comment_text(comment)
         print(depth, author, permalink)
-        print(body)
+        print(comment_body)
         print('------')
         comment_data.update({
             comment_id: {
                 'author': author,
-                'text': body,
+                'text': comment_body,
                 'permalink': permalink,
                 'ancestor_id': parent_id,
                 'depth': depth
@@ -56,7 +56,7 @@ def parse_hn(obj):
     
     parent_data = {
         'title': title,
-        'body': body,
+        'body': parent_body,
         'author': parent_author,
         'id': parent_id,
         'score': score,
