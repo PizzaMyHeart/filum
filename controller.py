@@ -45,7 +45,7 @@ class Controller(object):
     
     def show_one_ancestor(self, id):
         columns = ('row_id','permalink', 'author', 'posted_timestamp', 'score', 'body')
-        results = self.model.select_row(columns, 'ancestor', id)
+        results = self.model.select_one_ancestor(columns, id)
         self.view.display_top_level(results)
 
     def show_all_descendants(self, ancestor):
@@ -67,7 +67,7 @@ def main():
 
 
     elif args.ancestor:
-        #c.show_one_ancestor(args.ancestor)
+        c.show_one_ancestor(args.ancestor)
         c.show_all_descendants(args.ancestor)
 
         

@@ -33,7 +33,8 @@ class CommentView():
         console.print(table)
     
     def display_top_level(self, item):
-        (row_id, permalink, author, posted_timestamp, score, body) = item
+        print(item)
+        (row_id, permalink, author, posted_timestamp, score, body) = item[0]
         to_print = f'{author} {score} {permalink}\n{body}'
         
         console.print(to_print)

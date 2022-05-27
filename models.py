@@ -88,10 +88,11 @@ def insert_row(conn, thread:dict, table_name):
             raise ItemAlreadyExistsError
 
 @connect
-def select_row(conn, columns, table_name, id):
-    sql = f'''SELECT ({', '.join(['?']*len(columns))}) FROM (?) WHERE id = (?)'''
-    values = columns + tuple(table_name) + tuple(id)
-    results = conn.execute(sql, (values)).fetchall()
+def select_one_ancestor(conn, columns, id):
+    columns = ', '.join(columns)
+    print(columns)
+    sql = f'''SELECT {columns} FROM ancestors WHERE row_id = ?'''
+    results = conn.execute(sql, (id,)).fetchall()
     # TODO: Rewrite this to return a dict
 
     return results
@@ -136,8 +137,8 @@ class Model_db(object):
     def insert_row(self, thread, table_name):
         return insert_row(self._connection, thread, table_name)
 
-    def select_row(self, columns, table_name, id):
-        return select_row(self._connection, columns, table_name, id)
+    def select_one_ancestor(self, columns, id):
+        return select_one_ancestor(self._connection, columns, id)
 
     def select_all_ancestors(self):
         return select_all_ancestors(self._connection)
