@@ -1,20 +1,18 @@
 from models import Model_db, ItemAlreadyExistsError
 from download import Download
-import pprint
 import traceback
 from rich.pretty import pprint
+from rich.console import Console
 import argparse
 from view import CommentView
+from prompt_toolkit import prompt, PromptSession
+from prompt_toolkit.key_binding import KeyBindings
 import sys
 
-parser = argparse.ArgumentParser(description='Archive discussion threads')
+bindings = KeyBindings()
+session = PromptSession()
+console = Console()
 
-parser.add_argument('--add', dest='url', help='add a URL')
-parser.add_argument('--list', action='store_true', help='show all saved posts')
-parser.add_argument('--list-descendants', dest='ancestor')
-args = parser.parse_args()
-
-#print(args)
 
 
 class Controller(object):
@@ -55,25 +53,4 @@ class Controller(object):
         for result in results:
             self.view.display_indented(result)
         '''
-def main():
-    c = Controller(Model_db(), CommentView())
-    if args.url:
-        thread = c.download_thread(args.url)
-        c.add_thread(thread)
-            
 
-    elif args.list:
-        c.show_all_ancestors()
-
-
-    elif args.ancestor:
-        c.show_one_ancestor(args.ancestor)
-        c.show_all_descendants(args.ancestor)
-
-        
-
-if __name__ == '__main__':
-    try:
-        main()
-    except Exception as err:
-        traceback.print_exc()

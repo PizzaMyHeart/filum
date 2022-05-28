@@ -8,6 +8,7 @@ from rich.pretty import pprint
 from helpers import html_to_md
 from rich.prompt import Prompt
 from rich.markdown import Markdown
+from prompt_toolkit import prompt
 
 console = Console()
 
