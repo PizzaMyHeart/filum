@@ -8,21 +8,24 @@ from rich.pretty import pprint
 from helpers import html_to_md
 from rich.prompt import Prompt
 from rich.markdown import Markdown
-from prompt_toolkit import prompt
+
 
 console = Console()
 
 
 class CommentView():
     def __init__(self):
-        self.table = Table(box=box.SIMPLE)
         self.console = console
 
     def stringify(self, _tuple):
         return tuple(str(i) for i in _tuple)
 
     def display_table(self, _tuple):
-        table = self.table
+        '''Construct a new table each time to prevent concatenating
+        new tables together each time the "all" command is called in the
+        interactive shell.
+        '''
+        table = Table(box=box.SIMPLE)
         console = self.console
         table.add_column('', style='green')
         table.add_column('Title')
