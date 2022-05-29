@@ -5,12 +5,12 @@ from rich.padding import Padding
 from rich.panel import Panel
 from rich import box
 from rich.pretty import pprint
-from helpers import html_to_md
+from helpers import html_to_md, timestamp_to_iso
 from rich.prompt import Prompt
 from rich.markdown import Markdown
 
 
-console = Console()
+console = Console(style='on black')
 
 
 class CommentView():
@@ -34,14 +34,19 @@ class CommentView():
         table.add_column('Score')
         table.add_column('Source')
         table.add_column('Tags')
-        for row in _tuple:
-            table.add_row(*self.stringify(row))
+        # Convert each sqlite3.Row object to a dict
+        rows = [dict(row) for row in _tuple]
+        for row in rows:
+            row['posted_timestamp'] = timestamp_to_iso(row['posted_timestamp'])
+            row['saved_timestamp'] = timestamp_to_iso(row['saved_timestamp'])
+            table.add_row(*self.stringify(row.values()))
         console.print(table)
     
     def display_top_level(self, item):
-        print(item)
+        #print(item)
         item = item[0]
-        to_print = f'''\n[bold bright_yellow]{item["author"]}[/bold bright_yellow] {item["score"]} {item["permalink"]}\n{item["title"]}\n'''
+        timestamp = timestamp_to_iso(item['posted_timestamp'])
+        to_print = f'''\n[bold bright_yellow]{item["author"]}[/bold bright_yellow] {item["score"]} {timestamp} {item["permalink"]}\n{item["title"]}\n'''
         if item['body']:
             to_print += f'{item["body"]}\n'
         console.print(to_print)
