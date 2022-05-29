@@ -1,6 +1,7 @@
 import argparse
 from cmd import Cmd
 import sys
+from xmlrpc.client import Boolean
 from controller import Controller
 from models import Model_db
 from view import CommentView
@@ -80,8 +81,24 @@ def show_all() -> None:
     c.show_all_ancestors()
 
 def delete(id: int) -> None:
-    c.delete(id)
+    if confirm_delete():
+        c.delete(id)
+        print(f'Thread no. {id} deleted.')
+    else:
+        print('Delete action cancelled.')
 
+def confirm_delete() -> bool:
+    yes_no = ''
+
+    while yes_no not in ('y', 'n'):
+        yes_no = input('Are you sure you want to delete this thread? [y/n]')
+        if yes_no == 'y':
+            return True
+        elif yes_no == 'n':
+            return False
+        else:
+            continue
+    
 
 if args.i:
     FilumShell().cmdloop()        

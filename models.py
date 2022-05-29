@@ -1,6 +1,6 @@
 import sqlite3
 from sqlite3 import OperationalError, IntegrityError, ProgrammingError
-import pprint
+
 
 db_name = 'filum'
 
@@ -127,6 +127,8 @@ class Model_db(object):
             return results
 
     def delete(self, id):
+        # TODO: Rewrite this so that a col is added to ancestors which contains the row_number() values
+        # to avoid creating a new table every time the commands "thread" and "all" are run
         with self._conn:
             sql_descendants = f'''
                                 WITH a AS (
