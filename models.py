@@ -10,6 +10,7 @@ class ItemAlreadyExistsError(Exception):
 class Model_db(object):
     def __init__(self):
         self._conn = self.connect_to_db('filum')
+        self._conn.set_trace_callback(print)
         with self._conn:
             self.create_table_ancestors()
             self.create_table_descendants()
@@ -55,7 +56,7 @@ class Model_db(object):
             except OperationalError as err:
                 print(err)
 
-    def insert_row(self, thread:dict, table_name):
+    def insert_row(self, thread: dict, table_name):
         with self._conn:
             print(self)
             columns = thread.keys()
@@ -70,33 +71,70 @@ class Model_db(object):
                 if 'UNIQUE' in str(err):
                     raise ItemAlreadyExistsError
 
-    def select_one_ancestor(self, columns, id):
-        with self._conn:
-            columns = ', '.join(columns)
-            sql = f'''SELECT {columns} FROM ancestors WHERE row_id = ?'''
-            results = self._conn.execute(sql, (id,)).fetchall()
-
-            return results
-    
     def select_all_ancestors(self):
         with self._conn:
-            sql = 'SELECT row_id, title, posted_timestamp, saved_timestamp, score, source, tags FROM ancestors;'
+            sql = '''
+                    SELECT (SELECT COUNT(*) FROM ancestors b WHERE a.row_id >= b.row_id) AS num,
+                    title, posted_timestamp, saved_timestamp, score, source, tags
+                    FROM ancestors a;'''
+
+            sql = '''
+                    SELECT ROW_NUMBER() OVER (ORDER BY saved_timestamp) as num,
+                    title, posted_timestamp, saved_timestamp, score, source, tags
+                    FROM ancestors a
+            '''
             results = self._conn.execute(sql).fetchall()
+            
             return results
 
-    def select_all_descendants(self, id) -> list:
+    def select_one_ancestor(self, columns: list, id: int) -> sqlite3.Row:
+        with self._conn:
+            columns = ', '.join(columns)
+            sql = f'''SELECT {columns} FROM (SELECT *, (SELECT COUNT(*) FROM ancestors b WHERE a.row_id >= b.row_id) AS num FROM ancestors a) WHERE num = ?'''
+            sql = f'''
+                    WITH a AS (
+                        SELECT *, (SELECT COUNT(*) FROM ancestors b WHERE ancestors.row_id >= b.row_id) AS num FROM ancestors
+                        )
+                    SELECT {columns} FROM a WHERE num = (?)
+
+            '''
+            sql = f'''
+                    WITH a AS (
+                        SELECT *, ROW_NUMBER() OVER (ORDER BY saved_timestamp) as num FROM ancestors
+                        )
+                    SELECT {columns} FROM a WHERE num = (?)
+
+            '''
+            results = self._conn.execute(sql, (id, )).fetchall()
+            print(results)
+            return results
+    
+    
+
+    def select_all_descendants(self, id: int) -> sqlite3.Row:
         with self._conn:
             sql = f'''
                 WITH joined AS (
-                    SELECT d.depth, d.row_id, a.id, d.text, d.author, a.row_id AS key 
+                    SELECT d.depth, d.row_id, a.id, d.text, d.author, a.num AS key 
                     FROM descendants d 
-                    JOIN ancestors a 
+                    JOIN (SELECT *, ROW_NUMBER() OVER (ORDER BY saved_timestamp) AS num FROM ancestors a) a
                     ON d.ancestor_id = a.id
                     ) 
-                SELECT * FROM joined WHERE key = (?)
+                SELECT * FROM joined WHERE key = ?
             '''
             results = self._conn.execute(sql, (id,)).fetchall()
+            print(results)
             return results
+
+    def delete(self, id):
+        with self._conn:
+            sql_descendants = f'''
+                                DELETE FROM descendants 
+                                WHERE ancestor_id IN (SELECT id FROM ancestors WHERE row_id = ?);
+                                '''
+            sql_ancestors = 'DELETE FROM ancestors WHERE row_id = ?'
+            self._conn.execute(sql_descendants, (id,))
+            self._conn.execute(sql_ancestors, (id,))
        
 def main():
 

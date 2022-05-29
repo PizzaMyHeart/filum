@@ -39,6 +39,7 @@ class CommentView():
         console.print(table)
     
     def display_top_level(self, item):
+        print(item)
         item = item[0]
         to_print = f'''\n[bold bright_yellow]{item["author"]}[/bold bright_yellow] {item["score"]} {item["permalink"]}\n{item["title"]}\n'''
         if item['body']:

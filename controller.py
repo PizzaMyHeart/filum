@@ -5,12 +5,8 @@ from rich.pretty import pprint
 from rich.console import Console
 import argparse
 from view import CommentView
-from prompt_toolkit import prompt, PromptSession
-from prompt_toolkit.key_binding import KeyBindings
 import sys
 
-bindings = KeyBindings()
-session = PromptSession()
 console = Console()
 
 
@@ -42,15 +38,14 @@ class Controller(object):
         self.view.display_table(results)
     
     def show_one_ancestor(self, id):
-        columns = ('row_id','permalink', 'author', 'posted_timestamp', 'score', 'body', 'title')
+        columns = ('row_id', 'num', 'permalink', 'author', 'posted_timestamp', 'score', 'body', 'title')
         results = self.model.select_one_ancestor(columns, id)
         self.view.display_top_level(results)
 
     def show_all_descendants(self, ancestor):
         results = self.model.select_all_descendants(ancestor)
         self.view.display_indented(results)
-        '''
-        for result in results:
-            self.view.display_indented(result)
-        '''
+        
+    def delete(self, ancestor):
+        self.model.delete(ancestor)
 

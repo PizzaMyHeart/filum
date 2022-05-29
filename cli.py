@@ -50,7 +50,10 @@ parser_all = subparsers.add_parser('all', help='show all saved top-level items')
 parser_all.set_defaults(parser_all=False)
 
 parser_thread = subparsers.add_parser('thread', help='display a saved thread')
-parser_thread.add_argument('id', nargs='+')
+parser_thread.add_argument('id', nargs='+', type=int)
+
+parser_delete = subparsers.add_parser('delete', help='delete a saved thread')
+parser_delete.add_argument('id', nargs='+', type=int)
 
 
 parser.add_argument('-i', action='store_true', help='interactive mode')
@@ -73,6 +76,9 @@ def show_thread(id) -> None:
 def show_all() -> None:
     c.show_all_ancestors()
 
+def delete(id) -> None:
+    c.delete(id)
+
 
 if args.i:
     FilumShell().cmdloop()        
@@ -86,6 +92,9 @@ elif args.subparser == 'all':
 
 elif args.subparser == 'thread':
     show_thread(args.id[0])
+
+elif args.subparser == 'delete':
+    delete(args.id[0])
 
 
 
