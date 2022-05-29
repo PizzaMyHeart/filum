@@ -30,7 +30,10 @@ class FilumShell(Cmd):
         show_all()
 
     def do_thread(self, arg):
-        show_thread(arg)
+        show_thread(int(arg))
+
+    def do_delete(self, arg):
+        delete(int(arg))
 
     def do_quit(self, arg):
         sys.exit(0)
@@ -69,14 +72,14 @@ def add(url) -> None:
     thread = c.download_thread(url)
     c.add_thread(thread)
 
-def show_thread(id) -> None:
+def show_thread(id: int) -> None:
     c.show_one_ancestor(id)
     c.show_all_descendants(id)
 
 def show_all() -> None:
     c.show_all_ancestors()
 
-def delete(id) -> None:
+def delete(id: int) -> None:
     c.delete(id)
 
 
