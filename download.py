@@ -103,10 +103,10 @@ class Download:
                     get_comments(replies['data']['children'], path, depth_tracker)
             
         get_comments(response_comments)
-        body = response_parent['selftext_html'] if response_parent['selftext_html'] else None
+        body = html_to_md(response_parent['selftext_html']) if response_parent['selftext_html'] else None
         parent_metadata = {
             'title': response_parent['title'],
-            'body': html_to_md(body),
+            'body': body,
             'permalink': response_parent['permalink'],
             'num_comments': response_parent['num_comments'],
             'author': response_parent['author'],

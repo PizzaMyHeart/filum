@@ -129,10 +129,18 @@ class Model_db(object):
     def delete(self, id):
         with self._conn:
             sql_descendants = f'''
+                                WITH a AS (
+                                    SELECT id, ROW_NUMBER() OVER (ORDER BY saved_timestamp) AS num FROM ancestors
+                                )
                                 DELETE FROM descendants 
-                                WHERE ancestor_id IN (SELECT id FROM ancestors WHERE row_id = ?);
+                                WHERE ancestor_id IN (SELECT id FROM a WHERE num = ?);
                                 '''
-            sql_ancestors = 'DELETE FROM ancestors WHERE row_id = ?'
+            sql_ancestors = '''
+                                WITH a AS (
+                                    SELECT id, ROW_NUMBER() OVER (ORDER BY saved_timestamp) AS num FROM ancestors
+                                )
+                                DELETE FROM ancestors WHERE id IN (SELECT id FROM a WHERE num = ?)
+                                '''
             self._conn.execute(sql_descendants, (id,))
             self._conn.execute(sql_ancestors, (id,))
        
