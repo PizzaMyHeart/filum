@@ -58,7 +58,6 @@ class Model_db(object):
 
     def insert_row(self, thread: dict, table_name):
         with self._conn:
-            print(self)
             columns = thread.keys()
             values = tuple(thread.values())
             to_insert = f'''({', '.join(columns)}) VALUES ({', '.join(['?']*len(columns))})'''
@@ -106,7 +105,6 @@ class Model_db(object):
 
             '''
             results = self._conn.execute(sql, (id, )).fetchall()
-            print(results)
             return results
     
     
@@ -124,6 +122,15 @@ class Model_db(object):
             '''
             results = self._conn.execute(sql, (id,)).fetchall()
             return results
+
+    def get_ancestors_length(self) -> int:
+        with self._conn:
+            sql = 'SELECT rowid FROM ancestors;'
+            results = self._conn.execute(sql).fetchall()
+            if results is not None:
+                return len(results)
+            else:
+                return 0
 
     def delete(self, id) -> sqlite3.Row:
         # TODO: Rewrite this so that a col is added to ancestors which contains the row_number() values
@@ -143,12 +150,12 @@ class Model_db(object):
                                 DELETE FROM ancestors WHERE id IN (SELECT id FROM a WHERE num = ?)
                                 '''
             self._conn.execute(sql_descendants, (id,))
-            results = self._conn.execute(sql_ancestors, (id,))
-            return results
+            self._conn.execute(sql_ancestors, (id,))
        
 def main():
 
     db = Model_db()
+    db.get_ancestors_length()
 
 if __name__ == '__main__':
     main()

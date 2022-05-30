@@ -102,8 +102,12 @@ def show_all() -> None:
 def delete(id: int) -> None:
     try:
         if confirm_delete():
-            success = c.delete(id)
+            is_valid_id(id)
+            ancestors_length = c.get_ancestors_length()
+            print(ancestors_length)
+            success = True if id <= ancestors_length else False
             if success:
+                c.delete(id)
                 print(f'Thread no. {id} deleted.')
             else:
                 print(f'Thread no. {id} does not exist.\n{valid_id_message}')

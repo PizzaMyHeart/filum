@@ -23,7 +23,7 @@ class CommentView():
         new tables together each time the "all" command is called in the
         interactive shell.
         '''
-        table = Table(box=box.SIMPLE)
+        table = Table(box=box.SIMPLE, expand=True)
         console = self.console
         table.add_column('', style='green')
         table.add_column('Title')
@@ -44,7 +44,7 @@ class CommentView():
         #print(item)
         item = item[0]
         timestamp = timestamp_to_iso(item['posted_timestamp'])
-        to_print = f'''\n[bold bright_yellow]{item["author"]}[/bold bright_yellow] {item["score"]} {timestamp} {item["permalink"]}\n{item["title"]}\n'''
+        to_print = f'''\n[bold bright_yellow]{item["author"]}[/bold bright_yellow] {item["score"]} {timestamp} {item["permalink"]}\n✎ {item["title"]}\n'''
         if item['body']:
             to_print += f'{item["body"]}\n'
         console.print(to_print)
@@ -60,7 +60,7 @@ class CommentView():
                 item = f'\n[bold bright_cyan]{result["author"]}[/bold bright_cyan] [[green]{result["id"]}[/green]]\n'
                 
                 yield Padding(item, (0, 0, 0, result["depth"]))
-                yield Padding(text, (0, 0, 0, result["depth"]))
+                yield Padding(text, (0, 0, 0, result["depth"]+1))
 
         self.console.print(make_panels(results))
         '''

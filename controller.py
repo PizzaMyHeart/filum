@@ -49,3 +49,6 @@ class Controller(object):
     def delete(self, ancestor):
         self.model.delete(ancestor)
 
+    def get_ancestors_length(self):
+        return self.model.get_ancestors_length()
+
