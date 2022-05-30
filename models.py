@@ -113,7 +113,7 @@ class Model_db(object):
         with self._conn:
             sql = f'''
                 WITH joined AS (
-                    SELECT d.depth, d.row_id, a.id, d.text, d.author, a.num AS key 
+                    SELECT d.depth, d.row_id, d.score, d.timestamp, a.id, d.text, d.author, a.num AS key 
                     FROM descendants d 
                     JOIN (SELECT *, ROW_NUMBER() OVER (ORDER BY saved_timestamp) AS num FROM ancestors a) a
                     ON d.ancestor_id = a.id

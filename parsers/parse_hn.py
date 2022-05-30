@@ -39,6 +39,8 @@ def parse_hn(obj):
         depth = comment.find('td', class_='ind').attrs['indent']
         author = comment.find('a', class_='hnuser').contents[0]
         comment_id = comment.attrs['id']
+        comment_timestamp = comment.find('span', class_='age').attrs['title']
+        comment_timestamp = iso_to_timestamp(comment_timestamp)
         permalink = 'https://news.ycombinator.com/item?id=' + comment_id
         comment_body = get_comment_text(comment)
         print(depth, author, permalink)
@@ -50,7 +52,8 @@ def parse_hn(obj):
                 'text': comment_body,
                 'permalink': permalink,
                 'ancestor_id': parent_id,
-                'depth': depth
+                'depth': depth,
+                'timestamp': comment_timestamp
             }
         })
     

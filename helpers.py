@@ -6,6 +6,7 @@ def bs4_to_md(soup):
     return md(str(soup))
 
 def html_to_md(html):
+    # TODO: Show full hyperlinks (hn truncates these)
     return md(md(html))
 
 def root_url(url):

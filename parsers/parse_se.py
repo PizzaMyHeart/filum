@@ -40,6 +40,7 @@ def parse_se(obj):
                 comment_body = md(str(comment.find('span', class_='comment-copy'))).replace('\n', '')
                 comment_author = comment.select('.comment-user')[0].string
                 comment_timestamp = comment.find('span', class_='relativetime-clean').attrs['title'].split('Z')[0]
+                comment_timestamp = iso_to_timestamp(comment_timestamp)
                 print(comment_id, comment_author, comment_score)
                 print(comment_body, comment_timestamp)
 

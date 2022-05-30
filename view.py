@@ -56,8 +56,16 @@ class CommentView():
         def make_panels(results: list):
             for result in results:
                 text = Markdown(result['text'])
-                
-                item = f'\n[bold bright_cyan]{result["author"]}[/bold bright_cyan] [[green]{result["id"]}[/green]]\n'
+                #timestamp = result['timestamp']
+                timestamp = ''
+                print('Timestamp: ', result['timestamp'])
+                if result['timestamp']:
+                    timestamp = timestamp_to_iso(result['timestamp'])
+                if result['score'] is not None:
+                    score = result['score']
+                else:
+                    score = ''
+                item = f'\n[bold bright_cyan]{result["author"]}[/bold bright_cyan] [green]{score}[/green] [blue]{timestamp}[/blue]\n'
                 
                 yield Padding(item, (0, 0, 0, result["depth"]))
                 yield Padding(text, (0, 0, 0, result["depth"]+1))
