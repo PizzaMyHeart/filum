@@ -1,10 +1,8 @@
-from rich.tree import Tree
 from rich.table import Table
 from rich.console import Console, group
 from rich.padding import Padding
 from rich.panel import Panel
 from rich import box
-from rich.pretty import pprint
 from helpers import html_to_md, timestamp_to_iso
 from rich.prompt import Prompt
 from rich.markdown import Markdown

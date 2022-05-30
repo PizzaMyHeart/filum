@@ -125,7 +125,7 @@ class Model_db(object):
             results = self._conn.execute(sql, (id,)).fetchall()
             return results
 
-    def delete(self, id):
+    def delete(self, id) -> sqlite3.Row:
         # TODO: Rewrite this so that a col is added to ancestors which contains the row_number() values
         # to avoid creating a new table every time the commands "thread" and "all" are run
         with self._conn:
@@ -143,7 +143,8 @@ class Model_db(object):
                                 DELETE FROM ancestors WHERE id IN (SELECT id FROM a WHERE num = ?)
                                 '''
             self._conn.execute(sql_descendants, (id,))
-            self._conn.execute(sql_ancestors, (id,))
+            results = self._conn.execute(sql_ancestors, (id,))
+            return results
        
 def main():
 

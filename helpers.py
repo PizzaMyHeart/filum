@@ -9,7 +9,7 @@ def html_to_md(html):
     return md(md(html))
 
 def root_url(url):
-    p = re.compile(r'https:\/\/.+\.com')
+    p = re.compile(r'https://.+\.com')
     return p.search(url).group(0)
 
 def current_timestamp():
