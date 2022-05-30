@@ -10,7 +10,7 @@ class ItemAlreadyExistsError(Exception):
 class Model_db(object):
     def __init__(self):
         self._conn = self.connect_to_db('filum')
-        self._conn.set_trace_callback(print)
+        #self._conn.set_trace_callback(print)
         with self._conn:
             self.create_table_ancestors()
             self.create_table_descendants()
@@ -123,7 +123,6 @@ class Model_db(object):
                 SELECT * FROM joined WHERE key = ?
             '''
             results = self._conn.execute(sql, (id,)).fetchall()
-            print(results)
             return results
 
     def delete(self, id):
