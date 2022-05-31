@@ -19,8 +19,10 @@ def parse_hn(obj):
         comment_field = item.find('span', class_='commtext')
         #reply_span = comment_field.find('div', class_='reply')
         #reply_span.decompose()
-        print(comment_field.prettify())
-        return bs4_to_md(comment_field)
+        print(comment_field)
+        # Call the prettify() method to ensure each tag is rendered on a separate line.
+        # HN uses <p> tags to denote a new line.
+        return bs4_to_md(comment_field.prettify())
 
     if title:            
         title = title.contents[0]
