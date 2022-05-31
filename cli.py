@@ -3,7 +3,6 @@ from cmd import Cmd
 import sys
 import pathlib
 import platform
-import os
 import subprocess
 from controller import Controller
 from models import FilumModel
@@ -27,36 +26,43 @@ class FilumShell(Cmd):
         pass
 
     def do_add(self, arg):
+        '''Add a URL to the filum database: $ add <url>'''
         if arg == '':
             print('Please supply a URL.')
             return False
         add(arg)
 
     def do_all(self, arg):
+        '''Show all top-level items currently saved in the filum database: $ all'''
         show_all()
 
     def do_thread(self, arg):
+        '''Display a thread given its top-level selector: $ thread 1.\nTop-level selectors are contained in the left-most column in the table shown by the "all" command.'''
         try:
             show_thread(int(arg))
         except ValueError:
             print('Please enter a valid integer.')
 
     def do_delete(self, arg):
+        '''Delete a thread given its top-level selector: $ thread 1.\nTop-level selectors are contained in the left-most column in the table shown by the "all" command.'''
         try:
             delete(int(arg))
         except ValueError:
             print('Please enter a valid integer.')
 
     def do_config(self, arg):
+        '''Open the config file in an editor. Change settings by modifying the parameter values: $ config'''
         try:
             open_config()
         except Exception as err:
             print(err)
 
     def do_quit(self, arg):
+        '''Quit the interactive session using 'quit' or CTRL-D'''
         sys.exit(0)
 
     def do_EOF(self, arg):
+        '''Quit the interactive session using 'quit' or CTRL-D'''
         sys.exit(0)
 
 parser = argparse.ArgumentParser(description='Archive discussion threads', prog='filum')
@@ -84,8 +90,6 @@ parser_config.set_defaults(parser_config=False)
 parser.add_argument('-i', action='store_true', help='interactive mode')
 args = parser.parse_args()
 
-
-print(args)
 
 valid_id_message = 'Please enter a valid thread ID (positive integer). Run `filum all` to see a list of thread IDs.'
 
@@ -160,6 +164,16 @@ def open_config():
     else:                                   # linux variants
         subprocess.run(('nano', filepath)) 
 
+
+description = (
+    'filum - archive discussion threads from the command line.\n\n'
+    'Usage:\n'
+    'filum all\nfilum add <url>\nfilum thread <id>\nfilum delete <id>\n\n'
+    'filum is a tool to save discussion threads from Reddit, Hacker News, and Stack Exchange on your PC. '
+    'Like a bookmarking tool, but the text itself is saved locally. Worry no more about deleted threads.\n\n'
+    'Run "filum -h" for a full list of options.'
+)
+
 if args.i:
     FilumShell().cmdloop()        
 
@@ -179,6 +193,8 @@ elif args.subparser == 'thread':
 elif args.subparser == 'delete':
     delete(args.id[0])
 
+else:
+    print(description)
 
 
 
