@@ -23,7 +23,6 @@ class RichView():
         interactive shell.
         '''
         table = Table(box=box.SIMPLE, expand=True)
-        console = self.console
         table.add_column('', style='green')
         table.add_column('Title')
         table.add_column('Posted')
@@ -40,14 +39,11 @@ class RichView():
         self.console.print(table)
     
     def display_top_level(self, item):
-        #print(item)
         item = item[0]
         timestamp = timestamp_to_iso(item['posted_timestamp'])
         to_print = f'''\n[bold bright_yellow]{item["author"]}[/bold bright_yellow] {item["score"]} [blue]{timestamp}[/blue] {item["permalink"]}\n\n✎ {item["title"]}\n'''
         if item['body']:
-            to_print += f'{item["body"]}\n'
-        #self.console.print(to_print)
-        
+            to_print += f'{item["body"]}\n'     
 
         return to_print
         
@@ -72,7 +68,6 @@ class RichView():
                 yield Padding(header, (0, 0, 0, indent))
                 yield Padding(text, (0, 0, 0, indent + 1))
 
-        #self.console.print(make_panels(results))
         return make_panels(results)
 
     def display_thread(self, top_level, indented, pager=True):
@@ -86,7 +81,5 @@ class RichView():
                 self.console.print(top_level)
                 self.console.print(indented)
         
-if __name__ == '__main__':
-    pass
 
 

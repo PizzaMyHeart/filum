@@ -1,10 +1,15 @@
 import argparse
 from cmd import Cmd
 import sys
+import pathlib
+import platform
+import os
+import subprocess
 from controller import Controller
 from models import FilumModel
 from view import RichView
 from validation import is_valid_url, is_valid_id, InvalidInputError
+import configparser
 
 class FilumShell(Cmd):
     intro = 'filum interactive mode'
@@ -42,6 +47,12 @@ class FilumShell(Cmd):
         except ValueError:
             print('Please enter a valid integer.')
 
+    def do_config(self, arg):
+        try:
+            open_config()
+        except Exception as err:
+            print(err)
+
     def do_quit(self, arg):
         sys.exit(0)
 
@@ -49,6 +60,7 @@ class FilumShell(Cmd):
         sys.exit(0)
 
 parser = argparse.ArgumentParser(description='Archive discussion threads', prog='filum')
+
 
 subparsers = parser.add_subparsers(dest='subparser')
 
@@ -66,6 +78,9 @@ parser_delete = subparsers.add_parser('delete', help='delete a saved thread')
 parser_delete.add_argument('id', nargs='+', type=int)
 
 
+parser_config = subparsers.add_parser('config', help='open config file')
+parser_config.set_defaults(parser_config=False)
+
 parser.add_argument('-i', action='store_true', help='interactive mode')
 args = parser.parse_args()
 
@@ -73,6 +88,9 @@ args = parser.parse_args()
 print(args)
 
 valid_id_message = 'Please enter a valid thread ID (positive integer). Run `filum all` to see a list of thread IDs.'
+
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 c = Controller(FilumModel(), RichView())
 
@@ -90,7 +108,7 @@ def show_thread(id: int) -> None:
         is_valid_id(id)
         #c.show_one_ancestor(id)
         #c.show_all_descendants(id)
-        c.display_thread(id)
+        c.display_thread(id, pager=config.getboolean('output', 'pager'))
     except InvalidInputError as err:
         print(err)
     except IndexError as err:
@@ -131,11 +149,23 @@ def confirm_delete() -> bool:
         else:
             print('Enter "y" for yes or "n" for no.')
             continue
-    
+
+
+def open_config():
+    filepath = pathlib.Path(__file__).parent.resolve() / 'config.ini'
+    if platform.system() == 'Darwin':       # macOS
+        subprocess.run(('open', filepath))
+    elif platform.system() == 'Windows':    # Windows
+        subprocess.run('notepad', filepath)
+    else:                                   # linux variants
+        subprocess.run(('nano', filepath)) 
 
 if args.i:
     FilumShell().cmdloop()        
 
+if args.subparser == 'config':
+    print('Opening config file...')
+    open_config()
 
 if args.subparser == 'add':
     add(args.url[0])
