@@ -11,7 +11,7 @@ from rich.markdown import Markdown
 console = Console(style='on black')
 
 
-class CommentView():
+class RichView():
     def __init__(self):
         self.console = console
 

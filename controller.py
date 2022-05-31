@@ -3,8 +3,6 @@ from download import Download
 import traceback
 from rich.pretty import pprint
 from rich.console import Console
-import argparse
-from view import CommentView
 import sys
 
 console = Console()

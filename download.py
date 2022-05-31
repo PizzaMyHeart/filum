@@ -19,7 +19,7 @@ class Download:
             self.site = 'hn'
         elif 'stackexchange.com' in self.url or 'stackoverflow.com' in self.url:
             self.site = 'se'
-        print(self.site)
+        #print(self.site)
         return self
 
     def get_response(self):
@@ -34,11 +34,11 @@ class Download:
         return self
 
     def parse_html(self, raw):
-        self.soup = BeautifulSoup(raw, 'html.parser')
+        self.soup = BeautifulSoup(raw, 'html5lib')
         return self
     
     def prepare_response(self):
-        print(self.site)
+        #print(self.site)
         if self.site == 'reddit':
             self.r = self.r.json()
         else:
@@ -59,14 +59,14 @@ class Download:
         return self.process_url().get_response().prepare_response().get_thread()
         
 
-hn_url_root = 'https://news.ycombinator.com/item?id=31447804'
+hn_url_root = 'https://news.ycombinator.com/item?id=27336584'
 hn_url_comment = 'https://news.ycombinator.com/item?id=31451536'
 se_url_root = 'https://stats.stackexchange.com/questions/6/the-two-cultures-statistics-vs-machine-learning'
 se_url_answer = 'https://stackoverflow.com/questions/15340582/python-extract-pattern-matches/15340666#15340666'
 reddit_url_root = 'https://www.reddit.com/r/boardgames/comments/utkslk/tiny_epic_which_one_would_you_recommend/'
 
 def main():
-    Download(reddit_url_root).process_url().get_response().prepare_response().get_thread()
+    Download(hn_url_root).process_url().get_response().prepare_response().get_thread()
     
 
 if __name__ == '__main__':

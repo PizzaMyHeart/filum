@@ -19,6 +19,7 @@ def parse_hn(obj):
         comment_field = item.find('span', class_='commtext')
         #reply_span = comment_field.find('div', class_='reply')
         #reply_span.decompose()
+        print(comment_field.prettify())
         return bs4_to_md(comment_field)
 
     if title:            

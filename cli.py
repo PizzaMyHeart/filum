@@ -3,7 +3,7 @@ from cmd import Cmd
 import sys
 from controller import Controller
 from models import Model_db
-from view import CommentView
+from view import RichView
 from validation import is_valid_url, is_valid_id, InvalidInputError
 
 class FilumShell(Cmd):
@@ -74,7 +74,7 @@ print(args)
 
 valid_id_message = 'Please enter a valid thread ID (positive integer). Run `filum all` to see a list of thread IDs.'
 
-c = Controller(Model_db(), CommentView())
+c = Controller(Model_db(), RichView())
 
 def add(url) -> None:
     try:
