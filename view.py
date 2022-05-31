@@ -1,14 +1,13 @@
 from rich.table import Table
 from rich.console import Console, group
 from rich.padding import Padding
-from rich.panel import Panel
 from rich import box
-from helpers import html_to_md, timestamp_to_iso
-from rich.prompt import Prompt
+from helpers import timestamp_to_iso
 from rich.markdown import Markdown
+from rich.theme import Theme
 
 
-console = Console(style='on black')
+console = Console(theme=Theme({'markdown.block_quote': 'yellow'}), style='on black')
 
 
 class RichView():
@@ -38,16 +37,20 @@ class RichView():
             row['posted_timestamp'] = timestamp_to_iso(row['posted_timestamp'])
             row['saved_timestamp'] = timestamp_to_iso(row['saved_timestamp'])
             table.add_row(*self.stringify(row.values()))
-        console.print(table)
+        self.console.print(table)
     
     def display_top_level(self, item):
         #print(item)
         item = item[0]
         timestamp = timestamp_to_iso(item['posted_timestamp'])
-        to_print = f'''\n[bold bright_yellow]{item["author"]}[/bold bright_yellow] {item["score"]} {timestamp} {item["permalink"]}\n✎ {item["title"]}\n'''
+        to_print = f'''\n[bold bright_yellow]{item["author"]}[/bold bright_yellow] {item["score"]} [blue]{timestamp}[/blue] {item["permalink"]}\n\n✎ {item["title"]}\n'''
         if item['body']:
             to_print += f'{item["body"]}\n'
-        console.print(to_print)
+        #self.console.print(to_print)
+        
+
+        return to_print
+        
     
 
     def display_indented(self, results: list):
@@ -56,24 +59,34 @@ class RichView():
         def make_panels(results: list):
             for result in results:
                 text = Markdown(result['text'])
-                #timestamp = result['timestamp']
                 timestamp = ''
-                print('Timestamp: ', result['timestamp'])
+                indent = result["depth"] + 2
                 if result['timestamp']:
                     timestamp = timestamp_to_iso(result['timestamp'])
                 if result['score'] is not None:
                     score = result['score']
                 else:
                     score = ''
-                item = f'\n[bold bright_cyan]{result["author"]}[/bold bright_cyan] [green]{score}[/green] [blue]{timestamp}[/blue]\n'
+                header = f'\n¬ [bold bright_cyan]{result["author"]}[/bold bright_cyan] [green]{score}[/green] [blue]{timestamp}[/blue]\n'
                 
-                yield Padding(item, (0, 0, 0, result["depth"]))
-                yield Padding(text, (0, 0, 0, result["depth"]+1))
+                yield Padding(header, (0, 0, 0, indent))
+                yield Padding(text, (0, 0, 0, indent + 1))
 
-        self.console.print(make_panels(results))
-        '''
-        with self.console.pager(styles=True):
-            self.console.print(make_panels(results))
-        '''
+        #self.console.print(make_panels(results))
+        return make_panels(results)
+
+    def display_thread(self, top_level, indented, pager=True):
+        
+        if not pager:
+            self.console.print(top_level)
+            self.console.print(indented)    
+        elif pager:
+            with self.console.pager(styles=True):
+                # Only works if terminal pager supports colour
+                self.console.print(top_level)
+                self.console.print(indented)
+        
+if __name__ == '__main__':
+    pass
 
 

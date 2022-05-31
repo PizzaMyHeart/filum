@@ -90,6 +90,7 @@ def parse_se(obj):
         print('\n---')
         answer_author = get_author(answer)
         answer_timestamp = answer.time.attrs['datetime']
+        answer_timestamp = iso_to_timestamp(answer_timestamp)
         answer_permalink = url + '/a/' + answer_id        
         print(answer_author, answer_score)
         print(answer_body, answer_timestamp)

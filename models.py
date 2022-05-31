@@ -7,7 +7,7 @@ db_name = 'filum'
 class ItemAlreadyExistsError(Exception):
     pass
 
-class Model_db(object):
+class FilumModel(object):
     def __init__(self):
         self._conn = self.connect_to_db('filum')
         #self._conn.set_trace_callback(print)
@@ -154,7 +154,7 @@ class Model_db(object):
        
 def main():
 
-    db = Model_db()
+    db = FilumModel()
     db.get_ancestors_length()
 
 if __name__ == '__main__':

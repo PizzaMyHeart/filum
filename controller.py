@@ -1,4 +1,4 @@
-from models import Model_db, ItemAlreadyExistsError
+from models import ItemAlreadyExistsError
 from download import Download
 import traceback
 from rich.pretty import pprint
@@ -34,15 +34,26 @@ class Controller(object):
     def show_all_ancestors(self):
         results = self.model.select_all_ancestors()
         self.view.display_table(results)
+
+    '''
     
     def show_one_ancestor(self, id):
         columns = ('row_id', 'num', 'permalink', 'author', 'posted_timestamp', 'score', 'body', 'title')
         results = self.model.select_one_ancestor(columns, id)
-        self.view.display_top_level(results)
+        return self.view.display_top_level(results)
 
     def show_all_descendants(self, ancestor):
         results = self.model.select_all_descendants(ancestor)
-        self.view.display_indented(results)
+        return self.view.display_indented(results)
+    '''
+
+    def display_thread(self, id):
+        columns = ('row_id', 'num', 'permalink', 'author', 'posted_timestamp', 'score', 'body', 'title')
+        ancestor_query = self.model.select_one_ancestor(columns, id)
+        top_level = self.view.display_top_level(ancestor_query)
+        descendants_query = self.model.select_all_descendants(id)
+        indented = self.view.display_indented(descendants_query)
+        self.view.display_thread(top_level, indented)
         
     def delete(self, ancestor):
         self.model.delete(ancestor)

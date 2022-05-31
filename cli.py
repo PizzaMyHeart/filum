@@ -2,7 +2,7 @@ import argparse
 from cmd import Cmd
 import sys
 from controller import Controller
-from models import Model_db
+from models import FilumModel
 from view import RichView
 from validation import is_valid_url, is_valid_id, InvalidInputError
 
@@ -74,7 +74,7 @@ print(args)
 
 valid_id_message = 'Please enter a valid thread ID (positive integer). Run `filum all` to see a list of thread IDs.'
 
-c = Controller(Model_db(), RichView())
+c = Controller(FilumModel(), RichView())
 
 def add(url) -> None:
     try:
@@ -88,8 +88,9 @@ def add(url) -> None:
 def show_thread(id: int) -> None:
     try:
         is_valid_id(id)
-        c.show_one_ancestor(id)
-        c.show_all_descendants(id)
+        #c.show_one_ancestor(id)
+        #c.show_all_descendants(id)
+        c.display_thread(id)
     except InvalidInputError as err:
         print(err)
     except IndexError as err:
