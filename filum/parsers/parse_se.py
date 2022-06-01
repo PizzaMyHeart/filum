@@ -1,7 +1,7 @@
 '''Parses the BeautifulSoup object from a Stack Exchange page.
 '''
 from markdownify import markdownify as md
-from helpers import root_url, current_timestamp, bs4_to_md, iso_to_timestamp
+from filum.helpers import root_url, current_timestamp, bs4_to_md, iso_to_timestamp
 
 
 def parse_se(obj):

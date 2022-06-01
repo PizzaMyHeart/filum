@@ -1,8 +1,9 @@
+from typing import ValuesView, Mapping
 from rich.table import Table
 from rich.console import Console, group
 from rich.padding import Padding
 from rich import box
-from helpers import timestamp_to_iso
+from filum.helpers import timestamp_to_iso
 from rich.markdown import Markdown
 from rich.theme import Theme
 
@@ -12,14 +13,17 @@ console = Console(
     style='on black')
 
 
-class RichView():
+class RichView:
     def __init__(self):
         self.console = console
 
-    def stringify(self, _tuple):
-        return tuple(str(i) for i in _tuple)
+    def stringify(self, row: ValuesView) -> tuple:
+        '''Turns each item in the SQL query result into a string
+        that can be passed to Table().add_row
+        '''
+        return tuple(str(i) for i in row)
 
-    def display_table(self, _tuple):
+    def display_table(self, row_list: list) -> None:
         '''Construct a new table each time to prevent concatenating
         new tables together each time the "all" command is called in the
         interactive shell.
@@ -33,15 +37,14 @@ class RichView():
         table.add_column('Source')
         table.add_column('Tags')
         # Convert each sqlite3.Row object to a dict
-        rows = [dict(row) for row in _tuple]
+        rows = [dict(row) for row in row_list]
         for row in rows:
             row['posted_timestamp'] = timestamp_to_iso(row['posted_timestamp'])
             row['saved_timestamp'] = timestamp_to_iso(row['saved_timestamp'])
             table.add_row(*self.stringify(row.values()))
         self.console.print(table)
 
-    def display_top_level(self, item):
-        item = item[0]
+    def display_top_level(self, item: Mapping) -> str:
         timestamp = timestamp_to_iso(item['posted_timestamp'])
         to_print = (
             f'\n[bold bright_yellow]{item["author"]}[/bold bright_yellow] '

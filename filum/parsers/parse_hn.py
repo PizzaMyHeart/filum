@@ -3,7 +3,7 @@ Hacker News item.
 
 '''
 
-from helpers import current_timestamp, bs4_to_md, iso_to_timestamp
+from filum.helpers import current_timestamp, bs4_to_md, iso_to_timestamp
 
 
 def parse_hn(obj):

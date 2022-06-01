@@ -4,10 +4,10 @@ import sys
 import pathlib
 import platform
 import subprocess
-from controller import Controller
-from models import FilumModel
-from view import RichView
-from validation import is_valid_url, is_valid_id, InvalidInputError
+from filum.controller import Controller
+from filum.models import FilumModel
+from filum.view import RichView
+from filum.validation import is_valid_url, is_valid_id, InvalidInputError
 import configparser
 
 
@@ -100,7 +100,8 @@ args = parser.parse_args()
 valid_id_message = 'Please enter a valid thread ID (positive integer). Run `filum all` to see a list of thread IDs.'
 
 config = configparser.ConfigParser()
-config.read('config.ini')
+config_filepath = pathlib.Path(__file__).parent.resolve() / 'config.ini'
+config.read(config_filepath)
 
 c = Controller(FilumModel(), RichView())
 
@@ -165,13 +166,13 @@ def confirm_delete() -> bool:
 
 
 def open_config():
-    filepath = pathlib.Path(__file__).parent.resolve() / 'config.ini'
+    # filepath = pathlib.Path(__file__).parent.resolve() / 'config.ini'
     if platform.system() == 'Darwin':       # macOS
-        subprocess.run(('open', filepath))
+        subprocess.run(('open', config_filepath))
     elif platform.system() == 'Windows':    # Windows
-        subprocess.run('notepad', filepath)
+        subprocess.run('notepad', config_filepath)
     else:                                   # Linux variants
-        subprocess.run(('nano', filepath))
+        subprocess.run(('nano', config_filepath))
 
 
 description = (

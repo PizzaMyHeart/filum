@@ -1,4 +1,4 @@
-from helpers import html_to_md, current_timestamp
+from filum.helpers import html_to_md, current_timestamp
 
 
 def parse_reddit(obj):
