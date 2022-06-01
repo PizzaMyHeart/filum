@@ -1,8 +1,8 @@
 import sqlite3
 from sqlite3 import OperationalError, IntegrityError
+import pathlib
 
-
-db_name = 'filum'
+db_name = pathlib.Path(__file__).parent.resolve() / 'filum'
 
 
 class ItemAlreadyExistsError(Exception):
@@ -11,7 +11,7 @@ class ItemAlreadyExistsError(Exception):
 
 class FilumModel(object):
     def __init__(self):
-        self._conn = self.connect_to_db('filum')
+        self._conn = self.connect_to_db(db_name)
         # self._conn.set_trace_callback(print)
         with self._conn:
             self.create_table_ancestors()
@@ -105,7 +105,7 @@ class FilumModel(object):
                     SELECT {columns} FROM a WHERE num = (?)
 
             '''
-            results = self._conn.execute(sql, (id, )).fetchall()
+            results = self._conn.execute(sql, (id, )).fetchone()
             return results
 
     def select_all_descendants(self, id: int) -> sqlite3.Row:
