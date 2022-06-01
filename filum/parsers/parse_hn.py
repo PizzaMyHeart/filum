@@ -5,6 +5,7 @@ Hacker News item.
 
 from helpers import current_timestamp, bs4_to_md, iso_to_timestamp
 
+
 def parse_hn(obj):
     soup = obj.soup
     parent = soup.find('table', class_='fatitem')
@@ -17,14 +18,15 @@ def parse_hn(obj):
 
     def get_comment_text(item):
         comment_field = item.find('span', class_='commtext')
-        #reply_span = comment_field.find('div', class_='reply')
-        #reply_span.decompose()
+        reply_span = comment_field.find('div', class_='reply')
+        if reply_span:
+            reply_span.decompose()
         print(comment_field)
         # Call the prettify() method to ensure each tag is rendered on a separate line.
         # HN uses <p> tags to denote a new line.
         return bs4_to_md(comment_field.prettify())
 
-    if title:            
+    if title:
         title = title.contents[0]
         score = parent.find('span', class_='score').contents[0]
         parent_body = None
@@ -37,7 +39,7 @@ def parse_hn(obj):
         parent_author = parent.find('a', class_='hnuser').contents[0]
     parent_timestamp = parent.find('span', class_='age').attrs['title']
     parent_timestamp = iso_to_timestamp(parent_timestamp)
-    
+
     for comment in comments:
         depth = comment.find('td', class_='ind').attrs['indent']
         author = comment.find('a', class_='hnuser').contents[0]
@@ -59,7 +61,7 @@ def parse_hn(obj):
                 'timestamp': comment_timestamp
             }
         })
-    
+
     parent_data = {
         'title': title,
         'body': parent_body,

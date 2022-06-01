@@ -35,7 +35,7 @@ class FilumModel(object):
                 '(row_id INTEGER PRIMARY KEY AUTOINCREMENT,'
                 'id TEXT, title TEXT, body TEXT, posted_timestamp INTEGER, saved_timestamp INTEGER, '
                 'score INTEGER, permalink TEXT UNIQUE, num_comments INTEGER, author TEXT, source TEXT,'
-                'tags TEXT;'
+                'tags TEXT);'
             )
 
             try:

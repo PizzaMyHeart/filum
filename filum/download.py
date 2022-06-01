@@ -9,7 +9,6 @@ from parsers.parse_reddit import parse_reddit
 class Download:
     def __init__(self, url):
         self.url = url
-        return
 
     def process_url(self):
         # Reddit's unofficial API - add a '.json' suffix to any url

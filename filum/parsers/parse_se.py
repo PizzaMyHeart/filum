@@ -3,6 +3,7 @@
 from markdownify import markdownify as md
 from helpers import root_url, current_timestamp, bs4_to_md, iso_to_timestamp
 
+
 def parse_se(obj):
     soup = obj.soup.find(id='content')
     root_is_answer = False
@@ -18,10 +19,11 @@ def parse_se(obj):
     question_score = question.get('data-score')
     question_id = question.attrs['data-questionid']
     children = {}
-        
+
     def get_body(item):
         body = item.find('div', class_='s-prose js-post-body')
         return bs4_to_md(body)
+
     def get_author(item):
         # The SE question author is last in the list of users on a question footer
         if item.find_all('div', class_='user-details')[-1].a:
@@ -34,28 +36,28 @@ def parse_se(obj):
         return author.strip()
 
     def get_comments(comments):
-            for comment in comments:
-                comment_id = comment.get('data-comment-id')
-                comment_score = comment.get('data-comment-score')
-                comment_body = md(str(comment.find('span', class_='comment-copy'))).replace('\n', '')
-                comment_author = comment.select('.comment-user')[0].string
-                comment_timestamp = comment.find('span', class_='relativetime-clean').attrs['title'].split('Z')[0]
-                comment_timestamp = iso_to_timestamp(comment_timestamp)
-                print(comment_id, comment_author, comment_score)
-                print(comment_body, comment_timestamp)
+        for comment in comments:
+            comment_id = comment.get('data-comment-id')
+            comment_score = comment.get('data-comment-score')
+            comment_body = md(str(comment.find('span', class_='comment-copy'))).replace('\n', '')
+            comment_author = comment.select('.comment-user')[0].string
+            comment_timestamp = comment.find('span', class_='relativetime-clean').attrs['title'].split('Z')[0]
+            comment_timestamp = iso_to_timestamp(comment_timestamp)
+            print(comment_id, comment_author, comment_score)
+            print(comment_body, comment_timestamp)
 
-                children.update({
-                    comment_id:{
-                        'author': comment_author,
-                        'text': comment_body,
-                        'ancestor_id': question_id,
-                        'depth': 2,
-                        'score': comment_score
-                    }
-                })
+            children.update({
+                comment_id: {
+                    'author': comment_author,
+                    'text': comment_body,
+                    'ancestor_id': question_id,
+                    'depth': 2,
+                    'score': comment_score
+                }
+            })
     question_body = get_body(question)
     question_author = get_author(question)
-    
+
     question_timestamp = soup.time.attrs['datetime']
     question_timestamp = iso_to_timestamp(question_timestamp)
     if not root_is_answer:
@@ -66,23 +68,22 @@ def parse_se(obj):
     print(question_body)
 
     parent_data = {
-    'title': title,
-    'body': question_body,
-    'author': question_author,
-    'id': question_id,
-    'score': question_score,
-    'permalink': question_permalink,
-    'source': obj.site,
-    'posted_timestamp': question_timestamp,
-    'saved_timestamp': current_timestamp()
+        'title': title,
+        'body': question_body,
+        'author': question_author,
+        'id': question_id,
+        'score': question_score,
+        'permalink': question_permalink,
+        'source': obj.site,
+        'posted_timestamp': question_timestamp,
+        'saved_timestamp': current_timestamp()
     }
 
     if root_is_answer:
         answers = soup.find_all(id=f'answer-{answer_id}')
     else:
         answers = soup.find(id='answers').find_all('div', class_='answer')
-    
-        
+
     for answer in answers:
         answer_id = answer.get('data-answerid')
         answer_score = answer.get('data-score')
@@ -91,12 +92,12 @@ def parse_se(obj):
         answer_author = get_author(answer)
         answer_timestamp = answer.time.attrs['datetime']
         answer_timestamp = iso_to_timestamp(answer_timestamp)
-        answer_permalink = url + '/a/' + answer_id        
+        answer_permalink = url + '/a/' + answer_id
         print(answer_author, answer_score)
         print(answer_body, answer_timestamp)
 
         children.update({
-            answer_id:{
+            answer_id: {
                 'author': answer_author,
                 'text': answer_body,
                 'ancestor_id': question_id,
@@ -109,8 +110,8 @@ def parse_se(obj):
 
         answer_comments = answer.find_all('li', class_='comment')
         if len(answer_comments) == 0:
-                continue
-        
+            continue
+
         get_comments(answer_comments)
 
     thread = {
@@ -119,4 +120,3 @@ def parse_se(obj):
     }
 
     return thread
-    
