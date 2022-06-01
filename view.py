@@ -7,7 +7,9 @@ from rich.markdown import Markdown
 from rich.theme import Theme
 
 
-console = Console(theme=Theme({'markdown.block_quote': 'yellow'}), style='on black')
+console = Console(
+    theme=Theme({'markdown.block_quote': 'yellow'}),
+    style='on black')
 
 
 class RichView():
@@ -37,20 +39,21 @@ class RichView():
             row['saved_timestamp'] = timestamp_to_iso(row['saved_timestamp'])
             table.add_row(*self.stringify(row.values()))
         self.console.print(table)
-    
+
     def display_top_level(self, item):
         item = item[0]
         timestamp = timestamp_to_iso(item['posted_timestamp'])
-        to_print = f'''\n[bold bright_yellow]{item["author"]}[/bold bright_yellow] {item["score"]} [blue]{timestamp}[/blue] {item["permalink"]}\n\n✎ {item["title"]}\n'''
+        to_print = (
+            f'\n[bold bright_yellow]{item["author"]}[/bold bright_yellow] '
+            f'{item["score"]} [blue]{timestamp}[/blue] {item["permalink"]}\n\n'
+            f'✎ {item["title"]}\n'
+            )
         if item['body']:
-            to_print += f'{item["body"]}\n'     
+            to_print += f'{item["body"]}\n'
 
         return to_print
-        
-    
 
     def display_indented(self, results: list):
-
         @group()
         def make_panels(results: list):
             for result in results:
@@ -63,23 +66,23 @@ class RichView():
                     score = result['score']
                 else:
                     score = ''
-                header = f'\n¬ [bold bright_cyan]{result["author"]}[/bold bright_cyan] [green]{score}[/green] [blue]{timestamp}[/blue]\n'
-                
+                header = (
+                    f'\n¬ [bold bright_cyan]{result["author"]}[/bold bright_cyan] '
+                    f'[green]{score}[/green] [blue]{timestamp}[/blue]\n'
+                    )
+
                 yield Padding(header, (0, 0, 0, indent))
                 yield Padding(text, (0, 0, 0, indent + 1))
 
         return make_panels(results)
 
     def display_thread(self, top_level, indented, pager=True):
-        
+
         if not pager:
             self.console.print(top_level)
-            self.console.print(indented)    
+            self.console.print(indented)
         elif pager:
             with self.console.pager(styles=True):
                 # Only works if terminal pager supports colour
                 self.console.print(top_level)
                 self.console.print(indented)
-        
-
-

@@ -1,16 +1,18 @@
 import sqlite3
-from sqlite3 import OperationalError, IntegrityError, ProgrammingError
+from sqlite3 import OperationalError, IntegrityError
 
 
 db_name = 'filum'
 
+
 class ItemAlreadyExistsError(Exception):
     pass
+
 
 class FilumModel(object):
     def __init__(self):
         self._conn = self.connect_to_db('filum')
-        #self._conn.set_trace_callback(print)
+        # self._conn.set_trace_callback(print)
         with self._conn:
             self.create_table_ancestors()
             self.create_table_descendants()
@@ -28,12 +30,14 @@ class FilumModel(object):
 
     def create_table_ancestors(self):
         with self._conn:
-            sql = '''CREATE TABLE IF NOT EXISTS ancestors 
-                    (row_id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                    id TEXT, title TEXT, body TEXT, posted_timestamp INTEGER, saved_timestamp INTEGER, 
-                    score INTEGER, permalink TEXT UNIQUE, num_comments INTEGER, author TEXT, source TEXT,
-                    tags TEXT
-                    );'''
+            sql = (
+                'CREATE TABLE IF NOT EXISTS ancestors'
+                '(row_id INTEGER PRIMARY KEY AUTOINCREMENT,'
+                'id TEXT, title TEXT, body TEXT, posted_timestamp INTEGER, saved_timestamp INTEGER, '
+                'score INTEGER, permalink TEXT UNIQUE, num_comments INTEGER, author TEXT, source TEXT,'
+                'tags TEXT;'
+            )
+
             try:
                 self._conn.execute(sql)
             except OperationalError as err:
@@ -41,12 +45,12 @@ class FilumModel(object):
 
     def create_table_descendants(self):
         with self._conn:
-            sql = '''CREATE TABLE IF NOT EXISTS descendants 
-                    (row_id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                    ancestor_id INTEGER REFERENCES ancestors(row_id), 
+            sql = '''CREATE TABLE IF NOT EXISTS descendants
+                    (row_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    ancestor_id INTEGER REFERENCES ancestors(row_id),
                     id TEXT,
                     parent_id TEXT,
-                    text TEXT, permalink TEXT, 
+                    text TEXT, permalink TEXT,
                     author TEXT, author_id TEXT, is_submitter INTEGER,
                     upvotes INTEGER, downvotes INTEGER, score INTEGER, timestamp INTEGER,
                     depth INTEGER, path TEXT,
@@ -83,20 +87,17 @@ class FilumModel(object):
                     FROM ancestors a
             '''
             results = self._conn.execute(sql).fetchall()
-            
+
             return results
 
     def select_one_ancestor(self, columns: list, id: int) -> sqlite3.Row:
         with self._conn:
             columns = ', '.join(columns)
-            sql = f'''SELECT {columns} FROM (SELECT *, (SELECT COUNT(*) FROM ancestors b WHERE a.row_id >= b.row_id) AS num FROM ancestors a) WHERE num = ?'''
-            sql = f'''
-                    WITH a AS (
-                        SELECT *, (SELECT COUNT(*) FROM ancestors b WHERE ancestors.row_id >= b.row_id) AS num FROM ancestors
-                        )
-                    SELECT {columns} FROM a WHERE num = (?)
-
-            '''
+            sql = (
+                'WITH a AS ('
+                'SELECT *, (SELECT COUNT(*) FROM ancestors b WHERE ancestors.row_id >= b.row_id) AS num FROM ancestors)'
+                f'SELECT {columns} FROM a WHERE num = (?)'
+            )
             sql = f'''
                     WITH a AS (
                         SELECT *, ROW_NUMBER() OVER (ORDER BY saved_timestamp) as num FROM ancestors
@@ -106,18 +107,16 @@ class FilumModel(object):
             '''
             results = self._conn.execute(sql, (id, )).fetchall()
             return results
-    
-    
 
     def select_all_descendants(self, id: int) -> sqlite3.Row:
         with self._conn:
-            sql = f'''
+            sql = '''
                 WITH joined AS (
-                    SELECT d.depth, d.row_id, d.score, d.timestamp, a.id, d.text, d.author, a.num AS key 
-                    FROM descendants d 
+                    SELECT d.depth, d.row_id, d.score, d.timestamp, a.id, d.text, d.author, a.num AS key
+                    FROM descendants d
                     JOIN (SELECT *, ROW_NUMBER() OVER (ORDER BY saved_timestamp) AS num FROM ancestors a) a
                     ON d.ancestor_id = a.id
-                    ) 
+                    )
                 SELECT * FROM joined WHERE key = ?
             '''
             results = self._conn.execute(sql, (id,)).fetchall()
@@ -133,14 +132,15 @@ class FilumModel(object):
                 return 0
 
     def delete(self, id) -> sqlite3.Row:
-        # TODO: Rewrite this so that a col is added to ancestors which contains the row_number() values
-        # to avoid creating a new table every time the commands "thread" and "all" are run
+        # TODO: Rewrite this so that a col is added to ancestors which contains
+        # the row_number() values to avoid creating a new table every time the
+        # commands "thread" and "all" are run
         with self._conn:
-            sql_descendants = f'''
+            sql_descendants = '''
                                 WITH a AS (
                                     SELECT id, ROW_NUMBER() OVER (ORDER BY saved_timestamp) AS num FROM ancestors
                                 )
-                                DELETE FROM descendants 
+                                DELETE FROM descendants
                                 WHERE ancestor_id IN (SELECT id FROM a WHERE num = ?);
                                 '''
             sql_ancestors = '''
@@ -151,11 +151,13 @@ class FilumModel(object):
                                 '''
             self._conn.execute(sql_descendants, (id,))
             self._conn.execute(sql_ancestors, (id,))
-       
+
+
 def main():
 
     db = FilumModel()
     db.get_ancestors_length()
+
 
 if __name__ == '__main__':
     main()

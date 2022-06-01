@@ -1,19 +1,16 @@
 from models import ItemAlreadyExistsError
 from download import Download
 import traceback
-from rich.pretty import pprint
 from rich.console import Console
 import sys
 
 console = Console()
 
 
-
 class Controller(object):
     def __init__(self, model, view):
         self.model = model
         self.view = view
-        
 
     def download_thread(self, url):
         return Download(url).run()
@@ -27,16 +24,14 @@ class Controller(object):
             # TODO: Allow updating of existing thread
             print('This item already exists in your database.')
             sys.exit(0)
-        except Exception as err:
+        except Exception:
             traceback.print_exc()
-
 
     def show_all_ancestors(self):
         results = self.model.select_all_ancestors()
         self.view.display_table(results)
 
     '''
-    
     def show_one_ancestor(self, id):
         columns = ('row_id', 'num', 'permalink', 'author', 'posted_timestamp', 'score', 'body', 'title')
         results = self.model.select_one_ancestor(columns, id)
@@ -48,16 +43,16 @@ class Controller(object):
     '''
 
     def display_thread(self, id, pager):
-        columns = ('row_id', 'num', 'permalink', 'author', 'posted_timestamp', 'score', 'body', 'title')
+        columns = ('row_id', 'num', 'permalink', 'author', 'posted_timestamp',
+                   'score', 'body', 'title')
         ancestor_query = self.model.select_one_ancestor(columns, id)
         top_level = self.view.display_top_level(ancestor_query)
         descendants_query = self.model.select_all_descendants(id)
         indented = self.view.display_indented(descendants_query)
         self.view.display_thread(top_level, indented, pager=pager)
-        
+
     def delete(self, ancestor):
         self.model.delete(ancestor)
 
     def get_ancestors_length(self):
         return self.model.get_ancestors_length()
-

@@ -10,6 +10,7 @@ from view import RichView
 from validation import is_valid_url, is_valid_id, InvalidInputError
 import configparser
 
+
 class FilumShell(Cmd):
     intro = 'filum interactive mode'
     prompt = 'filum > '
@@ -20,7 +21,7 @@ class FilumShell(Cmd):
         except Exception as err:
             print(err)
             return False
-            
+
     def emptyline(self):
         # Do nothing if an empty line is entered at the prompt
         pass
@@ -37,14 +38,16 @@ class FilumShell(Cmd):
         show_all()
 
     def do_thread(self, arg):
-        '''Display a thread given its top-level selector: $ thread 1.\nTop-level selectors are contained in the left-most column in the table shown by the "all" command.'''
+        '''Display a thread given its top-level selector: $ thread 1.\n
+        Top-level selectors are contained in the left-most column in the table shown by the "all" command.'''
         try:
             show_thread(int(arg))
         except ValueError:
             print('Please enter a valid integer.')
 
     def do_delete(self, arg):
-        '''Delete a thread given its top-level selector: $ thread 1.\nTop-level selectors are contained in the left-most column in the table shown by the "all" command.'''
+        '''Delete a thread given its top-level selector: $ thread 1.\n
+        Top-level selectors are contained in the left-most column in the table shown by the "all" command.'''
         try:
             delete(int(arg))
         except ValueError:
@@ -65,7 +68,9 @@ class FilumShell(Cmd):
         '''Quit the interactive session using 'quit' or CTRL-D'''
         sys.exit(0)
 
-parser = argparse.ArgumentParser(description='Archive discussion threads', prog='filum')
+
+parser = argparse.ArgumentParser(description='Archive discussion threads',
+                                 prog='filum')
 
 
 subparsers = parser.add_subparsers(dest='subparser')
@@ -74,7 +79,8 @@ parser_add = subparsers.add_parser('add', help='add a URL')
 parser_add.add_argument('url', nargs='+', type=str, help='add a URL')
 parser_add.set_defaults(parser_add=True)
 
-parser_all = subparsers.add_parser('all', help='show all saved top-level items')
+parser_all = subparsers.add_parser(
+    'all', help='show all saved top-level items')
 parser_all.set_defaults(parser_all=False)
 
 parser_thread = subparsers.add_parser('thread', help='display a saved thread')
@@ -98,6 +104,7 @@ config.read('config.ini')
 
 c = Controller(FilumModel(), RichView())
 
+
 def add(url) -> None:
     try:
         is_valid_url(url)
@@ -110,17 +117,18 @@ def add(url) -> None:
 def show_thread(id: int) -> None:
     try:
         is_valid_id(id)
-        #c.show_one_ancestor(id)
-        #c.show_all_descendants(id)
+        # c.show_one_ancestor(id)
+        # c.show_all_descendants(id)
         c.display_thread(id, pager=config.getboolean('output', 'pager'))
     except InvalidInputError as err:
         print(err)
-    except IndexError as err:
+    except IndexError:
         print(valid_id_message)
 
 
 def show_all() -> None:
     c.show_all_ancestors()
+
 
 def delete(id: int) -> None:
     try:
@@ -138,8 +146,9 @@ def delete(id: int) -> None:
             print('Delete action cancelled.')
     except InvalidInputError as err:
         print(err)
-    except IndexError as err:
+    except IndexError:
         print(valid_id_message)
+
 
 def confirm_delete() -> bool:
     yes_no = ''
@@ -161,8 +170,8 @@ def open_config():
         subprocess.run(('open', filepath))
     elif platform.system() == 'Windows':    # Windows
         subprocess.run('notepad', filepath)
-    else:                                   # linux variants
-        subprocess.run(('nano', filepath)) 
+    else:                                   # Linux variants
+        subprocess.run(('nano', filepath))
 
 
 description = (
@@ -175,7 +184,7 @@ description = (
 )
 
 if args.i:
-    FilumShell().cmdloop()        
+    FilumShell().cmdloop()
 
 if args.subparser == 'config':
     print('Opening config file...')
@@ -195,7 +204,3 @@ elif args.subparser == 'delete':
 
 else:
     print(description)
-
-
-
-            
