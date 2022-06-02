@@ -1,12 +1,13 @@
-from typing import ValuesView, Mapping
-from rich.table import Table
-from rich.console import Console, group
-from rich.padding import Padding
+from typing import Mapping, ValuesView
+
 from rich import box
-from filum.helpers import timestamp_to_iso
+from rich.console import Console, group
 from rich.markdown import Markdown
+from rich.padding import Padding
+from rich.table import Table
 from rich.theme import Theme
 
+from filum.helpers import timestamp_to_iso
 
 console = Console(
     theme=Theme({'markdown.block_quote': 'yellow'}),

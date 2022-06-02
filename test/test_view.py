@@ -1,4 +1,5 @@
 import unittest
+
 from filum.view import RichView
 
 view = RichView()

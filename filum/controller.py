@@ -1,8 +1,10 @@
-from filum.models import ItemAlreadyExistsError
-from filum.download import Download
-import traceback
-from rich.console import Console
 import sys
+import traceback
+
+from rich.console import Console
+
+from filum.download import Download
+from filum.models import ItemAlreadyExistsError
 
 console = Console()
 

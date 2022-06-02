@@ -1,14 +1,15 @@
 import argparse
-from cmd import Cmd
-import sys
+import configparser
 import pathlib
 import platform
 import subprocess
+import sys
+from cmd import Cmd
+
 from filum.controller import Controller
 from filum.models import FilumModel
+from filum.validation import InvalidInputError, is_valid_id, is_valid_url
 from filum.view import RichView
-from filum.validation import is_valid_url, is_valid_id, InvalidInputError
-import configparser
 
 
 def main():

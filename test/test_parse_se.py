@@ -1,9 +1,9 @@
+import pathlib
 import unittest
 from test.expected_parser_outputs import expected_output_se
-from filum.parsers.parse_se import parse_se
-from bs4 import BeautifulSoup
-import pathlib
 
+from bs4 import BeautifulSoup
+from filum.parsers.parse_se import parse_se
 
 html_fp = pathlib.Path(__file__).parent.resolve() / 'test_se.html'
 

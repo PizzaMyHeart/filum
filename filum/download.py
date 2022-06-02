@@ -1,9 +1,11 @@
+import traceback
+
 import requests
 from bs4 import BeautifulSoup
-import traceback
+
 from filum.parsers.parse_hn import parse_hn
-from filum.parsers.parse_se import parse_se
 from filum.parsers.parse_reddit import parse_reddit
+from filum.parsers.parse_se import parse_se
 
 
 class Download:
