@@ -1,7 +1,7 @@
 from typing import Mapping, ValuesView
 
 from rich import box
-from rich.console import Console, group
+from rich.console import Console, Group, group
 from rich.markdown import Markdown
 from rich.padding import Padding
 from rich.table import Table
@@ -53,9 +53,12 @@ class RichView:
             f'✎ {item["title"]}\n'
             )
         if item['body']:
-            to_print += f'{item["body"]}\n'
-
-        return to_print
+            body = Markdown(item["body"])
+        top_level_group = Group(
+            Padding(to_print, (0, 0, 0, 2)),
+            Padding(body, (0, 0, 0, 2))
+        )
+        return top_level_group
 
     def display_indented(self, results: list):
         @group()
@@ -81,7 +84,6 @@ class RichView:
         return make_panels(results)
 
     def display_thread(self, top_level, indented, pager=True, pager_colours=True):
-
         if not pager:
             self.console.print(top_level)
             self.console.print(indented)
