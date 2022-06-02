@@ -64,7 +64,10 @@ ENV/
 env.bak/
 venv.bak/
 
+*.egg*
 
 *.db
 
 .vscode
+
+dist
