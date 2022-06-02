@@ -115,9 +115,11 @@ def main():
     def show_thread(id: int) -> None:
         try:
             is_valid_id(id)
-            # c.show_one_ancestor(id)
-            # c.show_all_descendants(id)
-            c.display_thread(id, pager=config.getboolean('output', 'pager'))
+            c.display_thread(
+                id,
+                pager=config.getboolean('output', 'pager'),
+                pager_colour=config.getboolean('output', 'pager_colour')
+                )
         except InvalidInputError as err:
             print(err)
         except IndexError:
