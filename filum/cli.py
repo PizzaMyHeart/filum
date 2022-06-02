@@ -12,6 +12,36 @@ from filum.validation import InvalidInputError, is_valid_id, is_valid_url
 from filum.view import RichView
 
 
+def parser():
+    parser = argparse.ArgumentParser(
+                                description='Archive discussion threads',
+                                prog='filum'
+                                    )
+
+    subparsers = parser.add_subparsers(dest='subparser')
+
+    parser_add = subparsers.add_parser('add', help='add a URL')
+    parser_add.add_argument('url', nargs='+', type=str, help='add a URL')
+    parser_add.set_defaults(parser_add=True)
+
+    parser_all = subparsers.add_parser('all', help='show all saved top-level items')
+    parser_all.set_defaults(parser_all=False)
+
+    parser_thread = subparsers.add_parser('thread', help='display a saved thread')
+    parser_thread.add_argument('id', nargs='+', type=int)
+
+    parser_delete = subparsers.add_parser('delete', help='delete a saved thread')
+    parser_delete.add_argument('id', nargs='+', type=int)
+
+    parser_config = subparsers.add_parser('config', help='open config file')
+    parser_config.set_defaults(parser_config=False)
+
+    parser.add_argument('-i', action='store_true', help='interactive mode')
+    args = parser.parse_args()
+
+    return args
+
+
 def main():
 
     class FilumShell(Cmd):
@@ -71,32 +101,6 @@ def main():
             '''Quit the interactive session using 'quit' or CTRL-D'''
             sys.exit(0)
 
-    parser = argparse.ArgumentParser(
-                                description='Archive discussion threads',
-                                prog='filum'
-                                    )
-
-    subparsers = parser.add_subparsers(dest='subparser')
-
-    parser_add = subparsers.add_parser('add', help='add a URL')
-    parser_add.add_argument('url', nargs='+', type=str, help='add a URL')
-    parser_add.set_defaults(parser_add=True)
-
-    parser_all = subparsers.add_parser('all', help='show all saved top-level items')
-    parser_all.set_defaults(parser_all=False)
-
-    parser_thread = subparsers.add_parser('thread', help='display a saved thread')
-    parser_thread.add_argument('id', nargs='+', type=int)
-
-    parser_delete = subparsers.add_parser('delete', help='delete a saved thread')
-    parser_delete.add_argument('id', nargs='+', type=int)
-
-    parser_config = subparsers.add_parser('config', help='open config file')
-    parser_config.set_defaults(parser_config=False)
-
-    parser.add_argument('-i', action='store_true', help='interactive mode')
-    args = parser.parse_args()
-
     valid_id_message = 'Please enter a valid thread ID (positive integer). Run `filum all` to see a list of thread IDs.'
 
     config = configparser.ConfigParser()
@@ -119,7 +123,7 @@ def main():
             c.display_thread(
                 id,
                 pager=config.getboolean('output', 'pager'),
-                pager_colour=config.getboolean('output', 'pager_colour')
+                pager_colours=config.getboolean('output', 'pager_colours')
                 )
         except InvalidInputError as err:
             print(err)
@@ -178,6 +182,8 @@ def main():
         'Like a bookmarking tool, but the text itself is saved locally. Worry no more about deleted threads.\n\n'
         'Run "filum -h" for a full list of options.'
     )
+
+    args = parser()
 
     if args.i:
         FilumShell().cmdloop()

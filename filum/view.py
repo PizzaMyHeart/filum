@@ -80,13 +80,13 @@ class RichView:
 
         return make_panels(results)
 
-    def display_thread(self, top_level, indented, pager=True, pager_colour=True):
+    def display_thread(self, top_level, indented, pager=True, pager_colours=True):
 
         if not pager:
             self.console.print(top_level)
             self.console.print(indented)
         elif pager:
-            with self.console.pager(styles=pager_colour):
+            with self.console.pager(styles=pager_colours):
                 # Only works if terminal pager supports colour
                 self.console.print(top_level)
                 self.console.print(indented)
