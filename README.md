@@ -9,8 +9,7 @@ Filum saves discussion threads to your local machine. Think Pocket or Instapaper
 
 - Reddit
 - Hacker News
-- Stack Exchange (including Stack Overflow)
+- Stack Exchange 
 
-### Save threads to archive.is (TODO)
 
-### Choose whether to save a post only or its comments as well (TODO)
+
