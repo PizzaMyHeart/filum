@@ -51,7 +51,7 @@ class Download:
         elif self.site == 'hn':
             return parse_hn(self)
         elif self.site == 'se':
-            return parse_se(self)
+            return parse_se(self.soup, self.url, self.site)
 
     def run(self):
         return self.process_url().get_response().prepare_response().get_thread()

@@ -9,7 +9,7 @@ def bs4_to_md(soup):
 
 def html_to_md(html):
     # TODO: Show full hyperlinks (hn truncates these)
-    return md(md(html), heading_style='ATX')
+    return md(md(html, heading_style='ATX'), heading_style='ATX')
 
 
 def root_url(url):
