@@ -4,15 +4,16 @@ import traceback
 from rich.console import Console
 
 from filum.download import Download
-from filum.database import ItemAlreadyExistsError
+from filum.database import Database, ItemAlreadyExistsError
+from filum.view import RichView
 
 console = Console()
 
 
 class Controller(object):
-    def __init__(self, database, view):
-        self.database = database
-        self.view = view
+    def __init__(self):
+        self.database = Database()
+        self.view = RichView()
 
     def download_thread(self, url):
         return Download(url).run()

@@ -7,9 +7,7 @@ import sys
 from cmd import Cmd
 
 from filum.controller import Controller
-from filum.database import Database
 from filum.validation import InvalidInputError, is_valid_id, is_valid_url
-from filum.view import RichView
 
 
 def parser():
@@ -107,7 +105,7 @@ def main():
     config_filepath = pathlib.Path(__file__).parent.resolve() / 'config.ini'
     config.read(config_filepath)
 
-    c = Controller(Database(), RichView())
+    c = Controller()
 
     def add(url) -> None:
         try:
