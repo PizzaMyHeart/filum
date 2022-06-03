@@ -1,4 +1,5 @@
 import re
+from collections import KeysView
 from datetime import datetime
 
 from markdownify import markdownify as md
@@ -30,6 +31,6 @@ def timestamp_to_iso(timestamp):
     return datetime.fromtimestamp(timestamp).isoformat(sep=' ', timespec='seconds')
 
 
-def qmarks(sequence: list) -> str:
+def qmarks(sequence: KeysView) -> str:
     'Get a qmark SQL placeholder of arbitrary length.'
     return ', '.join(['?']*len(sequence))
