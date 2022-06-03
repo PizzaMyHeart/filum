@@ -9,7 +9,7 @@ class ItemAlreadyExistsError(Exception):
     pass
 
 
-class FilumModel(object):
+class Database(object):
     def __init__(self):
         self._conn = self.connect_to_db(db_name)
         # self._conn.set_trace_callback(print)
@@ -90,9 +90,9 @@ class FilumModel(object):
 
             return results
 
-    def select_one_ancestor(self, columns: list, id: int) -> sqlite3.Row:
+    def select_one_ancestor(self, row_columns: list, id: int) -> sqlite3.Row:
         with self._conn:
-            columns = ', '.join(columns)
+            columns = ', '.join(row_columns)
             sql = (
                 'WITH a AS ('
                 'SELECT *, (SELECT COUNT(*) FROM ancestors b WHERE ancestors.row_id >= b.row_id) AS num FROM ancestors)'
@@ -131,7 +131,7 @@ class FilumModel(object):
             else:
                 return 0
 
-    def delete(self, id) -> sqlite3.Row:
+    def delete(self, id) -> None:
         # TODO: Rewrite this so that a col is added to ancestors which contains
         # the row_number() values to avoid creating a new table every time the
         # commands "thread" and "all" are run
@@ -155,7 +155,7 @@ class FilumModel(object):
 
 def main():
 
-    db = FilumModel()
+    db = Database()
     db.get_ancestors_length()
 
 

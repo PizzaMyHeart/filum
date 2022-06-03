@@ -1,4 +1,4 @@
-from typing import Mapping, ValuesView
+from typing import Mapping, ValuesView, Any
 
 from rich import box
 from rich.console import Console, Group, group
@@ -55,10 +55,9 @@ class RichView:
             f'[green]{item["score"]} pts[/green] [blue]{timestamp}[/blue] {item["permalink"]}\n\n'
             f'✎ {item["title"]}\n'
             )
+        body: Any = ''
         if item['body']:
             body = Markdown(item["body"])
-        else:
-            body = ''
         top_level_group = Group(
             Padding(to_print, (0, 0, 0, 2)),
             Padding(body, (0, 0, 0, 2))
