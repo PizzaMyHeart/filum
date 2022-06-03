@@ -66,6 +66,8 @@ venv.bak/
 
 *.egg*
 
+*.mypy*
+
 *.db
 
 .vscode

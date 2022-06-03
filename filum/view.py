@@ -24,7 +24,7 @@ class RichView:
         '''
         return tuple(str(i) for i in row)
 
-    def display_table(self, row_list: list) -> None:
+    def create_table(self, row_list: list) -> Table:
         '''Construct a new table each time to prevent concatenating
         new tables together each time the "all" command is called in the
         interactive shell.
@@ -37,30 +37,35 @@ class RichView:
         table.add_column('Score')
         table.add_column('Source')
         table.add_column('Tags')
+
         # Convert each sqlite3.Row object to a dict
         rows = [dict(row) for row in row_list]
+
         for row in rows:
             row['posted_timestamp'] = timestamp_to_iso(row['posted_timestamp'])
             row['saved_timestamp'] = timestamp_to_iso(row['saved_timestamp'])
             table.add_row(*self.stringify(row.values()))
-        self.console.print(table)
 
-    def display_top_level(self, item: Mapping) -> str:
+        return table
+
+    def create_thread_header(self, item: Mapping) -> Group:
         timestamp = timestamp_to_iso(item['posted_timestamp'])
         to_print = (
             f'\n[bold bright_yellow]{item["author"]}[/bold bright_yellow] '
-            f'{item["score"]} [blue]{timestamp}[/blue] {item["permalink"]}\n\n'
+            f'[green]{item["score"]} pts[/green] [blue]{timestamp}[/blue] {item["permalink"]}\n\n'
             f'✎ {item["title"]}\n'
             )
         if item['body']:
             body = Markdown(item["body"])
+        else:
+            body = ''
         top_level_group = Group(
             Padding(to_print, (0, 0, 0, 2)),
             Padding(body, (0, 0, 0, 2))
         )
         return top_level_group
 
-    def display_indented(self, results: list):
+    def create_thread_body(self, results: list) -> Group:
         @group()
         def make_panels(results: list):
             for result in results:
@@ -75,7 +80,7 @@ class RichView:
                     score = ''
                 header = (
                     f'\n¬ [bold bright_cyan]{result["author"]}[/bold bright_cyan] '
-                    f'[green]{score}[/green] [blue]{timestamp}[/blue]\n'
+                    f'[green]{score} pts[/green] [blue]{timestamp}[/blue]\n'
                     )
 
                 yield Padding(header, (0, 0, 0, indent))
@@ -83,12 +88,15 @@ class RichView:
 
         return make_panels(results)
 
-    def display_thread(self, top_level, indented, pager=True, pager_colours=True):
+    def display_thread(self, top_level, indented, pager=True, pager_colours=True) -> None:
         if not pager:
-            self.console.print(top_level)
-            self.console.print(indented)
+            self.filum_print(top_level)
+            self.filum_print(indented)
         elif pager:
             with self.console.pager(styles=pager_colours):
                 # Only works if terminal pager supports colour
-                self.console.print(top_level)
-                self.console.print(indented)
+                self.filum_print(top_level)
+                self.filum_print(indented)
+
+    def filum_print(self, item):
+        self.console.print(item)
