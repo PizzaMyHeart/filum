@@ -1,6 +1,7 @@
 import sqlite3
 from sqlite3 import OperationalError, IntegrityError
 import pathlib
+from filum.helpers import qmarks
 
 db_name = pathlib.Path(__file__).parent.resolve() / 'filum'
 
@@ -34,7 +35,7 @@ class Database(object):
                 'CREATE TABLE IF NOT EXISTS ancestors'
                 '(row_id INTEGER PRIMARY KEY AUTOINCREMENT,'
                 'id TEXT, title TEXT, body TEXT, posted_timestamp INTEGER, saved_timestamp INTEGER, '
-                'score INTEGER, permalink TEXT UNIQUE, num_comments INTEGER, author TEXT, source TEXT,'
+                'score INTEGER, permalink TEXT, num_comments INTEGER, author TEXT, source TEXT,'
                 'tags TEXT);'
             )
 
@@ -64,7 +65,7 @@ class Database(object):
         with self._conn:
             columns = thread.keys()
             values = tuple(thread.values())
-            to_insert = f'''({', '.join(columns)}) VALUES ({', '.join(['?']*len(columns))})'''
+            to_insert = f'''({', '.join(columns)}) VALUES ({qmarks(columns)})'''
             sql = f'''INSERT INTO {table_name} ''' + to_insert
             try:
                 self._conn.executemany(sql, (values,))
@@ -106,7 +107,7 @@ class Database(object):
 
             '''
             results = self._conn.execute(sql, (id, )).fetchone()
-            return results
+        return results
 
     def select_all_descendants(self, id: int) -> sqlite3.Row:
         with self._conn:
@@ -131,7 +132,7 @@ class Database(object):
             else:
                 return 0
 
-    def delete(self, id) -> None:
+    def delete(self, id: int) -> None:
         # TODO: Rewrite this so that a col is added to ancestors which contains
         # the row_number() values to avoid creating a new table every time the
         # commands "thread" and "all" are run
@@ -151,6 +152,35 @@ class Database(object):
                                 '''
             self._conn.execute(sql_descendants, (id,))
             self._conn.execute(sql_ancestors, (id,))
+
+    def update_thread():
+        # TODO
+        pass
+
+    def get_tags(self, id: int) -> str:
+        with self._conn:
+            sql = (
+                'WITH a AS (SELECT *, ROW_NUMBER() OVER (ORDER BY saved_timestamp) as num FROM ancestors) '
+                'SELECT tags FROM a WHERE num = ?'
+                )
+
+            tags = self._conn.execute(sql, (id, )).fetchone()[0]
+        return tags
+
+    def update_tags(self, id: int, tags: str):
+        with self._conn:
+            sql = (
+                'WITH a AS (SELECT *, ROW_NUMBER() OVER (ORDER BY saved_timestamp) as num FROM ancestors) '
+                'UPDATE ancestors SET tags = ? WHERE id IN (SELECT id FROM a WHERE num = ?)'
+                )
+            print(sql)
+            self._conn.execute(sql, (tags, id))
+
+    def delete_tag():
+        pass
+
+    def search_tag():
+        pass
 
 
 def main():

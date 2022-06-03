@@ -26,10 +26,14 @@ def parser():
     parser_all.set_defaults(parser_all=False)
 
     parser_thread = subparsers.add_parser('thread', help='display a saved thread')
-    parser_thread.add_argument('id', nargs='+', type=int)
+    parser_thread.add_argument('id', nargs=1, type=int)
 
     parser_delete = subparsers.add_parser('delete', help='delete a saved thread')
     parser_delete.add_argument('id', nargs='+', type=int)
+
+    parser_tag = subparsers.add_parser('tag', help='add or remove tags')
+    parser_tag.add_argument('id', nargs=1, type=int)
+    parser_tag.add_argument('tags', nargs='+', help='include one or more tags separated by a space')
 
     parser_config = subparsers.add_parser('config', help='open config file')
     parser_config.set_defaults(parser_config=False)
@@ -110,6 +114,7 @@ def main():
     def add(url) -> None:
         try:
             is_valid_url(url)
+            # TODO: If url already exists in database, ask if user wants to update the thread.
             thread = c.download_thread(url)
             c.add_thread(thread)
         except InvalidInputError as err:
@@ -163,6 +168,9 @@ def main():
                 print('Enter "y" for yes or "n" for no.')
                 continue
 
+    def modify_tags(id, add: bool, **kwargs):
+        c.modify_tags(id, add, **kwargs)
+
     def open_config():
         # filepath = pathlib.Path(__file__).parent.resolve() / 'config.ini'
         if platform.system() == 'Darwin':       # macOS
@@ -182,7 +190,7 @@ def main():
     )
 
     args = parser()
-
+    print(args)
     if args.i:
         FilumShell().cmdloop()
 
@@ -201,6 +209,9 @@ def main():
 
     elif args.subparser == 'delete':
         delete(args.id[0])
+
+    elif args.subparser == 'tag':
+        modify_tags(args.id[0], add=True, tags=args.tags)
 
     else:
         print(description)

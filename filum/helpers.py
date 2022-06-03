@@ -28,3 +28,8 @@ def iso_to_timestamp(time):
 
 def timestamp_to_iso(timestamp):
     return datetime.fromtimestamp(timestamp).isoformat(sep=' ', timespec='seconds')
+
+
+def qmarks(sequence: list) -> str:
+    'Get a qmark SQL placeholder of arbitrary length.'
+    return ', '.join(['?']*len(sequence))

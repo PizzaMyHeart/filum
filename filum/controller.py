@@ -52,3 +52,24 @@ class Controller(object):
 
     def get_ancestors_length(self):
         return self.database.get_ancestors_length()
+
+    def modify_tags(self, id: int, add=True, **kwargs):
+        '''Add or delete tags of a top-level item in the "ancestor" table
+        :param int id: The ID of the item (in consecutive ascending order)
+        :param list tags: User-supplied tags to be added
+        '''
+        current_tags = self.database.get_tags(id)
+        if current_tags is not None:
+            current_tags = current_tags.split(', ')
+        else:
+            current_tags = []
+        entered_tags = kwargs['tags']
+        print('Current tags: ', current_tags)
+        print('User entered these tags: ', entered_tags)
+        print(add)
+        if add:
+            # Ignore user-supplied tags that already exist
+            new_tags = ', '.join(set(current_tags).union(entered_tags))
+            self.database.update_tags(id, new_tags)
+
+
