@@ -36,7 +36,7 @@ class Download:
         self.r = requests.get(self.url, headers=headers)
         return self
 
-    def parse_html(self, raw):
+    def parse_html(self, raw: str):
         self.soup = BeautifulSoup(raw, 'html5lib')
         return self
 
