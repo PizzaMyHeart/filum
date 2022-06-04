@@ -78,6 +78,7 @@ class RichView:
             for result in results:
                 text = Markdown(result['text'])
                 timestamp = ''
+                # Padding can only accept integers not floats
                 indent = (result["depth"] + 2)*2
                 if result['timestamp']:
                     timestamp = timestamp_to_iso(result['timestamp'])

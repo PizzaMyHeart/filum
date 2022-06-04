@@ -26,9 +26,19 @@ class Controller(object):
         except ItemAlreadyExistsError:
             # TODO: Allow updating of existing thread
             print('This item already exists in your database.')
+            raise ItemAlreadyExistsError
             sys.exit(0)
         except Exception:
             traceback.print_exc()
+
+    def update_thread(self, thread: dict):
+        ancestor_id = self.database.update_ancestor(thread['parent_data'])
+        self.database.delete_descendants(ancestor_id)
+        for comment in thread['comment_data']:
+            self.database.insert_row(thread['comment_data'][comment], 'descendants')
+
+    def check_thread_exists(self, id):
+        self.database.select_one_ancestor(id)
 
     def show_all_ancestors(self):
         results = self.database.select_all_ancestors()
@@ -36,10 +46,8 @@ class Controller(object):
         self.view.filum_print(table)
 
     def display_thread(self, id, pager, pager_colours, cond='', **kwargs):
-        columns = ('row_id', 'num', 'permalink', 'author', 'posted_timestamp',
-                   'score', 'body', 'title')
         print('cond:', cond)
-        ancestor_query = self.database.select_one_ancestor(columns, id, cond=cond, **kwargs)
+        ancestor_query = self.database.select_one_ancestor(id, cond=cond, **kwargs)
         top_level = self.view.create_thread_header(ancestor_query)
 
         descendants_query = self.database.select_all_descendants(id, cond=cond, **kwargs)
@@ -48,7 +56,8 @@ class Controller(object):
         self.view.display_thread(top_level, indented, pager=pager, pager_colours=pager_colours)
 
     def delete(self, ancestor):
-        self.database.delete(ancestor)
+        self.database.delete_descendants(ancestor)
+        self.database.delete_ancestor(ancestor)
 
     def get_ancestors_length(self):
         return self.database.get_ancestors_length()

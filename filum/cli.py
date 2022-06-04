@@ -7,6 +7,7 @@ import sys
 from cmd import Cmd
 
 from filum.controller import Controller
+from filum.database import ItemAlreadyExistsError
 from filum.validation import InvalidInputError, is_valid_id, is_valid_url
 
 
@@ -124,6 +125,11 @@ def main():
             c.add_thread(thread)
         except InvalidInputError as err:
             print(err)
+        except ItemAlreadyExistsError as err:
+            print(err)
+            if confirm('Do you want to update this thread now? [y/n] '):
+                print('Updating thread ...')
+                c.update_thread(thread)
 
     def show_thread(id: int, cond='', **kwargs) -> None:
         print(cond)
@@ -146,7 +152,7 @@ def main():
 
     def delete(id: int) -> None:
         try:
-            if confirm_delete():
+            if confirm('Are you sure you want to delete this thread? [y/n] '):
                 is_valid_id(id)
                 ancestors_length = c.get_ancestors_length()
                 print(ancestors_length)
@@ -163,11 +169,11 @@ def main():
         except IndexError:
             print(valid_id_message)
 
-    def confirm_delete() -> bool:  # type: ignore
+    def confirm(prompt) -> bool:  # type: ignore
         yes_no = ''
 
         while yes_no not in ('y', 'n'):
-            yes_no = input('Are you sure you want to delete this thread? [y/n] ')
+            yes_no = input(prompt)
             if yes_no == 'y':
                 return True
             elif yes_no == 'n':

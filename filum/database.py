@@ -1,7 +1,7 @@
 import sqlite3
 from sqlite3 import OperationalError, IntegrityError
 import pathlib
-from filum.helpers import qmarks
+from filum.helpers import qmarks, current_timestamp
 
 db_name = pathlib.Path(__file__).parent.resolve() / 'filum'
 
@@ -13,7 +13,7 @@ class ItemAlreadyExistsError(Exception):
 class Database(object):
     def __init__(self):
         self._conn = self.connect_to_db(db_name)
-        # self._conn.set_trace_callback(print)
+        self._conn.set_trace_callback(print)
         self.sql = dict([
             ('ancestors_sequential', 'SELECT *, ROW_NUMBER() OVER (ORDER BY saved_timestamp) as num FROM ancestors')
             ])
@@ -39,7 +39,7 @@ class Database(object):
                 'CREATE TABLE IF NOT EXISTS ancestors'
                 '(row_id INTEGER PRIMARY KEY AUTOINCREMENT,'
                 'id TEXT, title TEXT, body TEXT, posted_timestamp INTEGER, saved_timestamp INTEGER, '
-                'score INTEGER, permalink TEXT, num_comments INTEGER, author TEXT, source TEXT,'
+                'score INTEGER, permalink TEXT UNIQUE, num_comments INTEGER, author TEXT, source TEXT,'
                 'tags TEXT);'
             )
 
@@ -79,6 +79,23 @@ class Database(object):
                 if 'UNIQUE' in str(err):
                     raise ItemAlreadyExistsError
 
+    def update_ancestor(self, thread: dict) -> str:
+        # TODO
+        with self._conn:
+            sql = 'UPDATE ancestors SET saved_timestamp = ?, score = ?, num_comments = ? WHERE permalink = ?'
+            try:
+                self._conn.execute(sql, (
+                        current_timestamp(),
+                        thread['score'],
+                        thread['num_comments'],
+                        thread['permalink']
+                        )
+                    )
+                ancestor_id = self._conn.execute('SELECT id FROM ancestors WHERE permalink = ?', (thread['permalink'], )).fetchone()[0]
+                return ancestor_id
+            except OperationalError as err:
+                print(err)
+
     def select_all_ancestors(self):
         with self._conn:
             sql = self.sql['ancestors_sequential']
@@ -86,22 +103,14 @@ class Database(object):
 
             return results
 
-    def select_one_ancestor(self, row_columns: list, id: int, cond='', **kwargs) -> sqlite3.Row:
+    def select_one_ancestor(self, id: int, cond='', **kwargs) -> sqlite3.Row:
         if 'where_param' in kwargs.keys():
             where_param = kwargs['where_param']
             execute_args = (where_param, id)
         else:
             execute_args = (id, )
-        # print('where_clause: ', where_placeholder)
         with self._conn:
-            columns = ', '.join(row_columns)
-            sql = f'''
-                    WITH a AS (
-                        {self.sql['ancestors_sequential']} {cond}
-                        )
-                    SELECT {columns} FROM a WHERE num = (?)
-
-            '''
+            sql = f'WITH a AS ({self.sql["ancestors_sequential"]} {cond})SELECT * FROM a WHERE num = (?)'
             results = self._conn.execute(sql, execute_args).fetchone()
         return results
 
@@ -133,6 +142,27 @@ class Database(object):
             else:
                 return 0
 
+    def delete_ancestor(self, id: int) -> None:
+        with self._conn:
+            sql_ancestors = '''
+                                WITH a AS (
+                                    SELECT id, ROW_NUMBER() OVER (ORDER BY saved_timestamp) AS num FROM ancestors
+                                )
+                                DELETE FROM ancestors WHERE id IN (SELECT id FROM a WHERE num = ?)
+                                '''
+            self._conn.execute(sql_ancestors, (id,))
+
+    def delete_descendants(self, id: int) -> None:
+        with self._conn:
+            sql_descendants = '''
+                                WITH a AS (
+                                    SELECT id, ROW_NUMBER() OVER (ORDER BY saved_timestamp) AS num FROM ancestors
+                                )
+                                DELETE FROM descendants
+                                WHERE ancestor_id IN (SELECT id FROM a WHERE num = ?);
+                                '''
+            self._conn.execute(sql_descendants, (id,))
+
     def delete(self, id: int) -> None:
         # TODO: Rewrite this so that a col is added to ancestors which contains
         # the row_number() values to avoid creating a new table every time the
@@ -154,10 +184,6 @@ class Database(object):
             self._conn.execute(sql_descendants, (id,))
             self._conn.execute(sql_ancestors, (id,))
 
-    def update_thread():
-        # TODO
-        pass
-
     def get_tags(self, id: int) -> str:
         with self._conn:
             sql = (
@@ -169,15 +195,13 @@ class Database(object):
         return tags
 
     def update_tags(self, id: int, tags: str):
+        '''Update (either add or delete) tags based on user input'''
         with self._conn:
             sql = (
                 f'WITH a AS ({self.sql["ancestors_sequential"]}) '
                 'UPDATE ancestors SET tags = ? WHERE id IN (SELECT id FROM a WHERE num = ?)'
                 )
             self._conn.execute(sql, (tags, id))
-
-    def delete_tag():
-        pass
 
     def search_tag(self, tag):
         param = f'%{tag}%'
