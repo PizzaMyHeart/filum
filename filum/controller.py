@@ -35,14 +35,14 @@ class Controller(object):
         table = self.view.create_table(results)
         self.view.filum_print(table)
 
-    def display_thread(self, id, pager, pager_colours):
+    def display_thread(self, id, pager, pager_colours, cond='', **kwargs):
         columns = ('row_id', 'num', 'permalink', 'author', 'posted_timestamp',
                    'score', 'body', 'title')
-
-        ancestor_query = self.database.select_one_ancestor(columns, id)
+        print('cond:', cond)
+        ancestor_query = self.database.select_one_ancestor(columns, id, cond=cond, **kwargs)
         top_level = self.view.create_thread_header(ancestor_query)
 
-        descendants_query = self.database.select_all_descendants(id)
+        descendants_query = self.database.select_all_descendants(id, cond=cond, **kwargs)
         indented = self.view.create_thread_body(descendants_query)
 
         self.view.display_thread(top_level, indented, pager=pager, pager_colours=pager_colours)
@@ -71,5 +71,12 @@ class Controller(object):
             # Ignore user-supplied tags that already exist
             new_tags = ', '.join(set(current_tags).union(entered_tags))
             self.database.update_tags(id, new_tags)
+
+    def search(self, searchstr):
+        print(searchstr)
+        results = self.database.search_tag(searchstr)
+        table = self.view.create_table(results)
+        self.view.filum_print(table)
+
 
 

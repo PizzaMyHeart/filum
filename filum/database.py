@@ -13,7 +13,7 @@ class ItemAlreadyExistsError(Exception):
 class Database(object):
     def __init__(self):
         self._conn = self.connect_to_db(db_name)
-        # self._conn.set_trace_callback(print)
+        self._conn.set_trace_callback(print)
         with self._conn:
             self.create_table_ancestors()
             self.create_table_descendants()
@@ -91,36 +91,43 @@ class Database(object):
 
             return results
 
-    def select_one_ancestor(self, row_columns: list, id: int) -> sqlite3.Row:
+    def select_one_ancestor(self, row_columns: list, id: int, cond='', **kwargs) -> sqlite3.Row:
+        where_param = kwargs['where_param']
+        if where_param:
+            execute_args = (where_param, id)
+        else:
+            execute_args = (id, )
+        # print('where_clause: ', where_placeholder)
         with self._conn:
             columns = ', '.join(row_columns)
-            sql = (
-                'WITH a AS ('
-                'SELECT *, (SELECT COUNT(*) FROM ancestors b WHERE ancestors.row_id >= b.row_id) AS num FROM ancestors)'
-                f'SELECT {columns} FROM a WHERE num = (?)'
-            )
             sql = f'''
                     WITH a AS (
-                        SELECT *, ROW_NUMBER() OVER (ORDER BY saved_timestamp) as num FROM ancestors
+                        SELECT *, ROW_NUMBER() OVER (ORDER BY saved_timestamp) as num FROM ancestors {cond}
                         )
                     SELECT {columns} FROM a WHERE num = (?)
 
             '''
-            results = self._conn.execute(sql, (id, )).fetchone()
+            results = self._conn.execute(sql, execute_args).fetchone()
         return results
 
-    def select_all_descendants(self, id: int) -> sqlite3.Row:
+    def select_all_descendants(self, id: int, cond='', **kwargs) -> sqlite3.Row:
+        where_placeholder = cond
+        where_param = kwargs['where_param']
+        if where_param:
+            execute_args = (where_param, id)
+        else:
+            execute_args = (id, )
         with self._conn:
-            sql = '''
-                WITH joined AS (
-                    SELECT d.depth, d.row_id, d.score, d.timestamp, a.id, d.text, d.author, a.num AS key
-                    FROM descendants d
-                    JOIN (SELECT *, ROW_NUMBER() OVER (ORDER BY saved_timestamp) AS num FROM ancestors a) a
-                    ON d.ancestor_id = a.id
-                    )
-                SELECT * FROM joined WHERE key = ?
-            '''
-            results = self._conn.execute(sql, (id,)).fetchall()
+            sql = (
+                'WITH joined AS ('
+                'SELECT d.depth, d.row_id, d.score, d.timestamp, a.id, d.text, d.author, a.num AS key '
+                'FROM descendants d '
+                f'JOIN (SELECT *, ROW_NUMBER() OVER (ORDER BY saved_timestamp) AS num FROM ancestors a {cond}) a '
+                'ON d.ancestor_id = a.id) '
+                'SELECT * FROM joined WHERE key = ?'
+            )
+            print(sql)
+            results = self._conn.execute(sql, execute_args).fetchall()
             return results
 
     def get_ancestors_length(self) -> int:
@@ -173,14 +180,22 @@ class Database(object):
                 'WITH a AS (SELECT *, ROW_NUMBER() OVER (ORDER BY saved_timestamp) as num FROM ancestors) '
                 'UPDATE ancestors SET tags = ? WHERE id IN (SELECT id FROM a WHERE num = ?)'
                 )
-            print(sql)
             self._conn.execute(sql, (tags, id))
 
     def delete_tag():
         pass
 
-    def search_tag():
-        pass
+
+    def search_tag(self, tag):
+        param = f'%{tag}%'
+        print(param)
+        with self._conn:
+            sql = (
+                'SELECT ROW_NUMBER() OVER (ORDER BY saved_timestamp) as num, '
+                'title, posted_timestamp, saved_timestamp, score, source, tags FROM ancestors WHERE tags LIKE ?'
+            )
+            results = self._conn.execute(sql, (param, )).fetchall()
+        return results
 
 
 def main():
