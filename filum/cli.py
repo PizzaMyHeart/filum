@@ -32,9 +32,10 @@ def parser():
     parser_delete = subparsers.add_parser('delete', help='delete a saved thread')
     parser_delete.add_argument('id', nargs='+', type=int)
 
-    parser_tag = subparsers.add_parser('tag', help='add or remove tags')
+    parser_tag = subparsers.add_parser('tag', help='add tags. Include --delete to remove tags instead')
     parser_tag.add_argument('id', nargs=1, type=int)
     parser_tag.add_argument('tags', nargs='+', help='include one or more tags separated by a space')
+    parser_tag.add_argument('--delete', action='store_true')
 
     parser_search = subparsers.add_parser('search', help='search for a thread')
     parser_search.add_argument('--tags', nargs='+', help='search using tags')
@@ -224,7 +225,11 @@ def main():
         delete(args.id[0])
 
     elif args.subparser == 'tag':
-        modify_tags(args.id[0], add=True, tags=args.tags)
+        if args.delete:
+            print('delete')
+            modify_tags(args.id[0], add=False, tags=args.tags)
+        else:
+            modify_tags(args.id[0], add=True, tags=args.tags)
 
     elif args.subparser == 'search':
         if args.tags:

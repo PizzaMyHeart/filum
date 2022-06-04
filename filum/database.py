@@ -13,7 +13,7 @@ class ItemAlreadyExistsError(Exception):
 class Database(object):
     def __init__(self):
         self._conn = self.connect_to_db(db_name)
-        self._conn.set_trace_callback(print)
+        # self._conn.set_trace_callback(print)
         self.sql = dict([
             ('ancestors_sequential', 'SELECT *, ROW_NUMBER() OVER (ORDER BY saved_timestamp) as num FROM ancestors')
             ])

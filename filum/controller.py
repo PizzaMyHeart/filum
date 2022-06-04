@@ -55,22 +55,25 @@ class Controller(object):
 
     def modify_tags(self, id: int, add=True, **kwargs):
         '''Add or delete tags of a top-level item in the "ancestor" table
-        :param int id: The ID of the item (in consecutive ascending order)
-        :param list tags: User-supplied tags to be added
+        :param int id: the ID of the item (in consecutive ascending order)
+        :param bool add: default is to add tags, otherwise delete tags
+        :key list tags: user-supplied tags to be added
+
         '''
         current_tags = self.database.get_tags(id)
         if current_tags is not None:
             current_tags = current_tags.split(', ')
         else:
             current_tags = []
-        entered_tags = kwargs['tags']
-        print('Current tags: ', current_tags)
-        print('User entered these tags: ', entered_tags)
-        print(add)
+        entered_tags = [tag.lower() for tag in kwargs['tags']]
         if add:
             # Ignore user-supplied tags that already exist
             new_tags = ', '.join(set(current_tags).union(entered_tags))
-            self.database.update_tags(id, new_tags)
+        else:
+            new_tags = ', '.join([tag for tag in current_tags if tag not in entered_tags])
+            if new_tags == '':
+                new_tags = None
+        self.database.update_tags(id, new_tags)
 
     def search(self, searchstr):
         print(searchstr)
