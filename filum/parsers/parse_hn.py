@@ -21,7 +21,6 @@ def parse_hn(obj):
         reply_span = comment_field.find('div', class_='reply')
         if reply_span:
             reply_span.decompose()
-        print(comment_field)
         # Call the prettify() method to ensure each tag is rendered on a separate line.
         # HN uses <p> tags to denote a new line.
         return bs4_to_md(comment_field.prettify())
@@ -29,6 +28,7 @@ def parse_hn(obj):
     if title:
         title = title.contents[0]
         parent_score = parent.find('span', class_='score').contents[0]
+        parent_score = int(parent_score.replace('points', ''))
         parent_body = None
         parent_author = parent.find('td', class_='subtext').find('a', class_='hnuser').contents[0]
     else:
@@ -37,6 +37,8 @@ def parse_hn(obj):
         title = parent.find('span', class_='onstory').a.contents[0]
         parent_body = get_comment_text(parent)
         parent_author = parent.find('a', class_='hnuser').contents[0]
+
+    print(parent_score)
     parent_timestamp = parent.find('span', class_='age').attrs['title']
     parent_timestamp = iso_to_timestamp(parent_timestamp)
 
@@ -48,9 +50,6 @@ def parse_hn(obj):
         comment_timestamp = iso_to_timestamp(comment_timestamp)
         permalink = 'https://news.ycombinator.com/item?id=' + comment_id
         comment_body = get_comment_text(child)
-        print(depth, author, permalink)
-        print(comment_body)
-        print('------')
         children_data.update({
             comment_id: {
                 'author': author,
