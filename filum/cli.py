@@ -162,7 +162,7 @@ def main():
         except IndexError:
             print(valid_id_message)
 
-    def confirm_delete() -> bool: # type: ignore
+    def confirm_delete() -> bool:  # type: ignore
         yes_no = ''
 
         while yes_no not in ('y', 'n'):
@@ -174,7 +174,6 @@ def main():
             else:
                 print('Enter "y" for yes or "n" for no.')
                 continue
-                
 
     def modify_tags(id, add: bool, **kwargs):
         c.modify_tags(id, add, **kwargs)

@@ -44,8 +44,16 @@ class RichView:
         for row in rows:
             row['posted_timestamp'] = timestamp_to_iso(row['posted_timestamp'])
             row['saved_timestamp'] = timestamp_to_iso(row['saved_timestamp'])
-            table.add_row(*self.stringify(row.values()))
-
+            table_row = (
+                row['num'],
+                row['title'],
+                row['posted_timestamp'],
+                row['saved_timestamp'],
+                row['score'],
+                row['source'],
+                row['tags']
+            )
+            table.add_row(*self.stringify(table_row))
         return table
 
     def create_thread_header(self, item: Mapping) -> Group:

@@ -77,6 +77,3 @@ class Controller(object):
         results = self.database.search_tag(searchstr)
         table = self.view.create_table(results)
         self.view.filum_print(table)
-
-
-
