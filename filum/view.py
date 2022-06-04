@@ -78,20 +78,20 @@ class RichView:
             for result in results:
                 text = Markdown(result['text'])
                 timestamp = ''
-                indent = result["depth"] + 2
+                indent = (result["depth"] + 2)*2
                 if result['timestamp']:
                     timestamp = timestamp_to_iso(result['timestamp'])
                 if result['score'] is not None:
-                    score = result['score']
+                    score = f'{result["score"]} pts'
                 else:
                     score = ''
                 header = (
                     f'\n¬ [bold bright_cyan]{result["author"]}[/bold bright_cyan] '
-                    f'[green]{score} pts[/green] [blue]{timestamp}[/blue]\n'
+                    f'[green]{score}[/green] [blue]{timestamp}[/blue]\n'
                     )
 
-                yield Padding(header, (0, 0, 0, indent))
-                yield Padding(text, (0, 0, 0, indent + 1))
+                yield Padding(header, (0, 2, 0, indent))
+                yield Padding(text, (0, 2, 0, indent + 2))
 
         return make_panels(results)
 
