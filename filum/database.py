@@ -15,7 +15,7 @@ class Database(object):
         self._conn = self.connect_to_db(db_name)
         # self._conn.set_trace_callback(print)
         self.sql = dict([
-            ('ancestors_sequential', 'SELECT *, ROW_NUMBER() OVER (ORDER BY saved_timestamp DESC) as num FROM ancestors')
+            ('ancestors_sequential', 'SELECT *, ROW_NUMBER() OVER (ORDER BY saved_timestamp DESC) as num FROM ancestors')  # noqa: E501
             ])
 
         with self._conn:
@@ -39,7 +39,7 @@ class Database(object):
                 'CREATE TABLE IF NOT EXISTS ancestors'
                 '(row_id INTEGER PRIMARY KEY AUTOINCREMENT,'
                 'id TEXT, title TEXT, body TEXT, posted_timestamp INTEGER, saved_timestamp INTEGER, '
-                'score INTEGER, permalink TEXT UNIQUE, num_comments INTEGER, author TEXT, source TEXT,'
+                'score INTEGER, permalink TEXT UNIQUE, author TEXT, source TEXT,'
                 'tags TEXT);'
             )
 
@@ -56,10 +56,9 @@ class Database(object):
                     id TEXT,
                     parent_id TEXT,
                     text TEXT, permalink TEXT,
-                    author TEXT, author_id TEXT, is_submitter INTEGER,
-                    upvotes INTEGER, downvotes INTEGER, score INTEGER, timestamp INTEGER,
-                    depth INTEGER, path TEXT,
-                    FOREIGN KEY (parent_id) REFERENCES descendants(id));'''
+                    author TEXT, author_id TEXT,
+                    score INTEGER, timestamp INTEGER,
+                    depth INTEGER);'''
             try:
                 self._conn.execute(sql)
             except OperationalError as err:
@@ -90,7 +89,8 @@ class Database(object):
                         )
                     )
                 id: int = self._conn.execute(
-                            'SELECT ROW_NUMBER() OVER (ORDER BY saved_timestamp DESC) FROM ancestors WHERE permalink = ?',
+                            ('SELECT ROW_NUMBER() OVER (ORDER BY saved_timestamp DESC) FROM ancestors ',
+                                'WHERE permalink = ?'),
                             (thread['permalink'], )
                             ) \
                     .fetchone()[0]

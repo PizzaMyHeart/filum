@@ -18,7 +18,6 @@ def parse_reddit(obj):
                 # Depth will need to be checked programmatically.
                 continue
 
-            parent_id = comment['data']['parent_id']
             depth = comment['data']['depth']
             replies = comment['data']['replies']
 
@@ -29,14 +28,11 @@ def parse_reddit(obj):
                 id: {
                     'author': comment['data']['author'],
                     'text': comment_body,
+                    'ancestor_id': parent['name'],
+                    'depth': depth,
+                    'score': comment['data']['score'],
                     'timestamp': comment['data']['created_utc'],
                     'permalink': comment_permalink,
-                    'upvotes': comment['data']['ups'],
-                    'downvotes': comment['data']['downs'],
-                    'score': comment['data']['score'],
-                    'parent_id': parent_id,
-                    'ancestor_id': parent['name'],
-                    'depth': depth
                     }
                 })
             if 'author_fullname' in comment['data'].keys():
@@ -52,24 +48,21 @@ def parse_reddit(obj):
     get_comments(comments)
     body = html_to_md(parent['selftext_html']) if parent['selftext_html'] else None
     parent_permalink = f'https://www.reddit.com{parent["permalink"]}'  # The 'www' part is important
-    parent_metadata = {
+    parent_data = {
         'title': parent['title'],
         'body': body,
-        'permalink': parent_permalink,
-        'num_comments': parent['num_comments'],
         'author': parent['author'],
-        'score': parent['score'],
         'id': parent['name'],
+        'score': parent['score'],
+        'permalink': parent_permalink,
         'source': obj.site,
         'posted_timestamp': parent['created_utc'],
         'saved_timestamp': current_timestamp()
     }
 
     thread = {
-        'parent_data': parent_metadata,
+        'parent_data': parent_data,
         'comment_data': comment_data
     }
 
-    print(thread)
-    print('\n====\n')
     return thread
