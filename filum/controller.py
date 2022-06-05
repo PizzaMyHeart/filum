@@ -46,7 +46,6 @@ class Controller(object):
         self.view.filum_print(table)
 
     def display_thread(self, id, pager, pager_colours, cond='', **kwargs):
-        print('cond:', cond)
         ancestor_query = self.database.select_one_ancestor(id, cond=cond, **kwargs)
         top_level = self.view.create_thread_header(ancestor_query)
 
@@ -85,7 +84,6 @@ class Controller(object):
         self.database.update_tags(id, new_tags)
 
     def search(self, searchstr):
-        print(searchstr)
         results = self.database.search_tag(searchstr)
         table = self.view.create_table(results)
         self.view.filum_print(table)

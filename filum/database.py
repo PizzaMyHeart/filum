@@ -13,7 +13,7 @@ class ItemAlreadyExistsError(Exception):
 class Database(object):
     def __init__(self):
         self._conn = self.connect_to_db(db_name)
-        self._conn.set_trace_callback(print)
+        # self._conn.set_trace_callback(print)
         self.sql = dict([
             ('ancestors_sequential', 'SELECT *, ROW_NUMBER() OVER (ORDER BY saved_timestamp) as num FROM ancestors')
             ])
@@ -80,7 +80,6 @@ class Database(object):
                     raise ItemAlreadyExistsError
 
     def update_ancestor(self, thread: dict) -> str:
-        # TODO
         with self._conn:
             sql = 'UPDATE ancestors SET saved_timestamp = ?, score = ?, num_comments = ? WHERE permalink = ?'
             try:
@@ -91,7 +90,11 @@ class Database(object):
                         thread['permalink']
                         )
                     )
-                ancestor_id = self._conn.execute('SELECT id FROM ancestors WHERE permalink = ?', (thread['permalink'], )).fetchone()[0]
+                ancestor_id = self._conn.execute(
+                                            'SELECT id FROM ancestors WHERE permalink = ?',
+                                            (thread['permalink'], )
+                                            ) \
+                                        .fetchone()[0]
                 return ancestor_id
             except OperationalError as err:
                 print(err)
@@ -129,7 +132,6 @@ class Database(object):
                 'ON d.ancestor_id = a.id) '
                 'SELECT * FROM joined WHERE key = ?'
             )
-            print(sql)
             results = self._conn.execute(sql, execute_args).fetchall()
             return results
 

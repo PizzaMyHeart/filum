@@ -38,7 +38,6 @@ def parse_hn(obj):
         parent_body = get_comment_text(parent)
         parent_author = parent.find('a', class_='hnuser').contents[0]
 
-    print(parent_score)
     parent_timestamp = parent.find('span', class_='age').attrs['title']
     parent_timestamp = iso_to_timestamp(parent_timestamp)
 

@@ -23,6 +23,9 @@ def parser():
     parser_add.add_argument('url', nargs='+', type=str, help='add a URL')
     parser_add.set_defaults(parser_add=True)
 
+    parser_update = subparsers.add_parser('update', help='update a saved thread')
+    parser_update.add_argument('id', nargs=1, type=int)
+
     parser_all = subparsers.add_parser('all', help='show all saved top-level items')
     parser_all.set_defaults(parser_all=False)
 
@@ -127,12 +130,23 @@ def main():
             print(err)
         except ItemAlreadyExistsError as err:
             print(err)
+            '''
             if confirm('Do you want to update this thread now? [y/n] '):
                 print('Updating thread ...')
                 c.update_thread(thread)
+            '''
+            update(url, thread)
+
+    def update(url, thread) -> None:
+        try:
+            is_valid_url(url)
+            if confirm('Do you want to update this thread now? [y/n] '):
+                print('Updating thread ...')
+                c.update_thread(thread)
+        except InvalidInputError as err:
+            print(err)
 
     def show_thread(id: int, cond='', **kwargs) -> None:
-        print(cond)
         try:
             is_valid_id(id)
             c.display_thread(
@@ -155,7 +169,6 @@ def main():
             if confirm('Are you sure you want to delete this thread? [y/n] '):
                 is_valid_id(id)
                 ancestors_length = c.get_ancestors_length()
-                print(ancestors_length)
                 success = True if id <= ancestors_length else False
                 if success:
                     c.delete(id)
@@ -207,7 +220,7 @@ def main():
     )
 
     args = parser()
-    print(args)
+    # print(args)
     if args.i:
         FilumShell().cmdloop()
 
@@ -217,6 +230,9 @@ def main():
 
     if args.subparser == 'add':
         add(args.url[0])
+
+    elif args.subparser == 'update':
+        pass
 
     elif args.subparser == 'all':
         show_all()
@@ -232,7 +248,6 @@ def main():
 
     elif args.subparser == 'tag':
         if args.delete:
-            print('delete')
             modify_tags(args.id[0], add=False, tags=args.tags)
         else:
             modify_tags(args.id[0], add=True, tags=args.tags)

@@ -3,10 +3,10 @@ from filum.helpers import html_to_md, current_timestamp
 
 def parse_reddit(obj):
     content = obj.r
-    response_parent = content[0]['data']['children'][0]['data']
-    response_comments = content[1]['data']['children']
+    parent = content[0]['data']['children'][0]['data']
+    comments = content[1]['data']['children']
 
-    comments = {}
+    comment_data = {}
 
     def get_comments(comments_dict, path=[], depth_tracker=[]):
         for comment in comments_dict:
@@ -26,50 +26,51 @@ def parse_reddit(obj):
 
             comment_body = comment['data']['body_html']
             comment_body = html_to_md(comment_body)
-            comments.update({
+            comment_permalink = f'https://reddit.com{comment["data"]["permalink"]}'
+            comment_data.update({
                 id: {
                     'author': comment['data']['author'],
                     'text': comment_body,
                     'timestamp': comment['data']['created_utc'],
-                    'permalink': comment['data']['permalink'],
+                    'permalink': comment_permalink,
                     'upvotes': comment['data']['ups'],
                     'downvotes': comment['data']['downs'],
                     'score': comment['data']['score'],
                     'parent_id': parent_id,
-                    'ancestor_id': response_parent['name'],
+                    'ancestor_id': parent['name'],
                     'is_submitter': is_submitter,
                     'depth': comment['data']['depth'],
                     'path': '/'.join(path)
                     }
                 })
-            print(html_to_md(comment['data']['body_html']))
             if 'author_fullname' in comment['data'].keys():
-                comments[id]['author_id'] = comment['data']['author_fullname']
+                comment_data[id]['author_id'] = comment['data']['author_fullname']
             else:
-                comments[id]['author_id'] = None
+                comment_data[id]['author_id'] = None
 
             if len(replies) == 0:
                 continue
             else:
                 get_comments(replies['data']['children'], path, depth_tracker)
 
-    get_comments(response_comments)
-    body = html_to_md(response_parent['selftext_html']) if response_parent['selftext_html'] else None
+    get_comments(comments)
+    body = html_to_md(parent['selftext_html']) if parent['selftext_html'] else None
+    parent_permalink = f'https://reddit.com{parent["permalink"]}'
     parent_metadata = {
-        'title': response_parent['title'],
+        'title': parent['title'],
         'body': body,
-        'permalink': response_parent['permalink'],
-        'num_comments': response_parent['num_comments'],
-        'author': response_parent['author'],
-        'score': response_parent['score'],
-        'id': response_parent['name'],
+        'permalink': parent_permalink,
+        'num_comments': parent['num_comments'],
+        'author': parent['author'],
+        'score': parent['score'],
+        'id': parent['name'],
         'source': obj.site,
-        'posted_timestamp': response_parent['created_utc'],
+        'posted_timestamp': parent['created_utc'],
         'saved_timestamp': current_timestamp()
     }
 
     thread = {
         'parent_data': parent_metadata,
-        'comment_data': comments
+        'comment_data': comment_data
     }
     return thread

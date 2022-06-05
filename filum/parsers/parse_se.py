@@ -57,7 +57,6 @@ def parse_se(soup, url, site):
     if '#' in url:
         root_is_answer = True
         answer_id = url.split('#')[-1]
-        print('answer_id: ' + answer_id)
     url = root_url(url)
     question = soup.find(id='question')
 
