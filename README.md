@@ -1,4 +1,4 @@
-# filum
+# filum 
 
 `filum` saves discussion threads to your local machine. 
 
@@ -30,7 +30,7 @@ For more details [click here](https://docs.python.org/3/library/venv.html).
 
 `$ filum add <url>`
 
-☞ `$ filum add https://www.reddit.com/r/Python/comments/v1rde4/whats_a_python_feature_that_is_very_powerful_but/ianzrfp/`
+Example: `$ filum add https://www.reddit.com/r/Python/comments/v1rde4/whats_a_python_feature_that_is_very_powerful_but/ianzrfp/`
 
 You may supply a permalink to a child node of the thread to save only a specific section of the thread.
 
@@ -46,7 +46,7 @@ The left-most column of the table contains values to be used as selectors (in pl
 
 `$ filum show <label>`
 
-☞ `$ filum show 2` for the thread in the table with '2' in the `#` column.
+Example: `$ filum show 2` for the thread in the table with '2' in the `#` column.
 
 *Note that the values in the `label` column are dynamic. Run `$ filum all` after modifying the database to see all changes.* 
 
@@ -58,13 +58,13 @@ If you use a pager, you can navigate between nodes in the thread by searching fo
 
 `$ filum delete <label>`
 
-☞ `$ filum delete 2` for the thread in the table with '2' in the `#` column.
+Example: `$ filum delete 2` for the thread in the table with '2' in the `#` column.
 
 ### Update a thread
 
 `$ filum update <label>`
 
-☞ `$ filum update 2` for the thread in the table with '2' in the `#` column.
+Example: `$ filum update 2` for the thread in the table with '2' in the `#` column.
 
 `filum` will offer to update a thread if you try to add a thread that's already saved in the database.
 
@@ -72,13 +72,13 @@ If you use a pager, you can navigate between nodes in the thread by searching fo
 
 `$ filum tags <label> <tag 1> <tag 2> ...`
 
-☞ `$ filum tags 2 python webdev` to add the tags "python" and "webdev" to the thread in the table with '2' in the `#` column.
+Example: `$ filum tags 2 python webdev` to add the tags "python" and "webdev" to the thread in the table with '2' in the `#` column.
 
 ### Delete tags from a saved thread
 
 `$ filum tags <label> <tag 1> <tag 2> ... --delete`
 
-☞ `$ filum tags 2 webdev --delete` to remove the tag "webdev" from the thread in the table with '2' in the `#` column.
+Example: `$ filum tags 2 webdev --delete` to remove the tag "webdev" from the thread in the table with '2' in the `#` column.
 
 ### Search for a thread
 
@@ -111,4 +111,4 @@ I'm not currently accepting any pull requests, but questions and suggestions are
 
 ## Disclaimer
 
-`filum` is alpha software and far from stable. Please do not rely solely on `filum` for archival&mdash;at the very least please bookmark the page or use the save feature on the respective platforms.
+`filum` is alpha software and far from stable. Please do not rely solely on `filum` for archival&mdash;at the very least bookmark the page or use the save feature on the respective platforms.
