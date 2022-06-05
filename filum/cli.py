@@ -10,47 +10,43 @@ from filum.controller import Controller
 from filum.database import ItemAlreadyExistsError
 from filum.validation import InvalidInputError, is_valid_id, is_valid_url
 
+parser = argparse.ArgumentParser(
+                            description='Archive discussion threads',
+                            prog='filum'
+                                )
 
-def parser():
-    parser = argparse.ArgumentParser(
-                                description='Archive discussion threads',
-                                prog='filum'
-                                    )
+subparsers = parser.add_subparsers(dest='subparser')
 
-    subparsers = parser.add_subparsers(dest='subparser')
+parser_add = subparsers.add_parser('add', help='add a URL')
+parser_add.add_argument('url', nargs='+', type=str, help='add a URL')
+parser_add.set_defaults(parser_add=True)
 
-    parser_add = subparsers.add_parser('add', help='add a URL')
-    parser_add.add_argument('url', nargs='+', type=str, help='add a URL')
-    parser_add.set_defaults(parser_add=True)
+parser_update = subparsers.add_parser('update', help='update a saved thread')
+parser_update.add_argument('id', nargs=1, type=int)
 
-    parser_update = subparsers.add_parser('update', help='update a saved thread')
-    parser_update.add_argument('id', nargs=1, type=int)
+parser_all = subparsers.add_parser('all', help='show all saved top-level items')
+parser_all.set_defaults(parser_all=False)
 
-    parser_all = subparsers.add_parser('all', help='show all saved top-level items')
-    parser_all.set_defaults(parser_all=False)
+parser_thread = subparsers.add_parser('thread', help='display a saved thread')
+parser_thread.add_argument('id', nargs=1, type=int)
+parser_thread.add_argument('--tags', nargs='+', help='select thread to display filtered on tags')
 
-    parser_thread = subparsers.add_parser('thread', help='display a saved thread')
-    parser_thread.add_argument('id', nargs=1, type=int)
-    parser_thread.add_argument('--tags', nargs='+', help='select thread to display filtered on tags')
+parser_delete = subparsers.add_parser('delete', help='delete a saved thread')
+parser_delete.add_argument('id', nargs='+', type=int)
 
-    parser_delete = subparsers.add_parser('delete', help='delete a saved thread')
-    parser_delete.add_argument('id', nargs='+', type=int)
+parser_tags = subparsers.add_parser('tags', help='add tags. Include --delete to remove tags instead')
+parser_tags.add_argument('id', nargs=1, type=int)
+parser_tags.add_argument('tags', nargs='+', help='include one or more tags separated by a space')
+parser_tags.add_argument('--delete', action='store_true')
 
-    parser_tag = subparsers.add_parser('tag', help='add tags. Include --delete to remove tags instead')
-    parser_tag.add_argument('id', nargs=1, type=int)
-    parser_tag.add_argument('tags', nargs='+', help='include one or more tags separated by a space')
-    parser_tag.add_argument('--delete', action='store_true')
+parser_search = subparsers.add_parser('search', help='search for a thread')
+parser_search.add_argument('--tags', nargs='+', help='search using tags')
 
-    parser_search = subparsers.add_parser('search', help='search for a thread')
-    parser_search.add_argument('--tags', nargs='+', help='search using tags')
+parser_config = subparsers.add_parser('config', help='open config file')
+parser_config.set_defaults(parser_config=False)
 
-    parser_config = subparsers.add_parser('config', help='open config file')
-    parser_config.set_defaults(parser_config=False)
-
-    parser.add_argument('-i', action='store_true', help='interactive mode')
-    args = parser.parse_args()
-
-    return args
+parser.add_argument('-i', action='store_true', help='interactive mode')
+args = parser.parse_args()
 
 
 def main():
@@ -77,6 +73,12 @@ def main():
                 return False
             add(arg)
 
+        def do_update(self, arg):
+            try:
+                update(int(arg))
+            except ValueError:
+                print('Please enter a valid integer.')
+
         def do_all(self, arg):
             '''Show all top-level items currently saved in the filum database: $ all'''
             show_all()
@@ -96,6 +98,24 @@ def main():
                 delete(int(arg))
             except ValueError:
                 print('Please enter a valid integer.')
+
+        def do_tags(self, line):
+            try:
+                args = parser_tags.parse_args(line.split())
+                if args.delete:
+                    modify_tags(args.id[0], add=False, tags=args.tags)
+                else:
+                    modify_tags(args.id[0], add=True, tags=args.tags)
+            except SystemExit:
+                return
+
+        def do_search(self, line):
+            try:
+                args = parser_search.parse_args(line.split())
+                if args.tags:
+                    search(args.tags[0])
+            except SystemExit:
+                return
 
         def do_config(self, arg):
             '''Open the config file in an editor. Change settings by modifying the parameter values: $ config'''
@@ -121,6 +141,7 @@ def main():
     c = Controller()
 
     def add(url) -> None:
+        print(url)
         try:
             is_valid_url(url)
             # TODO: If url already exists in database, ask if user wants to update the thread.
@@ -128,14 +149,16 @@ def main():
             c.add_thread(thread)
         except InvalidInputError as err:
             print(err)
-        except ItemAlreadyExistsError as err:
-            print(err)
-            update(thread)
+        except ItemAlreadyExistsError:
+            if confirm('Do you want to update this thread now? [y/n] '):
+                print('Updating thread ...')
+                c.update_thread(thread)
 
     def update(id: int) -> None:
         if confirm('Do you want to update this thread now? [y/n] '):
             print('Updating thread ...')
             url = c.get_permalink(id)
+            is_valid_url(url)
             thread = c.download_thread(url)
             c.update_thread(thread)
 
@@ -212,8 +235,6 @@ def main():
         'Run "filum -h" for a full list of options.'
     )
 
-    args = parser()
-    # print(args)
     if args.i:
         FilumShell().cmdloop()
 
@@ -239,7 +260,7 @@ def main():
     elif args.subparser == 'delete':
         delete(args.id[0])
 
-    elif args.subparser == 'tag':
+    elif args.subparser == 'tags':
         if args.delete:
             modify_tags(args.id[0], add=False, tags=args.tags)
         else:

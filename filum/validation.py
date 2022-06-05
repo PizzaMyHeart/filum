@@ -38,8 +38,9 @@ class InvalidThreadId(InvalidInputError):
 
 
 def is_valid_url(arg: str) -> bool:
+    url = arg.strip().lower()
     for pattern in url_patterns:
-        if pattern.match(arg):
+        if pattern.match(url):
             return True
     raise InvalidUrl
 

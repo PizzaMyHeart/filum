@@ -55,7 +55,7 @@ def parse_reddit(obj):
 
     get_comments(comments)
     body = html_to_md(parent['selftext_html']) if parent['selftext_html'] else None
-    parent_permalink = f'https://reddit.com{parent["permalink"]}'
+    parent_permalink = f'https://www.reddit.com{parent["permalink"]}'  # The 'www' part is important
     parent_metadata = {
         'title': parent['title'],
         'body': body,

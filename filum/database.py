@@ -15,7 +15,7 @@ class Database(object):
         self._conn = self.connect_to_db(db_name)
         # self._conn.set_trace_callback(print)
         self.sql = dict([
-            ('ancestors_sequential', 'SELECT *, ROW_NUMBER() OVER (ORDER BY saved_timestamp) as num FROM ancestors')
+            ('ancestors_sequential', 'SELECT *, ROW_NUMBER() OVER (ORDER BY saved_timestamp DESC) as num FROM ancestors')
             ])
 
         with self._conn:
@@ -75,29 +75,28 @@ class Database(object):
                 self._conn.executemany(sql, (values,))
                 self._conn.commit()
             except IntegrityError as err:
-                print(err)
+                # print(err)
                 if 'UNIQUE' in str(err):
                     raise ItemAlreadyExistsError
 
-    def update_ancestor(self, thread: dict) -> str:
+    def update_ancestor(self, thread: dict) -> int:
         with self._conn:
-            sql = 'UPDATE ancestors SET saved_timestamp = ?, score = ?, num_comments = ? WHERE permalink = ?'
+            sql = 'UPDATE ancestors SET saved_timestamp = ?, score = ? WHERE permalink = ?'
             try:
                 self._conn.execute(sql, (
                         current_timestamp(),
                         thread['score'],
-                        thread['num_comments'],
                         thread['permalink']
                         )
                     )
-                ancestor_id = self._conn.execute(
-                                            'SELECT id FROM ancestors WHERE permalink = ?',
-                                            (thread['permalink'], )
-                                            ) \
-                                        .fetchone()[0]
-                return ancestor_id
+                id: int = self._conn.execute(
+                            'SELECT ROW_NUMBER() OVER (ORDER BY saved_timestamp DESC) FROM ancestors WHERE permalink = ?',
+                            (thread['permalink'], )
+                            ) \
+                    .fetchone()[0]
             except OperationalError as err:
                 print(err)
+            return id
 
     def select_permalink(self, id: int) -> str:
         with self._conn:
@@ -154,7 +153,7 @@ class Database(object):
         with self._conn:
             sql_ancestors = '''
                                 WITH a AS (
-                                    SELECT id, ROW_NUMBER() OVER (ORDER BY saved_timestamp) AS num FROM ancestors
+                                    SELECT id, ROW_NUMBER() OVER (ORDER BY saved_timestamp DESC) AS num FROM ancestors
                                 )
                                 DELETE FROM ancestors WHERE id IN (SELECT id FROM a WHERE num = ?)
                                 '''
@@ -164,33 +163,12 @@ class Database(object):
         with self._conn:
             sql_descendants = '''
                                 WITH a AS (
-                                    SELECT id, ROW_NUMBER() OVER (ORDER BY saved_timestamp) AS num FROM ancestors
+                                    SELECT id, ROW_NUMBER() OVER (ORDER BY saved_timestamp DESC) AS num FROM ancestors
                                 )
                                 DELETE FROM descendants
                                 WHERE ancestor_id IN (SELECT id FROM a WHERE num = ?);
                                 '''
             self._conn.execute(sql_descendants, (id,))
-
-    def delete(self, id: int) -> None:
-        # TODO: Rewrite this so that a col is added to ancestors which contains
-        # the row_number() values to avoid creating a new table every time the
-        # commands "thread" and "all" are run
-        with self._conn:
-            sql_descendants = '''
-                                WITH a AS (
-                                    SELECT id, ROW_NUMBER() OVER (ORDER BY saved_timestamp) AS num FROM ancestors
-                                )
-                                DELETE FROM descendants
-                                WHERE ancestor_id IN (SELECT id FROM a WHERE num = ?);
-                                '''
-            sql_ancestors = '''
-                                WITH a AS (
-                                    SELECT id, ROW_NUMBER() OVER (ORDER BY saved_timestamp) AS num FROM ancestors
-                                )
-                                DELETE FROM ancestors WHERE id IN (SELECT id FROM a WHERE num = ?)
-                                '''
-            self._conn.execute(sql_descendants, (id,))
-            self._conn.execute(sql_ancestors, (id,))
 
     def get_tags(self, id: int) -> str:
         with self._conn:
@@ -216,7 +194,7 @@ class Database(object):
         print(param)
         with self._conn:
             sql = (
-                'SELECT ROW_NUMBER() OVER (ORDER BY saved_timestamp) as num, '
+                'SELECT ROW_NUMBER() OVER (ORDER BY saved_timestamp DESC) as num, '
                 'title, posted_timestamp, saved_timestamp, score, source, tags FROM ancestors WHERE tags LIKE ?'
             )
             results = self._conn.execute(sql, (param, )).fetchall()
