@@ -8,21 +8,19 @@ def parse_reddit(obj):
 
     comment_data = {}
 
-    def get_comments(comments_dict, path=[], depth_tracker=[]):
+    def get_comments(comments_dict):
         for comment in comments_dict:
-            id = comment['data']['name']
-            # print('replies: ', comment['data']['replies'])
-            replies = comment['data']['replies']
+            id = comment['data']['name']  # Used as dict key for comments
+            if comment['kind'] == 'more':
+                # These are comments that are hidden under the fold. There is usually a link saying
+                # '_load more comments_'
+                # TODO: Rewrite reddit parser to hit new URL and retrieve unexpanded children
+                # Depth will need to be checked programmatically.
+                continue
+
             parent_id = comment['data']['parent_id']
-            is_submitter = 1 if comment['data']['is_submitter'] else 0
             depth = comment['data']['depth']
-            depth_tracker.append(depth)
-            if len(depth_tracker) >= 2 and depth_tracker[-1] == depth_tracker[-2]:
-                path[-1] = id
-            elif len(depth_tracker) >= 2 and depth_tracker[-1] < depth_tracker[-2]:
-                path = path[:depth+1]
-            else:
-                path.append(id)
+            replies = comment['data']['replies']
 
             comment_body = comment['data']['body_html']
             comment_body = html_to_md(comment_body)
@@ -38,9 +36,7 @@ def parse_reddit(obj):
                     'score': comment['data']['score'],
                     'parent_id': parent_id,
                     'ancestor_id': parent['name'],
-                    'is_submitter': is_submitter,
-                    'depth': comment['data']['depth'],
-                    'path': '/'.join(path)
+                    'depth': depth
                     }
                 })
             if 'author_fullname' in comment['data'].keys():
@@ -51,7 +47,7 @@ def parse_reddit(obj):
             if len(replies) == 0:
                 continue
             else:
-                get_comments(replies['data']['children'], path, depth_tracker)
+                get_comments(replies['data']['children'])
 
     get_comments(comments)
     body = html_to_md(parent['selftext_html']) if parent['selftext_html'] else None
@@ -73,4 +69,7 @@ def parse_reddit(obj):
         'parent_data': parent_metadata,
         'comment_data': comment_data
     }
+
+    print(thread)
+    print('\n====\n')
     return thread
