@@ -24,8 +24,6 @@ For more details [click here](https://docs.python.org/3/library/venv.html).
 
 ## Usage
 
-*Remember to activate the virtual environment for `filum` before usage if you created one .*
-
 ### Save a new thread
 
 `$ filum add <url>`
