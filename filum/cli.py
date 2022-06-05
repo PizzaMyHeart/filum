@@ -27,9 +27,9 @@ parser_update.add_argument('id', nargs=1, type=int)
 parser_all = subparsers.add_parser('all', help='show all saved top-level items')
 parser_all.set_defaults(parser_all=False)
 
-parser_thread = subparsers.add_parser('thread', help='display a saved thread')
-parser_thread.add_argument('id', nargs=1, type=int)
-parser_thread.add_argument('--tags', nargs='+', help='select thread to display filtered on tags')
+parser_show = subparsers.add_parser('show', help='display a saved thread')
+parser_show.add_argument('id', nargs=1, type=int)
+parser_show.add_argument('--tags', nargs='+', help='select thread to display filtered on tags')
 
 parser_delete = subparsers.add_parser('delete', help='delete a saved thread')
 parser_delete.add_argument('id', nargs='+', type=int)
@@ -83,7 +83,7 @@ def main():
             '''Show all top-level items currently saved in the filum database: $ all'''
             show_all()
 
-        def do_thread(self, arg):
+        def do_show(self, arg):
             '''Display a thread given its top-level selector: $ thread 1.\n
             Top-level selectors are contained in the left-most column in the table shown by the "all" command.'''
             try:
@@ -161,6 +161,7 @@ def main():
             is_valid_url(url)
             thread = c.download_thread(url)
             c.update_thread(thread)
+            show_all()
 
     def show_thread(id: int, cond='', **kwargs) -> None:
         try:
@@ -189,6 +190,7 @@ def main():
                 if success:
                     c.delete(id)
                     print(f'Thread no. {id} deleted.')
+                    show_all()
                 else:
                     print(f'Thread no. {id} does not exist.\n{valid_id_message}')
             else:
@@ -213,6 +215,7 @@ def main():
 
     def modify_tags(id, add: bool, **kwargs):
         c.modify_tags(id, add, **kwargs)
+        show_all()
 
     def search(searchstr):
         c.search(searchstr)
@@ -251,7 +254,7 @@ def main():
     elif args.subparser == 'all':
         show_all()
 
-    elif args.subparser == 'thread':
+    elif args.subparser == 'show':
         if args.tags:
             show_thread(args.id[0], cond='WHERE tags LIKE ?', where_param=f'%{args.tags[0]}%')
         else:
