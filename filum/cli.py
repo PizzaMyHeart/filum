@@ -4,20 +4,39 @@ import pathlib
 import platform
 import subprocess
 import sys
-from cmd import Cmd
+import textwrap
 import warnings
+from cmd import Cmd
+
+from rich.console import Console
 
 from filum.controller import Controller
 from filum.database import ItemAlreadyExistsError
 from filum.validation import InvalidInputError, is_valid_id, is_valid_url
 
-from rich.console import Console
-
 console = Console()
 
 parser = argparse.ArgumentParser(
                             description='Archive discussion threads',
-                            prog='filum'
+                            prog='filum',
+                            formatter_class=argparse.RawDescriptionHelpFormatter,
+                            epilog=textwrap.dedent('''\
+                            Example usage:
+
+                            Add a URL
+                            $ filum add <url>
+
+                            View a table of all saved threads
+                            $ filum all
+
+                            Display a thread
+                            $ filum show <thread label>
+                            🖝 where <thread label> is the number in the left-most column of the table
+
+                            Add tags to a saved thread
+                            $ filum tags <tag 1> <tag 2> ... <tag n>
+                            🖝 add the '--delete' flag to delete these tags instead
+                            ''')
                                 )
 
 subparsers = parser.add_subparsers(dest='subparser')
@@ -46,8 +65,8 @@ parser_tags.add_argument('tags', nargs='+', help='include one or more tags separ
 parser_tags.add_argument('--delete', action='store_true')
 
 parser_search = subparsers.add_parser('search', help='search for a thread')
-parser_search.add_argument('--tags', nargs='+', help='filter table by tags')
-parser_search.add_argument('--source', nargs='+', help='filter table by source')
+parser_search.add_argument('--tags', nargs=1, help='filter table based on a tag')
+parser_search.add_argument('--source', nargs=1, help='filter table by source')
 
 parser_config = subparsers.add_parser('config', help='open config file')
 parser_config.set_defaults(parser_config=False)
@@ -96,11 +115,17 @@ def main():
             '''Show all top-level items currently saved in the filum database: $ all'''
             show_all()
 
-        def do_show(self, arg):
+        def do_show(self, line):
             '''Display a thread given its top-level selector: $ thread 1.\n
             Top-level selectors are contained in the left-most column in the table shown by the "all" command.'''
+            args = parser_show.parse_args(line.split())
             try:
-                show_thread(int(arg))
+                if args.tags:
+                    show_thread(args.id[0], cond='WHERE tags LIKE ?', where_param=f'%{args.tags[0]}%')
+                elif args.source:
+                    show_thread(args.id[0], cond='WHERE source LIKE ?', where_param=f'%{args.source[0]}%')
+                else:
+                    show_thread(args.id[0])
             except ValueError:
                 print('Please enter a valid integer.')
 
@@ -126,7 +151,9 @@ def main():
             try:
                 args = parser_search.parse_args(line.split())
                 if args.tags:
-                    search(args.tags[0])
+                    search('tags', args.tags[0])
+                elif args.source:
+                    search('source', args.source[0])
             except SystemExit:
                 return
 
@@ -145,7 +172,7 @@ def main():
             '''Quit the interactive session using 'quit' or CTRL-D'''
             sys.exit(0)
 
-    valid_id_message = 'Please enter a valid thread ID (positive integer). Run `filum all` to see a list of thread IDs.'
+    valid_id_message = 'Please enter a valid thread label (+ve int). Run `filum all` to see a list of thread labels.'
 
     config = configparser.ConfigParser()
     config_filepath = pathlib.Path(__file__).parent.resolve() / 'config.ini'
@@ -287,7 +314,6 @@ def main():
             modify_tags(args.id[0], add=True, tags=args.tags)
 
     elif args.subparser == 'search':
-        print(args)
         if args.tags:
             search('tags', args.tags[0])
         elif args.source:

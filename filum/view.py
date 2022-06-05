@@ -30,7 +30,7 @@ class RichView:
         interactive shell.
         '''
         table = Table(box=box.SIMPLE, expand=True)
-        table.add_column('', style='green')
+        table.add_column('#', style='green')
         table.add_column('Title')
         table.add_column('Posted')
         table.add_column('Saved')
