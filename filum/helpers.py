@@ -1,5 +1,5 @@
 import re
-from collections import KeysView
+from collections.abc import KeysView
 from datetime import datetime
 
 from markdownify import markdownify as md
