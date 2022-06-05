@@ -5,10 +5,15 @@ import platform
 import subprocess
 import sys
 from cmd import Cmd
+import warnings
 
 from filum.controller import Controller
 from filum.database import ItemAlreadyExistsError
 from filum.validation import InvalidInputError, is_valid_id, is_valid_url
+
+from rich.console import Console
+
+console = Console()
 
 parser = argparse.ArgumentParser(
                             description='Archive discussion threads',
@@ -50,6 +55,12 @@ args = parser.parse_args()
 
 
 def main():
+    warnings.filterwarnings(
+            'ignore',
+            category=UserWarning,
+            module='bs4',
+            message='.*looks more like a filename than markup.*'
+            )
 
     class FilumShell(Cmd):
         intro = 'filum interactive mode'
@@ -144,9 +155,10 @@ def main():
         print(url)
         try:
             is_valid_url(url)
-            # TODO: If url already exists in database, ask if user wants to update the thread.
-            thread = c.download_thread(url)
-            c.add_thread(thread)
+            with console.status(f'Downloading thread from {url}'):
+                thread = c.download_thread(url)
+                c.add_thread(thread)
+            print('Thread downloaded.')
         except InvalidInputError as err:
             print(err)
         except ItemAlreadyExistsError:
@@ -156,11 +168,12 @@ def main():
 
     def update(id: int) -> None:
         if confirm('Do you want to update this thread now? [y/n] '):
-            print('Updating thread ...')
-            url = c.get_permalink(id)
-            is_valid_url(url)
-            thread = c.download_thread(url)
-            c.update_thread(thread)
+            with console.status('Updating thread...'):
+                url = c.get_permalink(id)
+                is_valid_url(url)
+                thread = c.download_thread(url)
+                c.update_thread(thread)
+            print(f'Thread updated. ({url})')
             show_all()
 
     def show_thread(id: int, cond='', **kwargs) -> None:

@@ -89,8 +89,7 @@ class Database(object):
                         )
                     )
                 id: int = self._conn.execute(
-                            ('SELECT ROW_NUMBER() OVER (ORDER BY saved_timestamp DESC) FROM ancestors ',
-                                'WHERE permalink = ?'),
+                            ('SELECT ROW_NUMBER() OVER (ORDER BY saved_timestamp DESC) FROM ancestors WHERE permalink = ?'),  # noqa: E501
                             (thread['permalink'], )
                             ) \
                     .fetchone()[0]

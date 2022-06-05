@@ -1,4 +1,5 @@
 import traceback
+import warnings
 
 import requests
 from bs4 import BeautifulSoup
@@ -37,7 +38,13 @@ class Download:
         return self
 
     def parse_html(self, raw: str):
-        self.soup = BeautifulSoup(raw, 'html5lib')
+        warnings.filterwarnings(
+            'ignore',
+            category=UserWarning,
+            module='bs4',
+            message='.*looks more like a filename than markup.*'
+            )
+        self.soup = BeautifulSoup(raw, features='html5lib')
         return self
 
     def prepare_response(self):
