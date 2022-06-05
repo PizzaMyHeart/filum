@@ -130,21 +130,14 @@ def main():
             print(err)
         except ItemAlreadyExistsError as err:
             print(err)
-            '''
-            if confirm('Do you want to update this thread now? [y/n] '):
-                print('Updating thread ...')
-                c.update_thread(thread)
-            '''
-            update(url, thread)
+            update(thread)
 
-    def update(url, thread) -> None:
-        try:
-            is_valid_url(url)
-            if confirm('Do you want to update this thread now? [y/n] '):
-                print('Updating thread ...')
-                c.update_thread(thread)
-        except InvalidInputError as err:
-            print(err)
+    def update(id: int) -> None:
+        if confirm('Do you want to update this thread now? [y/n] '):
+            print('Updating thread ...')
+            url = c.get_permalink(id)
+            thread = c.download_thread(url)
+            c.update_thread(thread)
 
     def show_thread(id: int, cond='', **kwargs) -> None:
         try:
@@ -232,7 +225,7 @@ def main():
         add(args.url[0])
 
     elif args.subparser == 'update':
-        pass
+        update(args.id[0])
 
     elif args.subparser == 'all':
         show_all()

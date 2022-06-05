@@ -37,6 +37,9 @@ class Controller(object):
         for comment in thread['comment_data']:
             self.database.insert_row(thread['comment_data'][comment], 'descendants')
 
+    def get_permalink(self, id: int) -> str:
+        return self.database.select_permalink(id)
+
     def check_thread_exists(self, id):
         self.database.select_one_ancestor(id)
 

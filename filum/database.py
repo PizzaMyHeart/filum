@@ -99,6 +99,12 @@ class Database(object):
             except OperationalError as err:
                 print(err)
 
+    def select_permalink(self, id: int) -> str:
+        with self._conn:
+            sql = f'WITH a AS ({self.sql["ancestors_sequential"]}) SELECT permalink FROM a WHERE num = ?'
+            permalink = self._conn.execute(sql, (id, )).fetchone()[0]
+            return permalink
+
     def select_all_ancestors(self):
         with self._conn:
             sql = self.sql['ancestors_sequential']
