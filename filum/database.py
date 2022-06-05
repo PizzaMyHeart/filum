@@ -188,13 +188,12 @@ class Database(object):
                 )
             self._conn.execute(sql, (tags, id))
 
-    def search_tag(self, tag):
-        param = f'%{tag}%'
-        print(param)
+    def search(self, column: str, searchstr: str):
+        param = f'%{searchstr}%'
         with self._conn:
             sql = (
                 'SELECT ROW_NUMBER() OVER (ORDER BY saved_timestamp DESC) as num, '
-                'title, posted_timestamp, saved_timestamp, score, source, tags FROM ancestors WHERE tags LIKE ?'
+                f'title, posted_timestamp, saved_timestamp, score, source, tags FROM ancestors WHERE {column} LIKE ?'
             )
             results = self._conn.execute(sql, (param, )).fetchall()
         return results

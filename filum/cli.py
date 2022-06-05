@@ -34,7 +34,8 @@ parser_all.set_defaults(parser_all=False)
 
 parser_show = subparsers.add_parser('show', help='display a saved thread')
 parser_show.add_argument('id', nargs=1, type=int)
-parser_show.add_argument('--tags', nargs='+', help='select thread to display filtered on tags')
+parser_show.add_argument('--tags', nargs='+', help='display a thread selected from the table filtered by tags')
+parser_show.add_argument('--source', nargs='+', help='display a thread selected from the table filtered by source')
 
 parser_delete = subparsers.add_parser('delete', help='delete a saved thread')
 parser_delete.add_argument('id', nargs='+', type=int)
@@ -45,7 +46,8 @@ parser_tags.add_argument('tags', nargs='+', help='include one or more tags separ
 parser_tags.add_argument('--delete', action='store_true')
 
 parser_search = subparsers.add_parser('search', help='search for a thread')
-parser_search.add_argument('--tags', nargs='+', help='search using tags')
+parser_search.add_argument('--tags', nargs='+', help='filter table by tags')
+parser_search.add_argument('--source', nargs='+', help='filter table by source')
 
 parser_config = subparsers.add_parser('config', help='open config file')
 parser_config.set_defaults(parser_config=False)
@@ -230,8 +232,8 @@ def main():
         c.modify_tags(id, add, **kwargs)
         show_all()
 
-    def search(searchstr):
-        c.search(searchstr)
+    def search(column, searchstr):
+        c.search(column, searchstr)
 
     def open_config():
         # filepath = pathlib.Path(__file__).parent.resolve() / 'config.ini'
@@ -270,6 +272,8 @@ def main():
     elif args.subparser == 'show':
         if args.tags:
             show_thread(args.id[0], cond='WHERE tags LIKE ?', where_param=f'%{args.tags[0]}%')
+        elif args.source:
+            show_thread(args.id[0], cond='WHERE source LIKE ?', where_param=f'%{args.source[0]}%')
         else:
             show_thread(args.id[0])
 
@@ -283,8 +287,12 @@ def main():
             modify_tags(args.id[0], add=True, tags=args.tags)
 
     elif args.subparser == 'search':
+        print(args)
         if args.tags:
-            search(args.tags[0])
+            search('tags', args.tags[0])
+        elif args.source:
+            search('source', args.source[0])
+
     else:
         print(description)
 

@@ -86,7 +86,7 @@ class Controller(object):
                 new_tags = None
         self.database.update_tags(id, new_tags)
 
-    def search(self, searchstr):
-        results = self.database.search_tag(searchstr)
+    def search(self, column, searchstr):
+        results = self.database.search(column, searchstr)
         table = self.view.create_table(results)
         self.view.filum_print(table)
