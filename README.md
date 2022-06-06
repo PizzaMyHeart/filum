@@ -11,9 +11,13 @@ It's like Pocket or Instapaper but for Reddit, Hacker News and Stack Exchange.
 
 1. Create a virtual environment for `filum` (optional but recommended).
 
-Linux: `$ python3 -m venv /path/to/new/venv`
+Linux: 
 
-Windows: `$ c:\Python35\python -m venv c:\path\to\new\venv`
+`$ python3 -m venv /path/to/new/venv`
+
+Windows: 
+
+`$ c:\Python35\python -m venv c:\path\to\new\venv`
 
 For more details [click here](https://docs.python.org/3/library/venv.html).
 
@@ -28,7 +32,9 @@ For more details [click here](https://docs.python.org/3/library/venv.html).
 
 `$ filum add <url>`
 
-Example: `$ filum add https://www.reddit.com/r/Python/comments/v1rde4/whats_a_python_feature_that_is_very_powerful_but/ianzrfp/`
+Example: 
+
+`$ filum add https://www.reddit.com/r/Python/comments/v1rde4/whats_a_python_feature_that_is_very_powerful_but/ianzrfp/`
 
 You may supply a permalink to a child node of the thread to save only a specific section of the thread.
 
@@ -44,9 +50,11 @@ The left-most column of the table contains values to be used as selectors (in pl
 
 `$ filum show <label>`
 
-Example: `$ filum show 2` for the thread in the table with '2' in the `#` column.
+Example: 
 
-*Note that the values in the `label` column are dynamic. Run `$ filum all` after modifying the database to see all changes.* 
+`$ filum show 2` for the thread in the table with '2' in the `#` column.
+
+*Note that the values in the `#` column are dynamic. Run `$ filum all` after modifying the database to see all changes.* 
 
 The thread is piped through a terminal pager by default. To disable this, run `$ filum config` and edit `pager = true` to `pager = false`.
 
@@ -56,13 +64,17 @@ If you use a pager, you can navigate between nodes in the thread by searching fo
 
 `$ filum delete <label>`
 
-Example: `$ filum delete 2` for the thread in the table with '2' in the `#` column.
+Example: 
+
+`$ filum delete 2` for the thread in the table with '2' in the `#` column.
 
 ### Update a thread
 
 `$ filum update <label>`
 
-Example: `$ filum update 2` for the thread in the table with '2' in the `#` column.
+Example: 
+
+`$ filum update 2` for the thread in the table with '2' in the `#` column.
 
 `filum` will offer to update a thread if you try to add a thread that's already saved in the database.
 
@@ -70,13 +82,17 @@ Example: `$ filum update 2` for the thread in the table with '2' in the `#` colu
 
 `$ filum tags <label> <tag 1> <tag 2> ...`
 
-Example: `$ filum tags 2 python webdev` to add the tags "python" and "webdev" to the thread in the table with '2' in the `#` column.
+Example: 
+
+`$ filum tags 2 python webdev` to add the tags "python" and "webdev" to the thread in the table with '2' in the `#` column.
 
 ### Delete tags from a saved thread
 
 `$ filum tags <label> <tag 1> <tag 2> ... --delete`
 
-Example: `$ filum tags 2 webdev --delete` to remove the tag "webdev" from the thread in the table with '2' in the `#` column.
+Example: 
+
+`$ filum tags 2 webdev --delete` to remove the tag "webdev" from the thread in the table with '2' in the `#` column.
 
 ### Search for a thread
 
@@ -97,7 +113,7 @@ To select a thread based on the table returned by the search command, pass in th
 
 These limitations are on my to-do list to improve.
 
-- Reddit comment sub-threads that are hlabelden under a comment fold (with a "load more comments" link) are ignored
+- Reddit comment sub-threads that are hidden under a comment fold (with a "load more comments" link) are ignored
 - Hyperlinks in HN threads are not rendered in full
 - The search command only takes in one search string at a time
 - Filters for searching cannot be combined, e.g. you can search either by a tag or by source
