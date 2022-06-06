@@ -73,3 +73,7 @@ venv.bak/
 .vscode
 
 dist
+
+*.ini
+
+*.html

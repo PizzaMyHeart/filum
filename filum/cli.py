@@ -10,6 +10,7 @@ from cmd import Cmd
 
 from rich.console import Console
 
+from filum.config import FilumConfig
 from filum.controller import Controller
 from filum.database import ItemAlreadyExistsError
 from filum.validation import InvalidInputError, is_valid_id, is_valid_url
@@ -173,11 +174,15 @@ def main():
             sys.exit(0)
 
     valid_id_message = 'Please enter a valid thread label (+ve int). Run `filum all` to see a list of thread labels.'
-
+    '''
     config = configparser.ConfigParser()
     config_filepath = pathlib.Path(__file__).parent.resolve() / 'config.ini'
     config.read(config_filepath)
+    '''
 
+    config = FilumConfig()
+    config_parser = config.get_parser()
+    
     c = Controller()
 
     def add(url) -> None:
@@ -211,8 +216,8 @@ def main():
             c.display_thread(
                 id,
                 cond=cond,
-                pager=config.getboolean('output', 'pager'),
-                pager_colours=config.getboolean('output', 'pager_colours'),
+                pager=config_parser.getboolean('output', 'pager'),
+                pager_colours=config_parser.getboolean('output', 'pager_colours'),
                 **kwargs
                 )
         except InvalidInputError as err:
@@ -265,11 +270,11 @@ def main():
     def open_config():
         # filepath = pathlib.Path(__file__).parent.resolve() / 'config.ini'
         if platform.system() == 'Darwin':       # macOS
-            subprocess.run(('open', config_filepath))
+            subprocess.run(('open', config.config_filepath))
         elif platform.system() == 'Windows':    # Windows
-            subprocess.run('notepad', config_filepath)
+            subprocess.run('notepad', config.config_filepath)
         else:                                   # Linux variants
-            subprocess.run(('nano', config_filepath))
+            subprocess.run(('nano', config.config_filepath))
 
     description = (
         'filum - archive discussion threads from the command line.\n\n'
