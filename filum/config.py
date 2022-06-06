@@ -9,7 +9,7 @@ config_filepath = Path(__file__).parent.resolve() / 'config.ini'
 class FilumConfig(object):
     def __init__(self):
         self.config_filepath = Path(__file__).parent.resolve() / 'config.ini'
-        self.parser = configparser.ConfigParser(allow_no_value=True)
+        self.parser = configparser.ConfigParser(inline_comment_prefixes=';')
 
 
     def get_parser(self):
