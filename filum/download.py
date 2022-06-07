@@ -1,5 +1,4 @@
 import traceback
-import warnings
 
 import requests
 from bs4 import BeautifulSoup
@@ -20,8 +19,7 @@ class Download:
             self.site = 'reddit'
         elif 'news.ycombinator.com' in self.url:
             self.site = 'hn'
-        elif 'stackexchange.com' in self.url or \
-             'stackoverflow.com' in self.url:
+        else:
             self.site = 'se'
 
         return self
@@ -38,12 +36,6 @@ class Download:
         return self
 
     def parse_html(self, raw: str):
-        warnings.filterwarnings(
-            'ignore',
-            category=UserWarning,
-            module='bs4',
-            message='.*looks more like a filename than markup.*'
-            )
         self.soup = BeautifulSoup(raw, features='html5lib')
         return self
 

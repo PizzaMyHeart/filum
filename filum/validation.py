@@ -8,8 +8,17 @@ url_pattern_hn = re.compile(r'https:\/\/news.ycombinator.com\/item')
 # TODO: Add patterns for other SE sites such as Ask Ubuntu, Server Fault,
 # Super User
 
-url_patterns = [url_pattern_reddit, url_pattern_so,
-                url_pattern_se, url_pattern_hn]
+url_patterns = [
+    re.compile(r'https:\/\/www.reddit.com\/r\/.+\/comments\/'),
+    re.compile(r'https:\/\/news.ycombinator.com\/item'),
+    re.compile(r'https:\/\/.+\.stackexchange.com\/((questions)|(q)|(a))'),
+    re.compile(
+        r'https:\/\/((stackoverflow)'
+        r'|(serverfault)'
+        r'|(askubuntu)'
+        r'|(superuser)'
+        r').com\/((questions)|(q)|(a))'),
+]
 
 # Custom exceptions for input validation
 
