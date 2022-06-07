@@ -15,6 +15,8 @@ def html_to_md(html):
 
 
 def root_url(url):
+    '''Return the first part of the URL until and including ".com"
+    '''
     p = re.compile(r'https://.+\.com')
     return p.search(url).group(0)
 

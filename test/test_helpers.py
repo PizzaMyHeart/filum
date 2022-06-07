@@ -18,6 +18,7 @@ class TestHelpers(unittest.TestCase):
 
     def test_root_url(self):
         self.assertEqual(helpers.root_url('https://reddit.com/r/python'), 'https://reddit.com')
+        self.assertEqual(helpers.root_url('https://stats.stackexchange.com/questions/482738/seasonal-term-not-significant-after-differencing'), 'https://stats.stackexchange.com')  # noqa: E501
 
     def test_iso_to_timestamp(self):
         self.assertEqual(helpers.iso_to_timestamp('2022-06-02T11:16:50'), 1654165010)
