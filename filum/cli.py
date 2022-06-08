@@ -1,6 +1,4 @@
 import argparse
-import configparser
-import pathlib
 import platform
 import subprocess
 import sys
@@ -174,15 +172,10 @@ def main():
             sys.exit(0)
 
     valid_id_message = 'Please enter a valid thread label (+ve int). Run `filum all` to see a list of thread labels.'
-    '''
-    config = configparser.ConfigParser()
-    config_filepath = pathlib.Path(__file__).parent.resolve() / 'config.ini'
-    config.read(config_filepath)
-    '''
 
     config = FilumConfig()
     config_parser = config.get_parser()
-    
+
     c = Controller()
 
     def add(url) -> None:
