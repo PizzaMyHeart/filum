@@ -15,63 +15,66 @@ from filum.validation import InvalidInputError, is_valid_id, is_valid_url
 
 console = Console()
 
-parser = argparse.ArgumentParser(
-                            description='Archive discussion threads',
-                            prog='filum',
-                            formatter_class=argparse.RawDescriptionHelpFormatter,
-                            epilog=textwrap.dedent('''\
-                            Example usage:
 
-                            Add a URL
-                            $ filum add <url>
+class Parser(object):
+    parser = argparse.ArgumentParser(
+                description='Archive discussion threads',
+                prog='filum',
+                formatter_class=argparse.RawDescriptionHelpFormatter,
+                epilog=textwrap.dedent('''\
+                    Example usage:
 
-                            View a table of all saved threads
-                            $ filum all
+                    Add a URL
+                    $ filum add <url>
 
-                            Display a thread
-                            $ filum show <thread label>
-                            🖝 where <thread label> is the number in the left-most column of the table
+                    View a table of all saved threads
+                    $ filum all
 
-                            Add tags to a saved thread
-                            $ filum tags <tag 1> <tag 2> ... <tag n>
-                            🖝 add the '--delete' flag to delete these tags instead
-                            ''')
-                                )
+                    Display a thread
+                    $ filum show <thread label>
+                    🖝 where <thread label> is the number in the left-most column of the table
 
-subparsers = parser.add_subparsers(dest='subparser')
+                    Add tags to a saved thread
+                    $ filum tags <tag 1> <tag 2> ... <tag n>
+                    🖝 add the '--delete' flag to delete these tags instead
+                    ''')
+                )
 
-parser_add = subparsers.add_parser('add', help='add a URL')
-parser_add.add_argument('url', nargs='+', type=str, help='add a URL')
-parser_add.set_defaults(parser_add=True)
+    parser.add_argument('-i', action='store_true', help='interactive mode')
 
-parser_update = subparsers.add_parser('update', help='update a saved thread')
-parser_update.add_argument('id', nargs=1, type=int)
+    subparsers = parser.add_subparsers(dest='subparser')
 
-parser_all = subparsers.add_parser('all', help='show all saved top-level items')
-parser_all.set_defaults(parser_all=False)
+    parser_add = subparsers.add_parser('add', help='add a URL')
+    parser_add.add_argument('url', nargs='+', type=str, help='add a URL')
+    parser_add.set_defaults(parser_add=True)
 
-parser_show = subparsers.add_parser('show', help='display a saved thread')
-parser_show.add_argument('id', nargs=1, type=int)
-parser_show.add_argument('--tags', nargs='+', help='display a thread selected from the table filtered by tags')
-parser_show.add_argument('--source', nargs='+', help='display a thread selected from the table filtered by source')
+    parser_update = subparsers.add_parser('update', help='update a saved thread')
+    parser_update.add_argument('id', nargs=1, type=int)
 
-parser_delete = subparsers.add_parser('delete', help='delete a saved thread')
-parser_delete.add_argument('id', nargs='+', type=int)
+    parser_all = subparsers.add_parser('all', help='show all saved top-level items')
+    parser_all.set_defaults(parser_all=False)
 
-parser_tags = subparsers.add_parser('tags', help='add tags. Include --delete to remove tags instead')
-parser_tags.add_argument('id', nargs=1, type=int)
-parser_tags.add_argument('tags', nargs='+', help='include one or more tags separated by a space')
-parser_tags.add_argument('--delete', action='store_true')
+    parser_show = subparsers.add_parser('show', help='display a saved thread')
+    parser_show.add_argument('id', nargs=1, type=int)
+    parser_show.add_argument('--tags', nargs='+', help='display a thread selected from the table filtered by tags')
+    parser_show.add_argument('--source', nargs='+', help='display a thread selected from the table filtered by source')
 
-parser_search = subparsers.add_parser('search', help='search for a thread')
-parser_search.add_argument('--tags', nargs=1, help='filter table based on a tag')
-parser_search.add_argument('--source', nargs=1, help='filter table by source')
+    parser_delete = subparsers.add_parser('delete', help='delete a saved thread')
+    parser_delete.add_argument('id', nargs='+', type=int)
 
-parser_config = subparsers.add_parser('config', help='open config file')
-parser_config.set_defaults(parser_config=False)
+    parser_tags = subparsers.add_parser('tags', help='add tags. Include --delete to remove tags instead')
+    parser_tags.add_argument('id', nargs=1, type=int)
+    parser_tags.add_argument('tags', nargs='+', help='include one or more tags separated by a space')
+    parser_tags.add_argument('--delete', action='store_true')
 
-parser.add_argument('-i', action='store_true', help='interactive mode')
-args = parser.parse_args()
+    parser_search = subparsers.add_parser('search', help='search for a thread')
+    parser_search.add_argument('--tags', nargs=1, help='filter table based on a tag')
+    parser_search.add_argument('--source', nargs=1, help='filter table by source')
+
+    parser_config = subparsers.add_parser('config', help='open config file')
+    parser_config.set_defaults(parser_config=False)
+
+    args = parser.parse_args()
 
 
 def main():
@@ -81,6 +84,8 @@ def main():
             module='bs4',
             message='.*looks more like a filename than markup.*'
             )
+
+    parser = Parser()
 
     class FilumShell(Cmd):
         intro = 'filum interactive mode'
@@ -117,7 +122,7 @@ def main():
         def do_show(self, line):
             '''Display a thread given its top-level selector: $ thread 1.\n
             Top-level selectors are contained in the left-most column in the table shown by the "all" command.'''
-            args = parser_show.parse_args(line.split())
+            args = parser.parser_show.parse_args(line.split())
             try:
                 if args.tags:
                     show_thread(args.id[0], cond='WHERE tags LIKE ?', where_param=f'%{args.tags[0]}%')
@@ -138,7 +143,7 @@ def main():
 
         def do_tags(self, line):
             try:
-                args = parser_tags.parse_args(line.split())
+                args = parser.parser_tags.parse_args(line.split())
                 if args.delete:
                     modify_tags(args.id[0], add=False, tags=args.tags)
                 else:
@@ -148,7 +153,7 @@ def main():
 
         def do_search(self, line):
             try:
-                args = parser_search.parse_args(line.split())
+                args = parser.parser_search.parse_args(line.split())
                 if args.tags:
                     search('tags', args.tags[0])
                 elif args.source:
@@ -278,6 +283,7 @@ def main():
         'Run "filum -h" for a full list of options.'
     )
 
+    args = parser.args
     if args.i:
         FilumShell().cmdloop()
 

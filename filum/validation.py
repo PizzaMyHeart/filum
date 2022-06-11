@@ -46,16 +46,20 @@ class InvalidThreadId(InvalidInputError):
 # Validation functions
 
 
-def is_valid_url(arg: str) -> bool:
-    url = arg.strip().lower()
+def is_valid_url(url: str) -> bool:
+    '''Checks whether the user-supplied URL belongs to
+    Reddit, HN, or SE.
+    '''
     for pattern in url_patterns:
-        if pattern.match(url):
+        if pattern.match(url.strip().lower()):
             return True
     raise InvalidUrl
 
 
-def is_valid_id(arg: int) -> bool:
-    if type(arg) == int:
-        if arg > 0:
+def is_valid_id(id: int) -> bool:
+    '''Checks whether the user-supplied thread ID is
+    valid'''
+    if type(id) == int:
+        if id > 0:
             return True
     raise InvalidThreadId
