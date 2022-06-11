@@ -21,6 +21,20 @@ class TestDownload(unittest.TestCase):
             )
         self.assertEqual(d.site, 'reddit')
 
+    def test_process_url_hn(self):
+        url = 'https://news.ycombinator.com/item?id=31707163'
+        d = Download(url)
+        d.process_url()
+        self.assertEqual(d.url, url)
+        self.assertEqual(d.site, 'hn')
+
+    def test_process_url_se(self):
+        url = 'https://stackoverflow.com/questions/46098852/best-practices-python-classes'
+        d = Download(url)
+        d.process_url()
+        self.assertEqual(d.url, url)
+        self.assertEqual(d.site, 'se')
+
     def test_parse_html_creates_soup_from_html(self):
         d = Download('test')
         d.parse_html(html_se)
