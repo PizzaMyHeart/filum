@@ -1,6 +1,6 @@
 import unittest
 
-from filum.validation import is_valid_id, is_valid_url, InvalidUrl
+from filum.validation import is_valid_id, is_valid_url, InvalidUrl, InvalidThreadId
 
 
 class TestInputValidation(unittest.TestCase):
@@ -22,6 +22,14 @@ class TestInputValidation(unittest.TestCase):
             is_valid_url('https://stackoverflow.blog/2022/06/06/remote-work-is-killing-big-offices-cities-must-change-to-survive/?cb=1')
             is_valid_url('https://stackoverflow.com/users/9373782/pizza')
             is_valid_url('https://news.ycombinator.com/newest')
+
+    def test_is_valid_id(self):
+        self.assertTrue(is_valid_id(1))
+        
+        with self.assertRaises(InvalidThreadId):
+            is_valid_id(0)
+            is_valid_id('1')
+            is_valid_id(-1)
 
 
 if __name__ == '__main__':
