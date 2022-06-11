@@ -26,6 +26,10 @@ class TestHelpers(unittest.TestCase):
     def test_timestamp_to_iso(self):
         self.assertEqual(helpers.timestamp_to_iso(1654165010), '2022-06-02 11:16:50')
 
+    def test_qmarks(self):
+        columns = ['test']*5
+        self.assertEqual(helpers.qmarks(columns), '?, ?, ?, ?, ?')
+
 
 if __name__ == '__main__':
     unittest.main()
