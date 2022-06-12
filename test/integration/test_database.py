@@ -29,6 +29,10 @@ class TestDatabase(unittest.TestCase):
             with self.assertRaises(ItemAlreadyExistsError):
                 self.d.insert_row(test_thread, 'ancestors')
 
+    def test_select_permalink_returns_correct_permalink(self):
+        with self.conn:
+            self.assertEqual(self.d.select_permalink(1), 'https://news.ycombinator.com/item?id=31618955')
+
 
 if __name__ == '__main__':
     unittest.main()
