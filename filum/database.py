@@ -4,16 +4,17 @@ import pathlib
 from filum.helpers import qmarks, current_timestamp
 
 
-db_name = pathlib.Path(__file__).parent.resolve() / 'filum'
-
-
 class ItemAlreadyExistsError(Exception):
     pass
 
 
 class Database(object):
-    def __init__(self, db=db_name):
-        self._conn = self.connect_to_db(db)
+    def __init__(self, db='prod'):
+        if db == 'prod':
+            db_name = pathlib.Path(__file__).parent.resolve() / 'filum.db'
+        elif db == 'test':
+            db_name = ':memory:'
+        self._conn = self.connect_to_db(db_name)
         # self._conn.set_trace_callback(print)
         self.sql = dict([
             ('ancestors_sequential', 'SELECT *, ROW_NUMBER() OVER (ORDER BY saved_timestamp DESC) as num FROM ancestors')  # noqa: E501
@@ -24,12 +25,7 @@ class Database(object):
             self.create_table_descendants()
 
     def connect_to_db(self, db=None):
-        if db is None:
-            my_db = ':memory:'
-            print('New connection to in-memory SQLite db')
-        else:
-            my_db = f'{db}.db'
-        conn = sqlite3.connect(my_db)
+        conn = sqlite3.connect(db)
         # Return Row object from queries to allow accessing columns by name
         conn.row_factory = sqlite3.Row
         return conn
