@@ -3,8 +3,6 @@ from sqlite3 import OperationalError, IntegrityError
 import pathlib
 from filum.helpers import qmarks, current_timestamp
 
-db_name = pathlib.Path(__file__).parent.resolve() / 'filum'
-
 
 class ItemAlreadyExistsError(Exception):
     pass
@@ -12,7 +10,8 @@ class ItemAlreadyExistsError(Exception):
 
 class Database(object):
     def __init__(self):
-        self._conn = self.connect_to_db(db_name)
+        self.db_name = pathlib.Path(__file__).parent.resolve() / 'filum'
+        self._conn = self.connect_to_db(self.db_name)
         # self._conn.set_trace_callback(print)
         self.sql = dict([
             ('ancestors_sequential', 'SELECT *, ROW_NUMBER() OVER (ORDER BY saved_timestamp DESC) as num FROM ancestors')  # noqa: E501
