@@ -46,6 +46,12 @@ class TestView(unittest.TestCase):
         view.create_table(row_list)
         self.assertEqual(mock_method.call_count, 7)
 
+    @patch('filum.view.Table.add_row')
+    def test_create_table_makes_correct_num_of_rows(self, mock_method):
+        row_list = [self.row_dict]*3
+        view.create_table(row_list)
+        self.assertEqual(mock_method.call_count, 3)
+
 
 if __name__ == '__main__':
     unittest.main()
