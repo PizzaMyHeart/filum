@@ -190,7 +190,7 @@ class Database(object):
         with self._conn:
             sql = (
                 'SELECT ROW_NUMBER() OVER (ORDER BY saved_timestamp DESC) as num, '
-                f'title, posted_timestamp, saved_timestamp, score, source, tags FROM ancestors WHERE {column} LIKE ?'
+                f'* FROM ancestors WHERE {column} LIKE ?'
             )
             results = self._conn.execute(sql, (param, )).fetchall()
         return results
