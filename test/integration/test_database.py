@@ -37,10 +37,20 @@ class TestDatabase(unittest.TestCase):
 
     def test_delete_ancestor(self):
         with self.conn:
+            old_length = self.d.get_ancestors_length()
             self.d.delete_ancestor(1)
-            res = self.conn.execute('SELECT * FROM ancestors WHERE permalink = ?', (self.permalink,)).fetchone()
-            self.assertIsNone(res)
+            new_length = self.d.get_ancestors_length()
+            deleted_row = self.conn.execute('SELECT * FROM ancestors WHERE permalink = ?', (self.permalink,)).fetchone()
+            self.assertIsNone(deleted_row)
+            self.assertEqual(old_length, new_length + 1)
             self.conn.rollback()
+
+    def test_search_one_tag_singular_instance(self):
+        with self.conn:
+            results = self.d.search('tags', 'games')
+            for count, row in enumerate(results):
+                permalink = row['permalink']
+            self.assertEqual(permalink, self.permalink)
 
     def tearDown(self) -> None:
         self.conn.close()
