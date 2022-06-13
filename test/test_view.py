@@ -52,6 +52,11 @@ class TestView(unittest.TestCase):
         view.create_table(row_list)
         self.assertEqual(mock_method.call_count, 3)
 
+    @patch('filum.view.console.print')
+    def test_filum_print_calls_rich_console_print(self, mock_method):
+        view.filum_print('test')
+        mock_method.assert_called()
+
 
 if __name__ == '__main__':
     unittest.main()
