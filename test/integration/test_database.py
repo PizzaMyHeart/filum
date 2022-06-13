@@ -45,6 +45,19 @@ class TestDatabase(unittest.TestCase):
             self.assertEqual(old_length, new_length + 1)
             self.conn.rollback()
 
+    def test_delete_descendants(self):
+        with self.conn:
+            sql = ('WITH a AS (SELECT id, ROW_NUMBER() OVER (ORDER BY saved_timestamp DESC) AS num FROM ancestors) '
+                   'SELECT ancestor_id FROM descendants '
+                   'WHERE ancestor_id IN (SELECT id FROM a WHERE num = ?);')
+            ancestor_id = self.conn.execute(sql, (1,)).fetchall()[0][0]
+            self.d.delete_descendants(1)
+            deleted_rows = self.conn.execute(
+                'SELECT * FROM descendants WHERE ancestor_id = ?', (ancestor_id,)
+                ).fetchall()
+            self.assertTrue(len(deleted_rows) == 0)
+            self.conn.rollback()
+
     def test_search_one_tag_singular_instance(self):
         with self.conn:
             results = self.d.search('tags', 'games')
