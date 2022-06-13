@@ -43,7 +43,6 @@ class TestDatabase(unittest.TestCase):
             deleted_row = self.conn.execute('SELECT * FROM ancestors WHERE permalink = ?', (self.permalink,)).fetchone()
             self.assertIsNone(deleted_row)
             self.assertEqual(old_length, new_length + 1)
-            self.conn.rollback()
 
     def test_delete_descendants(self):
         with self.conn:
@@ -56,7 +55,6 @@ class TestDatabase(unittest.TestCase):
                 'SELECT * FROM descendants WHERE ancestor_id = ?', (ancestor_id,)
                 ).fetchall()
             self.assertTrue(len(deleted_rows) == 0)
-            self.conn.rollback()
 
     def test_search_one_tag_singular_instance(self):
         with self.conn:
@@ -66,6 +64,7 @@ class TestDatabase(unittest.TestCase):
             self.assertEqual(permalink, self.permalink)
 
     def tearDown(self) -> None:
+        self.conn.rollback()
         self.conn.close()
 
 
