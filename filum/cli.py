@@ -2,7 +2,7 @@ import sys
 import warnings
 from cmd import Cmd
 
-from filum.operations import add, update, show_all, show_thread, delete, modify_tags, search, open_config
+from filum.operations import add, get_all_tags, update, show_all, show_thread, delete, modify_tags, search, open_config
 from filum.parser import Parser
 
 
@@ -66,10 +66,13 @@ class FilumShell(Cmd):
     def do_tags(self, line):
         try:
             args = parser.parser_tags.parse_args(line.split())
-            if args.delete:
-                modify_tags(args.id[0], add=False, tags=args.tags)
+            if args.id:
+                if args.delete:
+                    modify_tags(args.id, add=False, tags=args.tags)
+                else:
+                    modify_tags(args.id, add=True, tags=args.tags)
             else:
-                modify_tags(args.id[0], add=True, tags=args.tags)
+                get_all_tags()
         except SystemExit:
             return
 
@@ -145,10 +148,13 @@ def main():
         delete(args.id[0])
 
     elif args.subparser == 'tags':
-        if args.delete:
-            modify_tags(args.id[0], add=False, tags=args.tags)
+        if args.id:
+            if args.delete:
+                modify_tags(args.id, add=False, tags=args.tags)
+            else:
+                modify_tags(args.id, add=True, tags=args.tags)
         else:
-            modify_tags(args.id[0], add=True, tags=args.tags)
+            get_all_tags()
 
     elif args.subparser == 'search':
         if args.tags:

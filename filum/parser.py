@@ -49,8 +49,8 @@ class Parser(object):
     parser_delete.add_argument('id', nargs='+', type=int)
 
     parser_tags = subparsers.add_parser('tags', help='add tags. Include --delete to remove tags instead')
-    parser_tags.add_argument('id', nargs=1, type=int)
-    parser_tags.add_argument('tags', nargs='+', help='include one or more tags separated by a space')
+    parser_tags.add_argument('id', nargs='?', type=int)
+    parser_tags.add_argument('tags', nargs='?', help='include one or more tags separated by a comma without a space')
     parser_tags.add_argument('--delete', action='store_true')
 
     parser_search = subparsers.add_parser('search', help='search for a thread')

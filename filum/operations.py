@@ -1,3 +1,5 @@
+'''filum functions that are accessed by the user via terminal commands or the interactive shell.'''
+
 import platform
 import subprocess
 
@@ -95,6 +97,10 @@ def confirm(prompt) -> bool:  # type: ignore
         else:
             print('Enter "y" for yes or "n" for no.')
             continue
+
+
+def get_all_tags():
+    c.show_all_tags()
 
 
 def modify_tags(id, add: bool, **kwargs):

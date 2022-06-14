@@ -64,6 +64,15 @@ class Controller(object):
     def get_ancestors_length(self):
         return self.database.get_ancestors_length()
 
+    def show_all_tags(self):
+        '''Display a list of existing tags'''
+        rows = self.database.get_all_tags()
+        tags = [row[0].split(', ') for row in rows]
+        tags_flattened = [item for items in tags for item in items]
+        self.view.filum_print('[bold green]Current tags:[/bold green]')
+        for tag in set(tags_flattened):
+            self.view.filum_print(f'    - {tag}')
+
     def modify_tags(self, id: int, add=True, **kwargs):
         '''Add or delete tags of a top-level item in the "ancestor" table
         :param int id: the ID of the item (in consecutive ascending order)
@@ -76,7 +85,7 @@ class Controller(object):
             current_tags = current_tags.split(', ')
         else:
             current_tags = []
-        entered_tags = [tag.lower() for tag in kwargs['tags']]
+        entered_tags = [tag.lower() for tag in kwargs['tags'].split(',')]
         if add:
             # Ignore user-supplied tags that already exist
             new_tags = ', '.join(set(current_tags).union(entered_tags))
@@ -90,3 +99,8 @@ class Controller(object):
         results = self.database.search(column, searchstr)
         table = self.view.create_table(results)
         self.view.filum_print(table)
+
+
+if __name__ == '__main__':
+    c = Controller()
+    c.show_all_tags()

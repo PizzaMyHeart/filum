@@ -166,6 +166,12 @@ class Database(object):
                                 '''
             self._conn.execute(sql_descendants, (id,))
 
+    def get_all_tags(self):
+        with self._conn:
+            sql = 'SELECT tags FROM ancestors'
+            rows = self._conn.execute(sql).fetchall()
+        return rows
+
     def get_tags(self, id: int) -> str:
         with self._conn:
             sql = (
@@ -199,7 +205,7 @@ class Database(object):
 def main():
 
     db = Database()
-    db.get_ancestors_length()
+    db.get_all_tags()
 
 
 if __name__ == '__main__':
