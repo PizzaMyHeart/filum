@@ -4,13 +4,10 @@ from pathlib import Path
 config_filepath = Path(__file__).parent.resolve() / 'config.ini'
 
 
-
-
 class FilumConfig(object):
     def __init__(self):
         self.config_filepath = Path(__file__).parent.resolve() / 'config.ini'
         self.parser = configparser.ConfigParser(inline_comment_prefixes=';')
-
 
     def get_parser(self):
 
@@ -23,7 +20,6 @@ class FilumConfig(object):
 
         return self.parser
 
-
     def create_config(self):
         config_content = '''
         [output]
@@ -35,6 +31,7 @@ class FilumConfig(object):
 
         with open(self.config_filepath, 'w') as config_file:
             self.parser.write(config_file)
+
 
 if __name__ == '__main__':
     pass

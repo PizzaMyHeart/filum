@@ -1,18 +1,102 @@
-import platform
-import subprocess
 import sys
 import warnings
 from cmd import Cmd
 
-from rich.console import Console
-
-from filum.config import FilumConfig
-from filum.controller import Controller
-from filum.database import ItemAlreadyExistsError
+from filum.operations import add, update, show_all, show_thread, delete, modify_tags, search, open_config
 from filum.parser import Parser
-from filum.validation import InvalidInputError, is_valid_id, is_valid_url
 
-console = Console()
+
+parser = Parser()
+
+
+class FilumShell(Cmd):
+    intro = 'filum interactive mode'
+    prompt = 'filum > '
+
+    def onecmd(self, line):
+        try:
+            return super().onecmd(line)
+        except Exception as err:
+            print(err)
+            return False
+
+    def emptyline(self):
+        # Do nothing if an empty line is entered at the prompt
+        pass
+
+    def do_add(self, arg):
+        '''Add a URL to the filum database: $ add <url>'''
+        if arg == '':
+            print('Please supply a URL.')
+            return False
+        add(arg)
+
+    def do_update(self, arg):
+        try:
+            update(int(arg))
+        except ValueError:
+            print('Please enter a valid integer.')
+
+    def do_all(self, arg):
+        '''Show all top-level items currently saved in the filum database: $ all'''
+        show_all()
+
+    def do_show(self, line):
+        '''Display a thread given its top-level selector: $ thread 1.\n
+        Top-level selectors are contained in the left-most column in the table shown by the "all" command.'''
+        args = parser.parser_show.parse_args(line.split())
+        try:
+            if args.tags:
+                show_thread(args.id[0], cond='WHERE tags LIKE ?', where_param=f'%{args.tags[0]}%')
+            elif args.source:
+                show_thread(args.id[0], cond='WHERE source LIKE ?', where_param=f'%{args.source[0]}%')
+            else:
+                show_thread(args.id[0])
+        except ValueError:
+            print('Please enter a valid integer.')
+
+    def do_delete(self, arg):
+        '''Delete a thread given its top-level selector: $ thread 1.\n
+        Top-level selectors are contained in the left-most column in the table shown by the "all" command.'''
+        try:
+            delete(int(arg))
+        except ValueError:
+            print('Please enter a valid integer.')
+
+    def do_tags(self, line):
+        try:
+            args = parser.parser_tags.parse_args(line.split())
+            if args.delete:
+                modify_tags(args.id[0], add=False, tags=args.tags)
+            else:
+                modify_tags(args.id[0], add=True, tags=args.tags)
+        except SystemExit:
+            return
+
+    def do_search(self, line):
+        try:
+            args = parser.parser_search.parse_args(line.split())
+            if args.tags:
+                search('tags', args.tags[0])
+            elif args.source:
+                search('source', args.source[0])
+        except SystemExit:
+            return
+
+    def do_config(self, arg):
+        '''Open the config file in an editor. Change settings by modifying the parameter values: $ config'''
+        try:
+            open_config()
+        except Exception as err:
+            print(err)
+
+    def do_quit(self, arg):
+        '''Quit the interactive session using 'quit' or CTRL-D'''
+        sys.exit(0)
+
+    def do_EOF(self, arg):
+        '''Quit the interactive session using 'quit' or CTRL-D'''
+        sys.exit(0)
 
 
 def main():
@@ -22,195 +106,6 @@ def main():
             module='bs4',
             message='.*looks more like a filename than markup.*'
             )
-
-    parser = Parser()
-
-    class FilumShell(Cmd):
-        intro = 'filum interactive mode'
-        prompt = 'filum > '
-
-        def onecmd(self, line):
-            try:
-                return super().onecmd(line)
-            except Exception as err:
-                print(err)
-                return False
-
-        def emptyline(self):
-            # Do nothing if an empty line is entered at the prompt
-            pass
-
-        def do_add(self, arg):
-            '''Add a URL to the filum database: $ add <url>'''
-            if arg == '':
-                print('Please supply a URL.')
-                return False
-            add(arg)
-
-        def do_update(self, arg):
-            try:
-                update(int(arg))
-            except ValueError:
-                print('Please enter a valid integer.')
-
-        def do_all(self, arg):
-            '''Show all top-level items currently saved in the filum database: $ all'''
-            show_all()
-
-        def do_show(self, line):
-            '''Display a thread given its top-level selector: $ thread 1.\n
-            Top-level selectors are contained in the left-most column in the table shown by the "all" command.'''
-            args = parser.parser_show.parse_args(line.split())
-            try:
-                if args.tags:
-                    show_thread(args.id[0], cond='WHERE tags LIKE ?', where_param=f'%{args.tags[0]}%')
-                elif args.source:
-                    show_thread(args.id[0], cond='WHERE source LIKE ?', where_param=f'%{args.source[0]}%')
-                else:
-                    show_thread(args.id[0])
-            except ValueError:
-                print('Please enter a valid integer.')
-
-        def do_delete(self, arg):
-            '''Delete a thread given its top-level selector: $ thread 1.\n
-            Top-level selectors are contained in the left-most column in the table shown by the "all" command.'''
-            try:
-                delete(int(arg))
-            except ValueError:
-                print('Please enter a valid integer.')
-
-        def do_tags(self, line):
-            try:
-                args = parser.parser_tags.parse_args(line.split())
-                if args.delete:
-                    modify_tags(args.id[0], add=False, tags=args.tags)
-                else:
-                    modify_tags(args.id[0], add=True, tags=args.tags)
-            except SystemExit:
-                return
-
-        def do_search(self, line):
-            try:
-                args = parser.parser_search.parse_args(line.split())
-                if args.tags:
-                    search('tags', args.tags[0])
-                elif args.source:
-                    search('source', args.source[0])
-            except SystemExit:
-                return
-
-        def do_config(self, arg):
-            '''Open the config file in an editor. Change settings by modifying the parameter values: $ config'''
-            try:
-                open_config()
-            except Exception as err:
-                print(err)
-
-        def do_quit(self, arg):
-            '''Quit the interactive session using 'quit' or CTRL-D'''
-            sys.exit(0)
-
-        def do_EOF(self, arg):
-            '''Quit the interactive session using 'quit' or CTRL-D'''
-            sys.exit(0)
-
-    valid_id_message = 'Please enter a valid thread label (+ve int). Run `filum all` to see a list of thread labels.'
-
-    config = FilumConfig()
-    config_parser = config.get_parser()
-
-    c = Controller()
-
-    def add(url) -> None:
-        print(url)
-        try:
-            is_valid_url(url)
-            with console.status(f'Downloading thread from {url}'):
-                thread = c.download_thread(url)
-                c.add_thread(thread)
-            print('Thread downloaded.')
-        except InvalidInputError as err:
-            print(err)
-        except ItemAlreadyExistsError:
-            if confirm('Do you want to update this thread now? [y/n] '):
-                print('Updating thread ...')
-                c.update_thread(thread)
-
-    def update(id: int) -> None:
-        if confirm('Do you want to update this thread now? [y/n] '):
-            with console.status('Updating thread...'):
-                url = c.get_permalink(id)
-                is_valid_url(url)
-                thread = c.download_thread(url)
-                c.update_thread(thread)
-            print(f'Thread updated. ({url})')
-            show_all()
-
-    def show_thread(id: int, cond='', **kwargs) -> None:
-        try:
-            is_valid_id(id)
-            c.display_thread(
-                id,
-                cond=cond,
-                pager=config_parser.getboolean('output', 'pager'),
-                pager_colours=config_parser.getboolean('output', 'pager_colours'),
-                **kwargs
-                )
-        except InvalidInputError as err:
-            print(err)
-        except IndexError:
-            print(valid_id_message)
-
-    def show_all() -> None:
-        c.show_all_ancestors()
-
-    def delete(id: int) -> None:
-        try:
-            if confirm('Are you sure you want to delete this thread? [y/n] '):
-                is_valid_id(id)
-                ancestors_length = c.get_ancestors_length()
-                success = True if id <= ancestors_length else False
-                if success:
-                    c.delete(id)
-                    print(f'Thread no. {id} deleted.')
-                    show_all()
-                else:
-                    print(f'Thread no. {id} does not exist.\n{valid_id_message}')
-            else:
-                print('Delete action cancelled.')
-        except InvalidInputError as err:
-            print(err)
-        except IndexError:
-            print(valid_id_message)
-
-    def confirm(prompt) -> bool:  # type: ignore
-        yes_no = ''
-
-        while yes_no not in ('y', 'n'):
-            yes_no = input(prompt)
-            if yes_no == 'y':
-                return True
-            elif yes_no == 'n':
-                return False
-            else:
-                print('Enter "y" for yes or "n" for no.')
-                continue
-
-    def modify_tags(id, add: bool, **kwargs):
-        c.modify_tags(id, add, **kwargs)
-        show_all()
-
-    def search(column, searchstr):
-        c.search(column, searchstr)
-
-    def open_config():
-        # filepath = pathlib.Path(__file__).parent.resolve() / 'config.ini'
-        if platform.system() == 'Darwin':       # macOS
-            subprocess.run(('open', config.config_filepath))
-        elif platform.system() == 'Windows':    # Windows
-            subprocess.run('notepad', config.config_filepath)
-        else:                                   # Linux variants
-            subprocess.run(('nano', config.config_filepath))
 
     description = (
         'filum - archive discussion threads from the command line.\n\n'
