@@ -1,4 +1,4 @@
-'''filum functions that are accessed by the user via terminal commands or the interactive shell.'''
+"""Contains filum functions that are accessed by the user via terminal commands or the interactive shell."""
 
 import platform
 import subprocess

@@ -1,3 +1,5 @@
+"""Contains helper functions for the filum application."""
+
 import re
 from collections.abc import KeysView
 from datetime import datetime
@@ -15,8 +17,7 @@ def html_to_md(html):
 
 
 def root_url(url):
-    '''Return the first part of the URL until and including ".com"
-    '''
+    """Return the first part of the URL until and including '.com'"""
     p = re.compile(r'https://.+\.com')
     return p.search(url).group(0)
 
@@ -34,5 +35,5 @@ def timestamp_to_iso(timestamp):
 
 
 def qmarks(sequence: KeysView) -> str:
-    'Get a qmark SQL placeholder of arbitrary length.'
+    """Get a qmark SQL placeholder of arbitrary length."""
     return ', '.join(['?']*len(sequence))

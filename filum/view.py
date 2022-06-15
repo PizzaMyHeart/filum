@@ -1,3 +1,5 @@
+"""Contains RichView, a class used to print items to the terminal."""
+
 from typing import Mapping, ValuesView, Any
 
 from rich import box
@@ -19,16 +21,18 @@ class RichView:
         self.console = console
 
     def stringify(self, row: ValuesView) -> tuple:
-        '''Turns each item in the SQL query result into a string
-        that can be passed to Table().add_row
-        '''
+        """Turns each item in the SQL query result into a string
+        that can be passed to rich.table.Table.add_row
+        """
         return tuple(str(i) for i in row)
 
     def create_table(self, row_list: list) -> Table:
-        '''Construct a new table each time to prevent concatenating
-        new tables together each time the "all" command is called in the
-        interactive shell.
-        '''
+        """Create a table containing top-level items in response to a query. Returns a Rich Table object."""
+
+        # Construct a new table each time to prevent concatenating
+        # new tables together each time the "all" command is called in the
+        # interactive shell.
+
         table = Table(box=box.SIMPLE, expand=True)
         table.add_column('#', style='green')
         table.add_column('Title')
@@ -57,6 +61,10 @@ class RichView:
         return table
 
     def create_thread_header(self, item: Mapping) -> Group:
+        """Create a header with post information such as author, time posted, score, etc.
+        Returns a group of Rich renderable objects as a Group object.
+        See https://rich.readthedocs.io/en/stable/group.html.
+        """
         timestamp = timestamp_to_iso(item['posted_timestamp'])
         to_print = (
             f'\n[bold bright_yellow]{item["author"]}[/bold bright_yellow] '
