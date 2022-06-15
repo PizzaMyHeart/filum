@@ -56,12 +56,32 @@ class TestDatabase(unittest.TestCase):
                 ).fetchall()
             self.assertTrue(len(deleted_rows) == 0)
 
+    def test_select_one_ancestor_without_conditions(self):
+        with self.conn:
+            results = self.d.select_one_ancestor(1)
+            self.assertEqual(results['title'], 'Ask HN: Non-violent video games with great stories?')
+
+    def test_select_one_ancestor_with_tag_condition(self):
+        with self.conn:
+            results = self.d.select_one_ancestor(1, cond='WHERE tags LIKE ?', where_param='python')
+            self.assertEqual(
+                results['title'],
+                'Creating a class with all the elements specified in a file using ConfigParser')
+
+    def test_select_all_descendants_without_conditions(self):
+        with self.conn:
+            results = self.d.select_all_descendants(1)
+            ids = [row['id'] for row in results]
+            self.assertEqual(''.join(set(ids)), '31618955')
+
+    def test_select_all_descendants_with_condition(self):
+        pass
+
     def test_search_one_tag_singular_instance(self):
         with self.conn:
             results = self.d.search('tags', 'games')
-            for count, row in enumerate(results):
-                permalink = row['permalink']
-            self.assertEqual(permalink, self.permalink)
+            results = [dict(i) for i in results]
+            self.assertEqual(results[0]['permalink'], self.permalink)
 
     def tearDown(self) -> None:
         self.conn.rollback()
