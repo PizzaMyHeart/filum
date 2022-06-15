@@ -48,11 +48,11 @@ class Controller(object):
         table = self.view.create_table(results)
         self.view.filum_print(table)
 
-    def display_thread(self, id, pager, pager_colours, cond='', **kwargs):
-        ancestor_query = self.database.select_one_ancestor(id, cond=cond, **kwargs)
+    def display_thread(self, id, pager, pager_colours, cond='', where_param=''):
+        ancestor_query = self.database.select_one_ancestor(id, cond=cond, where_param=where_param)
         top_level = self.view.create_thread_header(ancestor_query)
 
-        descendants_query = self.database.select_all_descendants(id, cond=cond, **kwargs)
+        descendants_query = self.database.select_all_descendants(id, cond=cond, where_param=where_param)
         indented = self.view.create_thread_body(descendants_query)
 
         self.view.display_thread(top_level, indented, pager=pager, pager_colours=pager_colours)

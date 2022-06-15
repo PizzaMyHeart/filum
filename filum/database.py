@@ -118,15 +118,15 @@ class Database(object):
 
             return results
 
-    def select_one_ancestor(self, id: int, cond='', **kwargs) -> sqlite3.Row:
-        values = self.get_params_tuple(id, kwargs)
+    def select_one_ancestor(self, id: int, cond='', where_param='') -> sqlite3.Row:
+        values = self.get_params_tuple(id, where_param)
         with self._conn:
             sql = f'WITH a AS ({self.sql["ancestors_sequential"]} {cond})SELECT * FROM a WHERE num = (?)'
             results = self._conn.execute(sql, values).fetchone()
         return results
 
-    def select_all_descendants(self, id: int, cond='', **kwargs) -> sqlite3.Row:
-        values = self.get_params_tuple(id, kwargs)
+    def select_all_descendants(self, id: int, cond='', where_param='') -> sqlite3.Row:
+        values = self.get_params_tuple(id, where_param)
         with self._conn:
             sql = (
                 'WITH joined AS ('
@@ -139,12 +139,11 @@ class Database(object):
             results = self._conn.execute(sql, values).fetchall()
             return results
 
-    def get_params_tuple(self, id: int, kwargs) -> tuple:
+    def get_params_tuple(self, id: int, where_param) -> tuple:
         """Returns a tuple of parameters to be substituted into SQL query placeholders
         used by select_one_ancestor and select_all_descendants.
         """
-        if 'where_param' in kwargs.keys():
-            where_param = kwargs['where_param']
+        if where_param != '':
             values = (where_param, id)
         else:
             values = (id, )

@@ -137,12 +137,16 @@ def main():
         show_all()
 
     elif args.subparser == 'show':
+        id = args.id[0]
+        cond = ''
+        where_param = ''
         if args.tags:
-            show_thread(args.id[0], cond='WHERE tags LIKE ?', where_param=f'%{args.tags[0]}%')
+            cond = 'WHERE tags LIKE ?'
+            where_param = f'%{args.tags[0]}%'
         elif args.source:
-            show_thread(args.id[0], cond='WHERE source LIKE ?', where_param=f'%{args.source[0]}%')
-        else:
-            show_thread(args.id[0])
+            cond = 'WHERE source LIKE ?'
+            where_param = f'%{args.source[0]}%'
+        show_thread(id, cond=cond, where_param=where_param)
 
     elif args.subparser == 'delete':
         delete(args.id[0])

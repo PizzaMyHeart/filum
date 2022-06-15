@@ -45,7 +45,7 @@ def update(id: int) -> None:
         show_all()
 
 
-def show_thread(id: int, cond='', **kwargs) -> None:
+def show_thread(id: int, cond='', where_param='') -> None:
     try:
         is_valid_id(id)
         c.display_thread(
@@ -53,7 +53,7 @@ def show_thread(id: int, cond='', **kwargs) -> None:
             cond=cond,
             pager=config_parser.getboolean('output', 'pager'),
             pager_colours=config_parser.getboolean('output', 'pager_colours'),
-            **kwargs
+            where_param=where_param
             )
     except InvalidInputError as err:
         print(err)
