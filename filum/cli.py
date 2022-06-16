@@ -8,6 +8,9 @@ from filum.operations import (add, get_all_tags, update, show_all, show_thread,
                               delete, modify_tags, search, open_config, push_to_web_archive)
 from filum.parser import Parser
 
+from logger.logger import create_logger
+
+logger = create_logger()
 
 parser = Parser()
 
@@ -40,25 +43,24 @@ class FilumShell(Cmd):
         except ValueError:
             print('Please enter a valid integer.')
 
-    def do_all(self, arg):
-        '''Show all top-level items currently saved in the filum database: $ all'''
-        show_all()
-
     def do_show(self, line):
         '''Display a thread given its top-level selector: $ thread 1.\n
         Top-level selectors are contained in the left-most column in the table shown by the "all" command.'''
         args = parser.parser_show.parse_args(line.split())
         try:
-            id = args.id[0]
-            cond = ''
-            where_param = ''
-            if args.tags:
-                cond = 'WHERE tags LIKE ?'
-                where_param = f'%{args.tags[0]}%'
-            elif args.source:
-                cond = 'WHERE source LIKE ?'
-                where_param = f'%{args.source[0]}%'
-            show_thread(id, cond=cond, where_param=where_param)
+            id = args.id
+            if id is None:
+                show_all()
+            else:
+                cond = ''
+                where_param = ''
+                if args.tags:
+                    cond = 'WHERE tags LIKE ?'
+                    where_param = f'%{args.tags[0]}%'
+                elif args.source:
+                    cond = 'WHERE source LIKE ?'
+                    where_param = f'%{args.source[0]}%'
+                show_thread(id, cond=cond, where_param=where_param)
         except ValueError:
             print('Please enter a valid integer.')
 
@@ -127,6 +129,9 @@ def main():
     )
 
     args = parser.args
+
+    logger.debug(args)
+
     if args.i:
         FilumShell().cmdloop()
 
@@ -140,23 +145,23 @@ def main():
     elif args.subparser == 'update':
         update(args.id[0])
 
-    elif args.subparser == 'all':
-        show_all()
-
     elif args.subparser == 'archive':
         push_to_web_archive(args.id[0])
 
     elif args.subparser == 'show':
-        id = args.id[0]
-        cond = ''
-        where_param = ''
-        if args.tags:
-            cond = 'WHERE tags LIKE ?'
-            where_param = f'%{args.tags[0]}%'
-        elif args.source:
-            cond = 'WHERE source LIKE ?'
-            where_param = f'%{args.source[0]}%'
-        show_thread(id, cond=cond, where_param=where_param)
+        id = args.id
+        if id is None:
+            show_all()
+        else:
+            cond = ''
+            where_param = ''
+            if args.tags:
+                cond = 'WHERE tags LIKE ?'
+                where_param = f'%{args.tags[0]}%'
+            elif args.source:
+                cond = 'WHERE source LIKE ?'
+                where_param = f'%{args.source[0]}%'
+            show_thread(id, cond=cond, where_param=where_param)
 
     elif args.subparser == 'delete':
         delete(args.id[0])

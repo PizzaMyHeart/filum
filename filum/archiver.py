@@ -21,13 +21,11 @@ class ArchiveUploader:
         """Helper function that takes the HTTP response object from the GET request to save
         a page to the Wayback Machine, and returns the corresponding Memento URL.
         """
-        '''
+
         for i in [i for i in response.headers['link'].split(', <')]:
             if 'rel="memento"' in i:
                 memento_string = i
         for i in memento_string.split('; '):
             if 'http' in i:
                 link = i.strip('<>')
-        '''
-        link = response
         return link

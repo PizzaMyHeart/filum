@@ -63,7 +63,7 @@ def get_http_response(url: str) -> requests.Response:
     session = requests.Session()
     retries = Retry(total=5, backoff_factor=5)
     adapter = HTTPAdapter(max_retries=retries)
-    session.mount('https://', retries)
+    session.mount('https://', adapter)
     session.mount('http://', adapter)
 
     return session.get(url, headers=headers)
