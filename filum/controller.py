@@ -1,8 +1,10 @@
-import sys
+"""Contains the Controller class which integrates database operations with application logic."""
+
 import traceback
 
 from rich.console import Console
 
+from filum.archiver import ArchiveUploader
 from filum.download import Download
 from filum.database import Database, ItemAlreadyExistsError
 from filum.view import RichView
@@ -14,20 +16,33 @@ class Controller(object):
     def __init__(self):
         self.database = Database()
         self.view = RichView()
+        self.archive_uploader = ArchiveUploader()
 
     def download_thread(self, url):
         return Download(url).run()
 
-    def add_thread(self, thread):
+    def add_thread(self, thread: dict):
+        """Add a discussion thread to the database.
+
+        Inserts the top-level node of a saved thread into the 'ancestors' table,
+        and the descendant nodes into the 'desendants' table.
+
+        Args:
+            thread: The dictionary returned by the download_thread method.
+
+        Returns:
+            None
+
+        Raises:
+            ItemAlreadyExistsError: A custom exception to indicate that the thread has already been saved previously.
+        """
         try:
             self.database.insert_row(thread['parent_data'], 'ancestors')
             for comment in thread['comment_data']:
                 self.database.insert_row(thread['comment_data'][comment], 'descendants')
         except ItemAlreadyExistsError:
-            # TODO: Allow updating of existing thread
             print('This item already exists in your database.')
             raise ItemAlreadyExistsError
-            sys.exit(0)
         except Exception:
             traceback.print_exc()
 
@@ -36,6 +51,28 @@ class Controller(object):
         self.database.delete_descendants(ancestor_id)
         for comment in thread['comment_data']:
             self.database.insert_row(thread['comment_data'][comment], 'descendants')
+
+    def _get_ancestor_id(self, id):
+        ancestor_id = dict(self.database.select_one_ancestor(id))
+        print(ancestor_id['id'])
+
+    def push_to_web_archive(self, id: int) -> str:
+        """Saves a snapshot of a thread to the Wayback Machine.
+
+        Args:
+            id: The thread ID
+
+        Returns:
+            web_archive_url: The URL of the saved item.
+        """
+        permalink = self.get_permalink(id)
+        web_archive_url = self.archive_uploader.save_snapshot(permalink)
+        self.database.update_web_archive_link(
+            permalink=permalink,
+            web_archive_url=web_archive_url,
+            column='web_archive_url',
+            table='ancestors')
+        return web_archive_url
 
     def get_permalink(self, id: int) -> str:
         return self.database.select_permalink(id)
@@ -65,7 +102,8 @@ class Controller(object):
         return self.database.get_ancestors_length()
 
     def show_all_tags(self):
-        '''Display a list of existing tags'''
+        """Display a list of existing tags"""
+
         rows = self.database.get_all_tags()
         tags = [row[0].split(', ') for row in rows]
         tags_flattened = [item for items in tags for item in items]
@@ -74,12 +112,14 @@ class Controller(object):
             self.view.filum_print(f'    - {tag}')
 
     def modify_tags(self, id: int, add=True, **kwargs):
-        '''Add or delete tags of a top-level item in the "ancestor" table
-        :param int id: the ID of the item (in consecutive ascending order)
-        :param bool add: default is to add tags, otherwise delete tags
-        :key list tags: user-supplied tags to be added
+        """Add or delete tags of a top-level item in the "ancestor" table
 
-        '''
+        Args:
+            id: the ID of the item (in consecutive ascending order)
+            add: default is to add tags, otherwise delete tags
+            **kwargs: user-supplied tags to be added
+        """
+
         current_tags = self.database.get_tags(id)
         if current_tags is not None:
             current_tags = current_tags.split(', ')
@@ -103,4 +143,4 @@ class Controller(object):
 
 if __name__ == '__main__':
     c = Controller()
-    c.show_all_tags()
+    c._get_ancestor_id(1)

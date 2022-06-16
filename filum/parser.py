@@ -1,3 +1,5 @@
+"""Contains the Parser class that defines an argparse CLI parser with subcommands."""
+
 import argparse
 import textwrap
 
@@ -26,13 +28,16 @@ class Parser(object):
                     ''')
                 )
 
-    parser.add_argument('-i', action='store_true', help='interactive mode')
+    parser.add_argument('-i', action='store_true', help='Interactive mode')
 
     subparsers = parser.add_subparsers(dest='subparser')
 
-    parser_add = subparsers.add_parser('add', help='add a URL')
+    parser_add = subparsers.add_parser('add', help='Add a URL')
     parser_add.add_argument('url', nargs='+', type=str, help='add a URL')
     parser_add.set_defaults(parser_add=True)
+
+    parser_archive = subparsers.add_parser('archive', help='Push the thread to the Wayback Machine.')
+    parser_archive.add_argument('id', nargs=1, type=int)
 
     parser_update = subparsers.add_parser('update', help='update a saved thread')
     parser_update.add_argument('id', nargs=1, type=int)

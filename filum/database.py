@@ -1,4 +1,4 @@
-"""Contains a Database class that interacts with the SQLite database."""
+"""Contains the Database class that interacts with the SQLite database."""
 
 import sqlite3
 from sqlite3 import OperationalError, IntegrityError
@@ -30,10 +30,17 @@ class Database(object):
             self.create_table_ancestors()
             self.create_table_descendants()
 
-    def connect_to_db(self, db=None):
-        """Return a connection object to interact with the database."""
+    def connect_to_db(self, db_name=None):
+        """Return a connection object to interact with the database.
 
-        conn = sqlite3.connect(db)
+        Args:
+            db_name: The path to the database.
+
+        Returns:
+            conn: An SQLite Connection object.
+        """
+
+        conn = sqlite3.connect(db_name)
         # Return Row object from queries to allow accessing columns by name
         conn.row_factory = sqlite3.Row
         return conn
@@ -207,6 +214,7 @@ class Database(object):
 
     def search(self, column: str, searchstr: str):
         """Search a column in the 'ancestors' table for a user-supplied string."""
+
         param = f'%{searchstr}%'
         with self._conn:
             sql = (
@@ -216,7 +224,7 @@ class Database(object):
             results = self._conn.execute(sql, (param, )).fetchall()
         return results
 
-    def check_column_exists(self, column: str, table: str) -> bool:
+    def _check_column_exists(self, column: str, table: str) -> bool:
         """Checks whether a column exists in a given table.
         Returns a Boolean.
         """
@@ -229,9 +237,38 @@ class Database(object):
                 return True
             return False
 
+    def _create_new_column(self, column: str, table: str = 'ancestors'):
+        try:
+            with self._conn:
+                sql = f'ALTER TABLE {table} ADD COLUMN {column} TEXT'
+                self._conn.execute(sql)
+        except OperationalError as err:
+            print(err)
+
+    def create_column_if_not_exists(func):
+        def wrapped(self, *args, **kwargs):
+            print(kwargs.items())
+            column = kwargs['column']
+            table = kwargs['table']
+            if not self._check_column_exists(column, table):
+                self._create_new_column(column, table)
+            func(self, *args, **kwargs)
+        return wrapped
+
     # Non-core features. These functions add the relevant column if it does not exist.
-    def update_web_archive_link(self, permalink: str, web_archive_url: str) -> None:
-        """Given an ancestor item's permalink, update its web archive URL."""
+    @create_column_if_not_exists
+    def update_web_archive_link(self, permalink: str, web_archive_url: str, column, table) -> None:
+        """Given an ancestor item's permalink, update its web archive URL.
+
+        Args:
+            permalink: The permalink of the saved item
+            web_archive_url: The URL of the item saved in the web archive
+            column: The name of the column that stores web_archive_url
+            table: The name of the containing table
+
+        Returns:
+            None
+        """
 
         with self._conn:
             sql = 'UPDATE ancestors SET web_archive_url = ? WHERE permalink = ?'
@@ -244,8 +281,7 @@ class Database(object):
 def main():
 
     db = Database()
-    # help(db)
-    print(db.check_column_exists('title', 'ancestors'))
+    help(db)
 
 
 if __name__ == '__main__':

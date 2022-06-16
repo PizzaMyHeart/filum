@@ -1,8 +1,11 @@
+"""The entry point of the filum application."""
+
 import sys
 import warnings
 from cmd import Cmd
 
-from filum.operations import add, get_all_tags, update, show_all, show_thread, delete, modify_tags, search, open_config
+from filum.operations import (add, get_all_tags, update, show_all, show_thread,
+                              delete, modify_tags, search, open_config, push_to_web_archive)
 from filum.parser import Parser
 
 
@@ -139,6 +142,9 @@ def main():
 
     elif args.subparser == 'all':
         show_all()
+
+    elif args.subparser == 'archive':
+        push_to_web_archive(args.id[0])
 
     elif args.subparser == 'show':
         id = args.id[0]

@@ -4,6 +4,7 @@ import platform
 import subprocess
 
 from rich.console import Console
+from filum.archiver import WaybackMachineError
 
 from filum.config import FilumConfig
 from filum.controller import Controller
@@ -29,14 +30,14 @@ def add(url) -> None:
     except InvalidInputError as err:
         print(err)
     except ItemAlreadyExistsError:
-        if confirm('Do you want to update this thread now? [y/n] '):
+        if confirm('Do you want to update this thread now?'):
             print('Updating thread ...')
             c.update_thread(thread)
 
 
 def update(id: int) -> None:
-    if confirm('Do you want to update this thread now? [y/n] '):
-        with console.status('Updating thread...'):
+    if confirm('Do you want to update this thread now?'):
+        with console.status('Updating thread'):
             url = c.get_permalink(id)
             is_valid_url(url)
             thread = c.download_thread(url)
@@ -89,7 +90,7 @@ def confirm(prompt) -> bool:  # type: ignore
     yes_no = ''
 
     while yes_no not in ('y', 'n'):
-        yes_no = input(prompt)
+        yes_no = input(f'{prompt} [y/n] ')
         if yes_no == 'y':
             return True
         elif yes_no == 'n':
@@ -120,3 +121,13 @@ def open_config():
         subprocess.run('notepad', config.config_filepath)
     else:                                   # Linux variants
         subprocess.run(('nano', config.config_filepath))
+
+
+def push_to_web_archive(id: int) -> None:
+    if confirm('Do you want to save a snapshot of this thread to the Wayback Machine?'):
+        with console.status('Saving to the Wayback Machine'):
+            try:
+                web_archive_url = c.push_to_web_archive(id)
+                console.print(f'📁 {web_archive_url}')
+            except WaybackMachineError:
+                console.print('[bold red]Job failed.[/bold red] Try again later.')
