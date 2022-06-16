@@ -14,6 +14,7 @@ class ItemAlreadyExistsError(Exception):
 
 
 class Database(object):
+    # TODO: Return results as dicts or lists of dicts
     def __init__(self, db='prod'):
         if db == 'prod':
             db_name = pathlib.Path(__file__).parent.resolve() / 'filum.db'
@@ -43,7 +44,7 @@ class Database(object):
                 'CREATE TABLE IF NOT EXISTS ancestors'
                 '(row_id INTEGER PRIMARY KEY AUTOINCREMENT,'
                 'id TEXT, title TEXT, body TEXT, posted_timestamp INTEGER, saved_timestamp INTEGER, '
-                'score INTEGER, permalink TEXT UNIQUE, author TEXT, source TEXT,'
+                'score INTEGER, permalink TEXT UNIQUE, author TEXT, source TEXT, '
                 'tags TEXT);')
             try:
                 self._conn.execute(sql)
@@ -215,11 +216,36 @@ class Database(object):
             results = self._conn.execute(sql, (param, )).fetchall()
         return results
 
+    def check_column_exists(self, column: str, table: str) -> bool:
+        """Checks whether a column exists in a given table.
+        Returns a Boolean.
+        """
+
+        with self._conn:
+            sql = f'PRAGMA table_info({table})'
+            results = self._conn.execute(sql).fetchall()
+            columns = [dict(result)['name'] for result in results]
+            if column in columns:
+                return True
+            return False
+
+    # Non-core features. These functions add the relevant column if it does not exist.
+    def update_web_archive_link(self, permalink: str, web_archive_url: str) -> None:
+        """Given an ancestor item's permalink, update its web archive URL."""
+
+        with self._conn:
+            sql = 'UPDATE ancestors SET web_archive_url = ? WHERE permalink = ?'
+            try:
+                self._conn.execute(sql, (web_archive_url, permalink))
+            except OperationalError as err:
+                print(err)
+
 
 def main():
 
     db = Database()
-    help(db)
+    # help(db)
+    print(db.check_column_exists('title', 'ancestors'))
 
 
 if __name__ == '__main__':
