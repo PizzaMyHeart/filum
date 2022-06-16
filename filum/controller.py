@@ -6,7 +6,8 @@ from rich.console import Console
 
 from filum.archiver import ArchiveUploader
 from filum.download import Download
-from filum.database import Database, ItemAlreadyExistsError
+from filum.database import Database
+from filum.exceptions import ItemAlreadyExistsError
 from filum.view import RichView
 
 console = Console()

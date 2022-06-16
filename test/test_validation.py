@@ -1,6 +1,7 @@
 import unittest
+from filum.exceptions import InvalidThreadId, InvalidUrl
 
-from filum.validation import is_valid_id, is_valid_url, InvalidUrl, InvalidThreadId
+from filum.validation import is_valid_id, is_valid_url
 
 
 class TestInputValidation(unittest.TestCase):

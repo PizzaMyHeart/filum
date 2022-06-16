@@ -1,15 +1,8 @@
 """Save pages to archive.ph and archive.org (Wayback Machine)"""
 # TODO: Optional integration with archivenow (https://github.com/oduwsdl/archivenow)
 
+from filum.exceptions import WaybackMachineError
 from filum.helpers import get_http_response
-
-
-class WaybackMachineError(Exception):
-    """Catch-all exception for Wayback Machine requests.
-
-    Raised when the HTTP status code is anything other than 200.
-    """
-    pass
 
 
 class ArchiveUploader:

@@ -1,6 +1,7 @@
 import unittest
 import pathlib
-from filum.database import Database, ItemAlreadyExistsError
+from filum.database import Database
+from filum.exceptions import ItemAlreadyExistsError
 
 sql_fp = pathlib.Path(__file__).parent.resolve() / 'test.sql'
 

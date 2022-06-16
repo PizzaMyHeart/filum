@@ -1,16 +1,11 @@
 """Contains the Database class that interacts with the SQLite database."""
 
-import sqlite3
-from sqlite3 import OperationalError, IntegrityError
 import pathlib
-from filum.helpers import qmarks, current_timestamp
+import sqlite3
+from sqlite3 import IntegrityError, OperationalError
 
-
-class ItemAlreadyExistsError(Exception):
-    """Custom exception that is raised when attempting
-    to add an item with a permalink that already exists in the database."""
-
-    pass
+from filum.exceptions import ItemAlreadyExistsError
+from filum.helpers import current_timestamp, qmarks
 
 
 class Database(object):
