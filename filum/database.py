@@ -4,8 +4,12 @@ import pathlib
 import sqlite3
 from sqlite3 import IntegrityError, OperationalError
 
+from logger.logger import create_logger
+
 from filum.exceptions import ItemAlreadyExistsError
 from filum.helpers import current_timestamp, qmarks
+
+logger = create_logger()
 
 
 class Database(object):
@@ -25,7 +29,7 @@ class Database(object):
             self.create_table_ancestors()
             self.create_table_descendants()
 
-    def connect_to_db(self, db_name=None):
+    def connect_to_db(self, db_name):
         """Return a connection object to interact with the database.
 
         Args:
@@ -34,7 +38,7 @@ class Database(object):
         Returns:
             conn: An SQLite Connection object.
         """
-
+        logger.debug(db_name)
         conn = sqlite3.connect(db_name)
         # Return Row object from queries to allow accessing columns by name
         conn.row_factory = sqlite3.Row

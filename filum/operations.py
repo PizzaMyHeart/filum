@@ -86,6 +86,7 @@ def show(args):
         id = args.id
         if id is None:
             show_without_id(args)
+            return
         if not id_exists(id):
             return
         else:
