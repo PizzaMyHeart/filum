@@ -46,12 +46,16 @@ class FilumShell(Cmd):
         Top-level selectors are contained in the left-most column in the table shown by the "all" command.'''
         args = parser.parser_show.parse_args(line.split())
         try:
+            id = args.id[0]
+            cond = ''
+            where_param = ''
             if args.tags:
-                show_thread(args.id[0], cond='WHERE tags LIKE ?', where_param=f'%{args.tags[0]}%')
+                cond = 'WHERE tags LIKE ?'
+                where_param = f'%{args.tags[0]}%'
             elif args.source:
-                show_thread(args.id[0], cond='WHERE source LIKE ?', where_param=f'%{args.source[0]}%')
-            else:
-                show_thread(args.id[0])
+                cond = 'WHERE source LIKE ?'
+                where_param = f'%{args.source[0]}%'
+            show_thread(id, cond=cond, where_param=where_param)
         except ValueError:
             print('Please enter a valid integer.')
 

@@ -41,6 +41,8 @@ class Parser(object):
     parser_all.set_defaults(parser_all=False)
 
     parser_show = subparsers.add_parser('show', help='display a saved thread')
+    # TODO: Make the 'id' argument optional. If calling 'show'
+    # without any arguments then show all threads (replacing the cmd 'all')
     parser_show.add_argument('id', nargs=1, type=int)
     parser_show.add_argument('--tags', nargs='+', help='display a thread selected from the table filtered by tags')
     parser_show.add_argument('--source', nargs='+', help='display a thread selected from the table filtered by source')

@@ -2,8 +2,9 @@
 
 import traceback
 
-import requests
 from bs4 import BeautifulSoup
+
+from filum.helpers import get_http_response
 
 from filum.parsers.parse_hn import parse_hn
 from filum.parsers.parse_reddit import parse_reddit
@@ -16,6 +17,7 @@ class Download:
 
     def process_url(self):
         """Given a URL, sets the .site attribute."""
+
         # Reddit's unofficial API - add a '.json' suffix to any url
         if 'reddit.com' in self.url:
             self.url += '.json'
@@ -29,14 +31,8 @@ class Download:
 
     def get_response(self):
         """Makes an HTTP GET request and saves the response object as an attribute."""
-        headers = {
-            'user-agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:100.0) Gecko/20100101 Firefox/100.0',
-            'dnt': '1',
-            'accept-encoding': 'gzip, deflate, br',
-            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-            'accept-language': 'en-US,en;q=0.5'
-        }
-        self.response = requests.get(self.url, headers=headers)
+
+        self.response = get_http_response(self.url)
         return self
 
     def parse_html(self, raw: str):

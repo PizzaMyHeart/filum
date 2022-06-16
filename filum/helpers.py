@@ -4,6 +4,7 @@ import re
 from collections.abc import KeysView
 from datetime import datetime
 
+import requests
 from markdownify import markdownify as md
 
 
@@ -37,3 +38,14 @@ def timestamp_to_iso(timestamp):
 def qmarks(sequence: KeysView) -> str:
     """Get a qmark SQL placeholder of arbitrary length."""
     return ', '.join(['?']*len(sequence))
+
+
+def get_http_response(url: str) -> requests.Response:
+    """Makes an HTTP GET request and returns the response object."""
+    headers = {
+        'user-agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:100.0) Gecko/20100101 Firefox/100.0',
+        'dnt': '1',
+        'accept-encoding': 'gzip, deflate, br',
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'accept-language': 'en-US,en;q=0.5'}
+    return requests.get(url, headers=headers)
