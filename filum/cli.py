@@ -35,6 +35,7 @@ class FilumShell(Cmd):
         add(arg)
 
     def do_update(self, arg):
+        """Update an existing thread in the database: $ update <id>"""
         try:
             update(int(arg))
         except ValueError:
@@ -48,8 +49,9 @@ class FilumShell(Cmd):
             return
 
     def do_show(self, line):
-        '''Display a thread given its top-level selector: $ thread 1.\n
-        Top-level selectors are contained in the left-most column in the table shown by the "all" command.'''
+        """Display a thread given its label: $ show <id>.\n
+        IDs are contained in the left-most column in the table that is displayed when using the '$ show'
+        command without any arguments."""
         try:
             args = parser.parser_show.parse_args(line.split())
             show(args)
@@ -57,14 +59,16 @@ class FilumShell(Cmd):
             return
 
     def do_delete(self, arg):
-        '''Delete a thread given its top-level selector: $ thread 1.\n
-        Top-level selectors are contained in the left-most column in the table shown by the "all" command.'''
+        """Delete a thread given its top-level selector: $ delete <id>.\n
+        IDs are contained in the left-most column in the table that is displayed when using the '$ show'
+        command without any arguments."""
         try:
             delete(int(arg))
         except ValueError:
             print('Please enter a valid integer.')
 
     def do_tags(self, line):
+        """Add tags, delete tags, or return a list of tags."""
         try:
             args = parser.parser_tags.parse_args(line.split())
             tags(args)
@@ -72,15 +76,15 @@ class FilumShell(Cmd):
             return
 
     def do_config(self, arg):
-        '''Open the config file in an editor. Change settings by modifying the parameter values: $ config'''
+        """Open the config file in an editor. Change settings by modifying the parameter values: $ config"""
         open_config()
 
     def do_quit(self, arg):
-        '''Quit the interactive session using 'quit' or CTRL-D'''
+        """Quit the interactive session using 'quit' or CTRL-D"""
         sys.exit(0)
 
     def do_EOF(self, arg):
-        '''Quit the interactive session using 'quit' or CTRL-D'''
+        """Quit the interactive session using 'quit' or CTRL-D"""
         sys.exit(0)
 
 
@@ -95,9 +99,8 @@ def main():
     description = (
         'filum - archive discussion threads from the command line.\n\n'
         'Usage:\n'
-        'filum all\nfilum add <url>\nfilum thread <id>\nfilum delete <id>\n\n'
+        'filum show\nfilum add <url>\nfilum show <id>\nfilum delete <id>\n\n'
         'filum is a tool to save discussion threads from Reddit, Hacker News, and Stack Exchange on your PC. '
-        'Like a bookmarking tool, but the text itself is saved locally. Worry no more about deleted threads.\n\n'
         'Run "filum -h" for a full list of options.'
     )
 

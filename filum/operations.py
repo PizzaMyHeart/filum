@@ -74,9 +74,9 @@ def show_all() -> None:
 
 def show_without_id(args):
     if args.tags:
-        c.search('tags', args.tags[0])
+        c.search('tags', args.tags)
     elif args.source:
-        c.search('source', args.source[0])
+        c.search('source', args.source)
     else:
         show_all()
 
@@ -93,11 +93,13 @@ def show(args):
             cond = ''
             where_param = ''
             if args.tags:
+                tags = args.tags
                 cond = 'WHERE tags LIKE ?'
-                where_param = f'%{args.tags[0]}%'
+                where_param = f'%{tags}%'
             elif args.source:
+                source = args.source
                 cond = 'WHERE source LIKE ?'
-                where_param = f'%{args.source[0]}%'
+                where_param = f'%{source}%'
             show_thread(id, cond=cond, where_param=where_param)
     except ValueError:
         print('Please enter a valid integer.')

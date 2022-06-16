@@ -16,11 +16,11 @@ class Parser(object):
                     $ filum add <url>
 
                     View a table of all saved threads
-                    $ filum all
+                    $ filum show
 
                     Display a thread
-                    $ filum show <thread label>
-                    🖝 where <thread label> is the number in the left-most column of the table
+                    $ filum show <id>
+                    🖝 where <id> is the number in the left-most column of the table
 
                     Add tags to a saved thread
                     $ filum tags <tag 1> <tag 2> ... <tag n>
@@ -36,28 +36,28 @@ class Parser(object):
     parser_add.add_argument('url', nargs=1, type=str, help='add a URL')
     parser_add.set_defaults(parser_add=True)
 
-    parser_archive = subparsers.add_parser('archive', help='Push the thread to the Wayback Machine.')
-    parser_archive.add_argument('--url', action='store_true')
-    parser_archive.add_argument('--open', action='store_true')
+    parser_archive = subparsers.add_parser('archive', help='Save a snapshot to the Wayback Machine')
+    parser_archive.add_argument('--url', action='store_true', help='Display the Wayback Machine URL')
+    parser_archive.add_argument('--open', action='store_true', help='Open the Wayback Machine snapshot in the web browser')  # noqa: E501
     parser_archive.add_argument('id', nargs=1, type=int)
 
-    parser_update = subparsers.add_parser('update', help='update a saved thread')
+    parser_update = subparsers.add_parser('update', help='Update a saved thread')
     parser_update.add_argument('id', nargs=1, type=int)
 
-    parser_show = subparsers.add_parser('show', help='display a saved thread')
+    parser_show = subparsers.add_parser('show', help='Display a saved thread')
     parser_show.add_argument('--tags', nargs='?', help='display a thread selected from the table filtered by tags')
     parser_show.add_argument('--source', nargs='?', help='display a thread selected from the table filtered by source')
     parser_show.add_argument('id', nargs='?', type=int, help='Item label. Omit this to show all items.')
 
-    parser_delete = subparsers.add_parser('delete', help='delete a saved thread')
+    parser_delete = subparsers.add_parser('delete', help='Delete a saved thread')
     parser_delete.add_argument('id', nargs='+', type=int)
 
-    parser_tags = subparsers.add_parser('tags', help='add tags. Include --delete to remove tags instead')
+    parser_tags = subparsers.add_parser('tags', help='Add tags. Include --delete to remove tags instead')
     parser_tags.add_argument('id', nargs='?', type=int)
     parser_tags.add_argument('tags', nargs='?', help='include one or more tags separated by a comma without a space')
     parser_tags.add_argument('--delete', action='store_true')
 
-    parser_config = subparsers.add_parser('config', help='open config file')
+    parser_config = subparsers.add_parser('config', help='Open the config file')
     parser_config.set_defaults(parser_config=False)
 
     args = parser.parse_args()
