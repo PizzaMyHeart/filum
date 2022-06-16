@@ -107,10 +107,10 @@ class Database(object):
                 print(err)
             return id
 
-    def select_permalink(self, id: int) -> str:
-        """Returns the permalink of a row in the 'ancestors' table."""
+    def select_one_value_from_ancestors(self, id: int, column: str) -> str:
+        """Returns the a column value from the 'ancestors' table."""
         with self._conn:
-            sql = f'WITH a AS ({self.sql["ancestors_sequential"]}) SELECT permalink FROM a WHERE num = ?'
+            sql = f'WITH a AS ({self.sql["ancestors_sequential"]}) SELECT {column} FROM a WHERE num = ?'
             permalink = self._conn.execute(sql, (id, )).fetchone()[0]
             return permalink
 

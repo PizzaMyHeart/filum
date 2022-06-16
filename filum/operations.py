@@ -2,13 +2,14 @@
 
 import platform
 import subprocess
+import webbrowser
 
 from rich.console import Console
 
 from filum.config import FilumConfig
 from filum.controller import Controller
 from filum.exceptions import InvalidInputError, ItemAlreadyExistsError, WaybackMachineError
-from filum.validation import is_valid_id, is_valid_url
+from filum.validation import id_exists, is_valid_id, is_valid_url
 
 valid_id_message = 'Please enter a valid thread label (+ve int). Run `filum all` to see a list of thread labels.'
 
@@ -35,14 +36,20 @@ def add(url) -> None:
 
 
 def update(id: int) -> None:
-    if confirm('Do you want to update this thread now?'):
-        with console.status('Updating thread'):
-            url = c.get_permalink(id)
-            is_valid_url(url)
-            thread = c.download_thread(url)
-            c.update_thread(thread)
-        print(f'Thread updated. ({url})')
-        show_all()
+    try:
+        is_valid_id(id)
+        if not id_exists(id):
+            return
+        if confirm('Do you want to update this thread now?'):
+            with console.status('Updating thread'):
+                url = c.get_permalink(id)
+                is_valid_url(url)
+                thread = c.download_thread(url)
+                c.update_thread(thread)
+            print(f'Thread updated. ({url})')
+            show_all()
+    except InvalidInputError as err:
+        print(err)
 
 
 def show_thread(id: int, cond='', where_param='') -> None:
@@ -79,6 +86,8 @@ def show(args):
         id = args.id
         if id is None:
             show_without_id(args)
+        if not id_exists(id):
+            return
         else:
             cond = ''
             where_param = ''
@@ -91,20 +100,19 @@ def show(args):
             show_thread(id, cond=cond, where_param=where_param)
     except ValueError:
         print('Please enter a valid integer.')
+    except InvalidInputError as err:
+        print(err)
 
 
 def delete(id: int) -> None:
     try:
+        is_valid_id(id)
+        if not id_exists(id):
+            return
         if confirm('Are you sure you want to delete this thread? [y/n] '):
-            is_valid_id(id)
-            ancestors_length = c.get_ancestors_length()
-            success = True if id <= ancestors_length else False
-            if success:
-                c.delete(id)
-                print(f'Thread no. {id} deleted.')
-                show_all()
-            else:
-                print(f'Thread no. {id} does not exist.\n{valid_id_message}')
+            c.delete(id)
+            print(f'Thread no. {id} deleted.')
+            show_all()
         else:
             print('Delete action cancelled.')
     except InvalidInputError as err:
@@ -139,13 +147,20 @@ def modify_tags(id, add: bool, **kwargs):
 def tags(args):
     try:
         id = args.id
+        tags = args.tags
         if id is None:
             get_all_tags()
         else:
+            if not id_exists(id):
+                return
+            if tags is None:
+                item_tags = c.get_tags_of_item(id)
+                console.print(item_tags)
+                return
             if args.delete:
-                modify_tags(id, add=False, tags=args.tags)
+                modify_tags(id, add=False, tags=tags)
             else:
-                modify_tags(id, add=True, tags=args.tags)
+                modify_tags(id, add=True, tags=tags)
     except SystemExit:
         return
 
@@ -164,6 +179,7 @@ def open_config():
 
 
 def push_to_web_archive(id: int) -> None:
+    is_valid_id(id)
     if confirm('Do you want to save a snapshot of this thread to the Wayback Machine?'):
         with console.status('Saving to the Wayback Machine'):
             try:
@@ -171,3 +187,24 @@ def push_to_web_archive(id: int) -> None:
                 console.print(f'📁 {web_archive_url}')
             except WaybackMachineError:
                 console.print('[bold red]Job failed.[/bold red] Try again later.')
+
+
+def archive(args):
+    try:
+        id = args.id[0]
+        is_valid_id(id)
+        if not id_exists(id):
+            return
+        if not args.url and not args.open:
+            push_to_web_archive(id)
+        else:
+            web_archive_url = c.get_web_archive_url(id)
+            message = 'You have not made any snapshots of this thread on the Wayback Machine.'
+            if web_archive_url is not None:
+                message = f'💾 Saved on the Wayback Machine at:\n\n{web_archive_url}\n'
+            if args.url:
+                console.print(message)
+            elif args.open:
+                webbrowser.open_new_tab(web_archive_url)
+    except InvalidInputError as err:
+        print(err)

@@ -4,8 +4,8 @@ import sys
 import warnings
 from cmd import Cmd
 
-from filum.operations import (add, show, tags, update,
-                              delete, show_without_id, open_config, push_to_web_archive)
+from filum.operations import (add, archive, show, tags, update,
+                              delete, show_without_id, open_config)
 from filum.parser import Parser
 
 from logger.logger import create_logger
@@ -40,11 +40,21 @@ class FilumShell(Cmd):
         except ValueError:
             print('Please enter a valid integer.')
 
+    def do_archive(self, line):
+        try:
+            args = parser.parser_archive.parse_args(line.split())
+            archive(args)
+        except SystemExit:
+            return
+
     def do_show(self, line):
         '''Display a thread given its top-level selector: $ thread 1.\n
         Top-level selectors are contained in the left-most column in the table shown by the "all" command.'''
-        args = parser.parser_show.parse_args(line.split())
-        show(args)
+        try:
+            args = parser.parser_show.parse_args(line.split())
+            show(args)
+        except SystemExit:
+            return
 
     def do_delete(self, arg):
         '''Delete a thread given its top-level selector: $ thread 1.\n
@@ -55,8 +65,11 @@ class FilumShell(Cmd):
             print('Please enter a valid integer.')
 
     def do_tags(self, line):
-        args = parser.parser_tags.parse_args(line.split())
-        tags(args)
+        try:
+            args = parser.parser_tags.parse_args(line.split())
+            tags(args)
+        except SystemExit:
+            return
 
     def do_config(self, arg):
         '''Open the config file in an editor. Change settings by modifying the parameter values: $ config'''
@@ -105,7 +118,7 @@ def main():
         update(args.id[0])
 
     elif args.subparser == 'archive':
-        push_to_web_archive(args.id[0])
+        archive(args)
 
     elif args.subparser == 'show':
         show(args)

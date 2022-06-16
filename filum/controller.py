@@ -76,7 +76,13 @@ class Controller(object):
         return web_archive_url
 
     def get_permalink(self, id: int) -> str:
-        return self.database.select_permalink(id)
+        return self.database.select_one_value_from_ancestors(id, 'permalink')
+
+    def get_web_archive_url(self, id: int) -> str:
+        return self.database.select_one_value_from_ancestors(id, 'web_archive_url')
+
+    def get_tags_of_item(self, id: int) -> str:
+        return self.database.select_one_value_from_ancestors(id, 'tags')
 
     def check_thread_exists(self, id):
         self.database.select_one_ancestor(id)

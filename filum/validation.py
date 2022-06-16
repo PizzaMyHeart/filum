@@ -1,6 +1,9 @@
 import re
 
 from filum.exceptions import InvalidThreadId, InvalidUrl
+from filum.controller import Controller
+
+c = Controller()
 
 url_pattern_reddit = re.compile(r'https:\/\/www.reddit.com\/r\/.+\/comments\/')
 url_pattern_so = re.compile(r'https:\/\/stackoverflow.com\/((questions)|(q)|(a))')
@@ -43,3 +46,12 @@ def is_valid_id(id: int) -> bool:
         if id > 0:
             return True
     raise InvalidThreadId
+
+
+def id_exists(id: int) -> bool:
+    valid_id_message = 'Please enter a valid thread label (+ve int). Run `filum show` to see a list of thread labels.'
+    ancestors_length = c.get_ancestors_length()
+    if id <= ancestors_length:
+        return True
+    print(f'Thread no. {id} does not exist.\n{valid_id_message}')
+    return False

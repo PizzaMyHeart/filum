@@ -34,7 +34,7 @@ class TestDatabase(unittest.TestCase):
 
     def test_select_permalink_returns_correct_permalink(self):
         with self.conn:
-            self.assertEqual(self.d.select_permalink(1), self.permalink)
+            self.assertEqual(self.d.select_one_value_from_ancestors(1), self.permalink)
 
     def test_delete_ancestor(self):
         with self.conn:

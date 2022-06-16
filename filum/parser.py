@@ -37,6 +37,8 @@ class Parser(object):
     parser_add.set_defaults(parser_add=True)
 
     parser_archive = subparsers.add_parser('archive', help='Push the thread to the Wayback Machine.')
+    parser_archive.add_argument('--url', action='store_true')
+    parser_archive.add_argument('--open', action='store_true')
     parser_archive.add_argument('id', nargs=1, type=int)
 
     parser_update = subparsers.add_parser('update', help='update a saved thread')
