@@ -7,8 +7,8 @@ from rich.console import Console
 
 from filum.config import FilumConfig
 from filum.controller import Controller
-from filum.exceptions import ItemAlreadyExistsError, WaybackMachineError
-from filum.validation import InvalidInputError, is_valid_id, is_valid_url
+from filum.exceptions import InvalidInputError, ItemAlreadyExistsError, WaybackMachineError
+from filum.validation import is_valid_id, is_valid_url
 
 valid_id_message = 'Please enter a valid thread label (+ve int). Run `filum all` to see a list of thread labels.'
 

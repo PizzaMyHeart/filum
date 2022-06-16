@@ -5,6 +5,7 @@ from collections.abc import KeysView
 from datetime import datetime
 
 import requests
+from requests.adapters import HTTPAdapter, Retry
 from markdownify import markdownify as md
 
 
@@ -41,11 +42,28 @@ def qmarks(sequence: KeysView) -> str:
 
 
 def get_http_response(url: str) -> requests.Response:
-    """Makes an HTTP GET request and returns the response object."""
+    """Makes an HTTP GET request and returns the response object.
+
+    Retries a total of 5 times if unsuccessful.
+
+    Args:
+        url: A URL string
+
+    Returns:
+        A requests.Response object
+    """
+
     headers = {
         'user-agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:100.0) Gecko/20100101 Firefox/100.0',
         'dnt': '1',
         'accept-encoding': 'gzip, deflate, br',
         'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
         'accept-language': 'en-US,en;q=0.5'}
-    return requests.get(url, headers=headers)
+
+    session = requests.Session()
+    retries = Retry(total=5, backoff_factor=5)
+    adapter = HTTPAdapter(max_retries=retries)
+    session.mount('https://', retries)
+    session.mount('http://', adapter)
+
+    return session.get(url, headers=headers)

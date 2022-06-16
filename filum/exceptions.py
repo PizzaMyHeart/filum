@@ -5,11 +5,11 @@
 
 
 class InvalidInputError(Exception):
-    '''Exception for errors due to invalid user input'''
+    """Exception for errors due to invalid user input"""
 
 
 class InvalidUrl(InvalidInputError):
-    '''Invalid URL'''
+    """Invalid URL"""
     def __init__(self):
         self.message = ('Please enter a URL prefixed with "https://".\n'
                         'Supported sites: Reddit, Hacker News, Stack Exchange')
@@ -17,17 +17,25 @@ class InvalidUrl(InvalidInputError):
 
 
 class InvalidThreadId(InvalidInputError):
-    '''Invalid thread ID'''
+    """Invalid thread ID"""
     def __init__(self):
         self.message = ('Please enter a valid thread ID (positive integer). '
                         'Run `filum all` to see a list of thread IDs.')
         super().__init__(self.message)
+
+# Custom exceptions for database operations
 
 
 class ItemAlreadyExistsError(Exception):
     """Custom exception that is raised when attempting
     to add an item with a permalink that already exists in the database."""
 
+    pass
+
+# Custom exceptions to handle unsuccessful HTTP requests
+
+
+class FailedRequest(Exception):
     pass
 
 
