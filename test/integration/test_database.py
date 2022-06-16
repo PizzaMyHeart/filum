@@ -8,7 +8,7 @@ sql_fp = pathlib.Path(__file__).parent.resolve() / 'test.sql'
 
 class TestDatabase(unittest.TestCase):
     def setUp(self) -> None:
-        self.d = Database('test')
+        self.d = Database(db='test')
         self.conn = self.d._conn
         with open(sql_fp) as f:
             sql = f.read()
@@ -34,7 +34,7 @@ class TestDatabase(unittest.TestCase):
 
     def test_select_permalink_returns_correct_permalink(self):
         with self.conn:
-            self.assertEqual(self.d.select_one_value_from_ancestors(1), self.permalink)
+            self.assertEqual(self.d.select_one_value_from_ancestors(1, 'permalink'), self.permalink)
 
     def test_delete_ancestor(self):
         with self.conn:
