@@ -65,6 +65,34 @@ def show_all() -> None:
     c.show_all_ancestors()
 
 
+def show_without_id(args):
+    if args.tags:
+        c.search('tags', args.tags[0])
+    elif args.source:
+        c.search('source', args.source[0])
+    else:
+        show_all()
+
+
+def show(args):
+    try:
+        id = args.id
+        if id is None:
+            show_without_id(args)
+        else:
+            cond = ''
+            where_param = ''
+            if args.tags:
+                cond = 'WHERE tags LIKE ?'
+                where_param = f'%{args.tags[0]}%'
+            elif args.source:
+                cond = 'WHERE source LIKE ?'
+                where_param = f'%{args.source[0]}%'
+            show_thread(id, cond=cond, where_param=where_param)
+    except ValueError:
+        print('Please enter a valid integer.')
+
+
 def delete(id: int) -> None:
     try:
         if confirm('Are you sure you want to delete this thread? [y/n] '):
@@ -108,18 +136,31 @@ def modify_tags(id, add: bool, **kwargs):
     show_all()
 
 
-def search(column, searchstr):
-    c.search(column, searchstr)
+def tags(args):
+    try:
+        id = args.id
+        if id is None:
+            get_all_tags()
+        else:
+            if args.delete:
+                modify_tags(id, add=False, tags=args.tags)
+            else:
+                modify_tags(id, add=True, tags=args.tags)
+    except SystemExit:
+        return
 
 
 def open_config():
-    # filepath = pathlib.Path(__file__).parent.resolve() / 'config.ini'
-    if platform.system() == 'Darwin':       # macOS
-        subprocess.run(('open', config.config_filepath))
-    elif platform.system() == 'Windows':    # Windows
-        subprocess.run('notepad', config.config_filepath)
-    else:                                   # Linux variants
-        subprocess.run(('nano', config.config_filepath))
+    print('Opening config file...')
+    try:
+        if platform.system() == 'Darwin':       # macOS
+            subprocess.run(('open', config.config_filepath))
+        elif platform.system() == 'Windows':    # Windows
+            subprocess.run('notepad', config.config_filepath)
+        else:                                   # Linux variants
+            subprocess.run(('nano', config.config_filepath))
+    except Exception as err:
+        print(err)
 
 
 def push_to_web_archive(id: int) -> None:

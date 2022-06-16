@@ -33,7 +33,7 @@ class Parser(object):
     subparsers = parser.add_subparsers(dest='subparser')
 
     parser_add = subparsers.add_parser('add', help='Add a URL')
-    parser_add.add_argument('url', nargs='+', type=str, help='add a URL')
+    parser_add.add_argument('url', nargs=1, type=str, help='add a URL')
     parser_add.set_defaults(parser_add=True)
 
     parser_archive = subparsers.add_parser('archive', help='Push the thread to the Wayback Machine.')
@@ -43,9 +43,9 @@ class Parser(object):
     parser_update.add_argument('id', nargs=1, type=int)
 
     parser_show = subparsers.add_parser('show', help='display a saved thread')
-    parser_show.add_argument('id', nargs='?', type=int, help='Item label. Omit this to show all items.')
     parser_show.add_argument('--tags', nargs='+', help='display a thread selected from the table filtered by tags')
     parser_show.add_argument('--source', nargs='+', help='display a thread selected from the table filtered by source')
+    parser_show.add_argument('id', nargs='?', type=int, help='Item label. Omit this to show all items.')
 
     parser_delete = subparsers.add_parser('delete', help='delete a saved thread')
     parser_delete.add_argument('id', nargs='+', type=int)
@@ -54,10 +54,6 @@ class Parser(object):
     parser_tags.add_argument('id', nargs='?', type=int)
     parser_tags.add_argument('tags', nargs='?', help='include one or more tags separated by a comma without a space')
     parser_tags.add_argument('--delete', action='store_true')
-
-    parser_search = subparsers.add_parser('search', help='search for a thread')
-    parser_search.add_argument('--tags', nargs=1, help='filter table based on a tag')
-    parser_search.add_argument('--source', nargs=1, help='filter table by source')
 
     parser_config = subparsers.add_parser('config', help='open config file')
     parser_config.set_defaults(parser_config=False)

@@ -4,8 +4,8 @@ import sys
 import warnings
 from cmd import Cmd
 
-from filum.operations import (add, get_all_tags, update, show_all, show_thread,
-                              delete, modify_tags, search, open_config, push_to_web_archive)
+from filum.operations import (add, show, tags, update,
+                              delete, show_without_id, open_config, push_to_web_archive)
 from filum.parser import Parser
 
 from logger.logger import create_logger
@@ -31,10 +31,7 @@ class FilumShell(Cmd):
         pass
 
     def do_add(self, arg):
-        '''Add a URL to the filum database: $ add <url>'''
-        if arg == '':
-            print('Please supply a URL.')
-            return False
+        """Add a URL to the filum database: $ add <url>"""
         add(arg)
 
     def do_update(self, arg):
@@ -47,22 +44,7 @@ class FilumShell(Cmd):
         '''Display a thread given its top-level selector: $ thread 1.\n
         Top-level selectors are contained in the left-most column in the table shown by the "all" command.'''
         args = parser.parser_show.parse_args(line.split())
-        try:
-            id = args.id
-            if id is None:
-                show_all()
-            else:
-                cond = ''
-                where_param = ''
-                if args.tags:
-                    cond = 'WHERE tags LIKE ?'
-                    where_param = f'%{args.tags[0]}%'
-                elif args.source:
-                    cond = 'WHERE source LIKE ?'
-                    where_param = f'%{args.source[0]}%'
-                show_thread(id, cond=cond, where_param=where_param)
-        except ValueError:
-            print('Please enter a valid integer.')
+        show(args)
 
     def do_delete(self, arg):
         '''Delete a thread given its top-level selector: $ thread 1.\n
@@ -73,34 +55,12 @@ class FilumShell(Cmd):
             print('Please enter a valid integer.')
 
     def do_tags(self, line):
-        try:
-            args = parser.parser_tags.parse_args(line.split())
-            if args.id:
-                if args.delete:
-                    modify_tags(args.id, add=False, tags=args.tags)
-                else:
-                    modify_tags(args.id, add=True, tags=args.tags)
-            else:
-                get_all_tags()
-        except SystemExit:
-            return
-
-    def do_search(self, line):
-        try:
-            args = parser.parser_search.parse_args(line.split())
-            if args.tags:
-                search('tags', args.tags[0])
-            elif args.source:
-                search('source', args.source[0])
-        except SystemExit:
-            return
+        args = parser.parser_tags.parse_args(line.split())
+        tags(args)
 
     def do_config(self, arg):
         '''Open the config file in an editor. Change settings by modifying the parameter values: $ config'''
-        try:
-            open_config()
-        except Exception as err:
-            print(err)
+        open_config()
 
     def do_quit(self, arg):
         '''Quit the interactive session using 'quit' or CTRL-D'''
@@ -136,7 +96,6 @@ def main():
         FilumShell().cmdloop()
 
     if args.subparser == 'config':
-        print('Opening config file...')
         open_config()
 
     if args.subparser == 'add':
@@ -149,37 +108,16 @@ def main():
         push_to_web_archive(args.id[0])
 
     elif args.subparser == 'show':
-        id = args.id
-        if id is None:
-            show_all()
-        else:
-            cond = ''
-            where_param = ''
-            if args.tags:
-                cond = 'WHERE tags LIKE ?'
-                where_param = f'%{args.tags[0]}%'
-            elif args.source:
-                cond = 'WHERE source LIKE ?'
-                where_param = f'%{args.source[0]}%'
-            show_thread(id, cond=cond, where_param=where_param)
+        show(args)
 
     elif args.subparser == 'delete':
         delete(args.id[0])
 
     elif args.subparser == 'tags':
-        if args.id:
-            if args.delete:
-                modify_tags(args.id, add=False, tags=args.tags)
-            else:
-                modify_tags(args.id, add=True, tags=args.tags)
-        else:
-            get_all_tags()
+        tags(args)
 
     elif args.subparser == 'search':
-        if args.tags:
-            search('tags', args.tags[0])
-        elif args.source:
-            search('source', args.source[0])
+        show_without_id(args)
 
     else:
         print(description)

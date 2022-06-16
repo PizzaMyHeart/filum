@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from filum.operations import add, update, show_all, show_thread, delete, modify_tags, search, open_config
+from filum.operations import add, update, show_all, show_thread, delete, modify_tags, show_without_id, open_config
 
 
 class TestOperations(unittest.TestCase):
