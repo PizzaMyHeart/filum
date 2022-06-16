@@ -52,7 +52,7 @@ class Database(object):
                 '(row_id INTEGER PRIMARY KEY AUTOINCREMENT,'
                 'id TEXT, title TEXT, body TEXT, posted_timestamp INTEGER, saved_timestamp INTEGER, '
                 'score INTEGER, permalink TEXT UNIQUE, author TEXT, source TEXT, '
-                'tags TEXT);')
+                'web_archive_url TEXT, tags TEXT);')
             try:
                 self._conn.execute(sql)
             except OperationalError as err:
