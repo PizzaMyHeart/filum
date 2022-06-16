@@ -43,8 +43,8 @@ class Parser(object):
     parser_update.add_argument('id', nargs=1, type=int)
 
     parser_show = subparsers.add_parser('show', help='display a saved thread')
-    parser_show.add_argument('--tags', nargs='+', help='display a thread selected from the table filtered by tags')
-    parser_show.add_argument('--source', nargs='+', help='display a thread selected from the table filtered by source')
+    parser_show.add_argument('--tags', nargs='?', help='display a thread selected from the table filtered by tags')
+    parser_show.add_argument('--source', nargs='?', help='display a thread selected from the table filtered by source')
     parser_show.add_argument('id', nargs='?', type=int, help='Item label. Omit this to show all items.')
 
     parser_delete = subparsers.add_parser('delete', help='delete a saved thread')
