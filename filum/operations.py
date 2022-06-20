@@ -11,7 +11,7 @@ from filum.controller import Controller
 from filum.exceptions import InvalidInputError, ItemAlreadyExistsError, WaybackMachineError
 from filum.validation import id_exists, is_valid_id, is_valid_url
 
-valid_id_message = 'Please enter a valid thread label (+ve int). Run `filum all` to see a list of thread labels.'
+valid_id_message = 'Please enter a valid thread label (a positive integer). Run `filum all` to see a list of thread labels.'
 
 config = FilumConfig()
 config_parser = config.get_parser()
@@ -174,7 +174,7 @@ def open_config():
         if platform.system() == 'Darwin':       # macOS
             subprocess.run(('open', config.config_filepath))
         elif platform.system() == 'Windows':    # Windows
-            subprocess.run('notepad', config.config_filepath)
+            subprocess.run(['notepad', config.config_filepath])
         else:                                   # Linux variants
             subprocess.run(('nano', config.config_filepath))
     except Exception as err:
@@ -184,7 +184,7 @@ def open_config():
 def push_to_web_archive(id: int) -> None:
     is_valid_id(id)
     if confirm('Do you want to save a snapshot of this thread to the Wayback Machine?'):
-        with console.status('Saving to the Wayback Machine'):
+        with console.status('Saving to the Wayback Machine (this may take a while ...'):
             try:
                 web_archive_url = c.push_to_web_archive(id)
                 console.print(f'📁 {web_archive_url}')
