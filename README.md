@@ -1,29 +1,43 @@
 # filum 
 
-`filum` saves discussion threads to your local machine. 
+`filum` is a command-line tool that saves discussion threads to your local machine. 
 
-It's like a bookmark manager but it saves actual content rather than just the link pointing to it.
+It's like a bookmark manager that saves actual content rather than just the link pointing to it.
 
-It's like Pocket or Instapaper but for Reddit, Hacker News and Stack Exchange. 
+Like Pocket and Instapaper, it extracts text content for an uncluttered experience. Unlike Pocket and Instapaper, it works for discussion threads on Reddit, Hacker News, and Stack Exchange.
 
 
 ## Installation
 
 1. Create a virtual environment for `filum` (optional but recommended).
 
-Linux: 
+    Linux: 
 
-`$ python3 -m venv /path/to/new/venv`
+    `$ python3 -m venv /path/to/new/venv`
 
-Windows: 
+    Windows: 
 
-`$ c:\Python35\python -m venv c:\path\to\new\venv`
+    `$ c:\Python35\python -m venv c:\path\to\new\venv`
 
-For more details [click here](https://docs.python.org/3/library/venv.html).
+    For more details [click here](https://docs.python.org/3/library/venv.html).
+
 
 2. Install from PyPI.
 
-`python3 -m pip install filum`
+    `python3 -m pip install filum`
+
+
+3. Activate the virtual environment.
+
+    Linux:
+
+    `$ source /path/to/venv/bin/activate`
+
+    Windows:
+
+    `$ \path\to\venv\Scripts\Activate`
+
+    Now you can run the commands in the following section.
 
 
 ## Usage
@@ -42,19 +56,19 @@ The following platforms are supported: Reddit, Hacker News, Stack Exchange.
 
 ### View information about currently saved threads
 
-`$ filum all`
+`$ filum show`
 
-The left-most column of the table contains values to be used as selectors (in place of `<label>`) for the subsequent commands.
+The left-most column of the table contains values to be used as selectors (in place of `<id>`) for the subsequent commands.
+
+*Note that the values in the `ID` column are dynamic. Run `$ filum show` each time after you modify the database to see all updated changes.* 
 
 ### View a specific thread
 
-`$ filum show <label>`
+`$ filum show <id>`
 
 Example: 
 
-`$ filum show 2` for the thread in the table with '2' in the `#` column.
-
-*Note that the values in the `#` column are dynamic. Run `$ filum all` after modifying the database to see all changes.* 
+`$ filum show 2` for the thread in the table with '2' in the `ID` column.
 
 The thread is piped through a terminal pager by default. To disable this, run `$ filum config` and edit `pager = true` to `pager = false`.
 
@@ -62,65 +76,99 @@ If you use a pager, you can navigate between nodes in the thread by searching fo
 
 ### Delete a thread
 
-`$ filum delete <label>`
+`$ filum delete <id>`
 
 Example: 
 
-`$ filum delete 2` for the thread in the table with '2' in the `#` column.
+`$ filum delete 2` for the thread in the table with '2' in the `ID` column.
 
 ### Update a thread
 
-`$ filum update <label>`
+`$ filum update <id>`
 
 Example: 
 
-`$ filum update 2` for the thread in the table with '2' in the `#` column.
+`$ filum update 2` for the thread in the table with '2' in the `ID` column.
 
 `filum` will offer to update a thread if you try to add a thread that's already saved in the database.
 
 ### Add tags to a saved thread
 
-`$ filum tags <label> <tag 1> <tag 2> ...`
+`$ filum tags <id> <tag 1> <tag 2> ...`
 
 Example: 
 
-`$ filum tags 2 python webdev` to add the tags "python" and "webdev" to the thread in the table with '2' in the `#` column.
+`$ filum tags 2 python webdev` to add the tags "python" and "webdev" to the thread in the table with '2' in the `ID` column.
 
 ### Delete tags from a saved thread
 
-`$ filum tags <label> <tag 1> <tag 2> ... --delete`
+`$ filum tags <id> <tag 1> <tag 2> ... --delete`
 
 Example: 
 
-`$ filum tags 2 webdev --delete` to remove the tag "webdev" from the thread in the table with '2' in the `#` column.
+`$ filum tags 2 webdev --delete` to remove the tag "webdev" from the thread in the table with '2' in the `ID` column.
+
+### Show all current tags
+
+`$ filum tags`
 
 ### Search for a thread
 
 Full-text search of saved threads is currently unavailable. However, you can filter the threads by tags or by source.
 
-`$ filum search --tags <tag>`
+`$ filum show --tags <tag>`
 
-`$ filum search --source <source>`
+`$ filum show --source <source>`
 
-To select a thread based on the table returned by the search command, pass in the flag that was used as the filter.
+You can now select a thread based on the filtered table.
 
-`$ filum show <label> --tags <tag>`
+`$ filum show --tags <tag> <id>`
 
-`$ filum show <label> --source <source>`
+`$ filum show --source <source> <id>`
+
+### Save a thread to the Wayback Machine
+
+`$ filum archive <id>`
+
+Re-running this command on a thread you have already saved to the Wayback Machine will prompt you to confirm whether you want to save a new snapshot. Currently only the latest snapshot is saved.
+
+*This feature depends on the availability of the Wayback Machine's Save Page Now service, which is under incredibly high demand. Please be mindful when using this command.*
+
+Show the URL of a Wayback Machine snapshot: `$ filum archive --url`
+
+Visit a Wayback Machine snapshot: `$ filum archive --open`
+
+
+## Interactive prompt
+
+Run `$ filum -i` to start a prompt where you can use `filum` subcommands without specifying the `filum` keyword.
+
+
+## Configuration options
+
+- `pager`: Pipes thread output to your default pager. Defaults to true.
+
+- `pager_colours`: Enables coloured pager output. Note that you may need to tweak your environment variables for this to work. Defaults to true.
+    - [Linux](https://serverfault.com/a/35888)
+
+- `hyperlinks`: Enables hyperlink rendering in Markdown. Not all terminals support this. Defaults to false.
+
+- `max_rows_without_pager`: Sets the maximum number of rows of the table returned by `filum show` above which the table should be displayed via the pager.
 
 
 ## Known limitations
 
-These limitations are on my to-do list to improve.
+These are on my to-do list to improve.
 
 - Reddit comment sub-threads that are hidden under a comment fold (with a "load more comments" link) are ignored
-- Hyperlinks in HN threads are not rendered in full
 - The search command only takes in one search string at a time
 - Filters for searching cannot be combined, e.g. you can search either by a tag or by source
+- Look into alternatives to the Wayback Machine for archival (although archive.today makes it really painful to work with using scripts)
+
 
 ## Contributing
 
-I'm not currently accepting any pull requests, but questions and suggestions are more than welcome. 
+I'm not currently accepting any pull requests, but questions and suggestions are more than welcome. Feel free to open a GitHub issue.
 
 
 ## Disclaimer
