@@ -5,10 +5,14 @@ import traceback
 from rich.console import Console
 
 from filum.archiver import ArchiveUploader
-from filum.download import Download
 from filum.database import Database
+from filum.download import Download
 from filum.exceptions import ItemAlreadyExistsError
 from filum.view import RichView
+
+from logger.logger import create_logger
+
+logger = create_logger()
 
 console = Console()
 

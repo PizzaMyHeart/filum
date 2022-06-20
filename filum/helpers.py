@@ -10,15 +10,49 @@ from markdownify import markdownify as md
 
 
 def bs4_to_md(soup):
-    return md(str(soup), heading_style='ATX')
+    return to_md(str(soup))
 
 
 def html_to_md(html):
     # TODO: Show full hyperlinks (hn truncates these)
-    return md(md(html, heading_style='ATX'), heading_style='ATX')
+    return to_md(html)
 
 
-def root_url(url):
+def to_md(content):
+    return md(content, heading_style='ATX', autolinks=False)
+
+
+def escape_brackets(text: str) -> str:
+    """Escape brackets that otherwise result in invalid Markdown.
+
+    If a pair of brackets do not immediately precede a pair of parentheses
+    (which would denote a Markdown hyperlink), then this function escapes the
+    brackets to ensure the hyperlinks adjacent to them are rendered correctly.
+
+    e.g.\n
+    [1]: [Example](https://example.com) - the hyperlink will not be rendered
+    correctly unless the brackets in '[1]' are escaped.
+
+    Args:
+        text: A Markdown-formatted string
+
+    Returns:
+        The string with correctly escaped brackets
+    """
+    # Negative lookahead assertion to match brackets
+    # that aren't immediately preceding a pair of parentheses.
+    # Creates three capture groups: one for each bracket, and
+    # one for whatever is within the brackets.
+    pattern = re.compile(r'(\[)(.*)(\])(?!\()')
+    return re.sub(pattern, r'\\\1\2\\\3', text)
+
+
+def sanitise_text(text: str) -> str:
+    text = str(text)
+    return escape_brackets(text)
+
+
+def get_root_url(url):
     """Return the first part of the URL until and including '.com'"""
     p = re.compile(r'https://.+\.com')
     return p.search(url).group(0)

@@ -9,7 +9,10 @@ from rich.padding import Padding
 from rich.table import Table
 from rich.theme import Theme
 
-from filum.helpers import timestamp_to_iso
+from filum.helpers import timestamp_to_iso, sanitise_text
+from logger.logger import create_logger
+
+logger = create_logger()
 
 console = Console(
     theme=Theme({'markdown.block_quote': 'yellow'}),
@@ -74,6 +77,7 @@ class RichView:
         body: Any = ''
         if item['body']:
             body = Markdown(item["body"])
+        print(sanitise_text(item['body']))
         top_level_group = Group(
             Padding(to_print, (0, 0, 0, 2)),
             Padding(body, (0, 0, 0, 2))

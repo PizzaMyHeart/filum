@@ -54,7 +54,7 @@ class Download:
         if self.site == 'reddit':
             return parse_reddit(self)
         elif self.site == 'hn':
-            return parse_hn(self)
+            return parse_hn(self.soup, self.site)
         elif self.site == 'se':
             return parse_se(self.soup, self.url, self.site)
 

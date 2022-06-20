@@ -3,11 +3,10 @@ Hacker News item.
 
 '''
 
-from filum.helpers import current_timestamp, bs4_to_md, iso_to_timestamp
+from filum.helpers import (bs4_to_md, current_timestamp, iso_to_timestamp, sanitise_text)
 
 
-def parse_hn(obj):
-    soup = obj.soup
+def parse_hn(soup, site):
     parent = soup.find('table', class_='fatitem')
     parent_id = parent.find('tr', class_='athing').attrs['id']
     parent_permalink = 'https://news.ycombinator.com/item?id=' + parent_id
@@ -16,8 +15,8 @@ def parse_hn(obj):
     children = soup.find_all('tr', class_='athing comtr')
     children_data = {}
 
-    def get_comment_text(item):
-        comment_field = item.find('span', class_='commtext')
+    def get_comment_text(elem):
+        comment_field = elem.find('span', class_='commtext')
         reply_span = comment_field.find('div', class_='reply')
         if reply_span:
             reply_span.decompose()
@@ -25,11 +24,17 @@ def parse_hn(obj):
         # HN uses <p> tags to denote a new line.
         return bs4_to_md(comment_field.prettify())
 
+    def get_parent_body(elem):
+        body = elem.find(lambda tag: tag.name == 'td' and not tag.attrs)
+        if body.find('form'):
+            body = None
+        return bs4_to_md(body.prettify())
+
     if title:
         title = title.contents[0]
         parent_score = parent.find('span', class_='score').contents[0]
         parent_score = int(parent_score.replace('points', ''))
-        parent_body = None
+        parent_body = get_parent_body(parent)
         parent_author = parent.find('td', class_='subtext').find('a', class_='hnuser').contents[0]
     else:
         # If the root item doesn't have a title element, then
@@ -37,7 +42,7 @@ def parse_hn(obj):
         title = parent.find('span', class_='onstory').a.contents[0]
         parent_body = get_comment_text(parent)
         parent_author = parent.find('a', class_='hnuser').contents[0]
-
+    parent_body = sanitise_text(parent_body)
     parent_timestamp = parent.find('span', class_='age').attrs['title']
     parent_timestamp = iso_to_timestamp(parent_timestamp)
 
@@ -49,6 +54,7 @@ def parse_hn(obj):
         comment_timestamp = iso_to_timestamp(comment_timestamp)
         permalink = 'https://news.ycombinator.com/item?id=' + comment_id
         comment_body = get_comment_text(child)
+        comment_body = sanitise_text(comment_body)
         children_data.update({
             comment_id: {
                 'author': author,
@@ -66,7 +72,7 @@ def parse_hn(obj):
         'author': parent_author,
         'id': parent_id,
         'score': parent_score,
-        'source': obj.site,
+        'source': site,
         'permalink': parent_permalink,
         'posted_timestamp': parent_timestamp,
         'saved_timestamp': current_timestamp()

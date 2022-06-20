@@ -246,7 +246,6 @@ class Database(object):
 
     def create_column_if_not_exists(func):
         def wrapped(self, *args, **kwargs):
-            print(kwargs.items())
             column = kwargs['column']
             table = kwargs['table']
             if not self._check_column_exists(column, table):
