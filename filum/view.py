@@ -18,17 +18,17 @@ logger = create_logger()
 config = FilumConfig()
 config_parser = config.get_parser()
 
-colors = {
-    'link_color': 'not bold not italic underline bright_cyan',
-    'op_color': 'bright_yellow',
-    'poster_color': 'bright_cyan'
+colours = {
+    'link_colour': 'not bold not italic underline bright_cyan',
+    'op_colour': 'bright_yellow',
+    'poster_colour': 'bright_cyan'
 }
 
 
 console = Console(
     theme=Theme({
         'markdown.block_quote': 'yellow',
-        'repr.url': colors['link_color'], 'markdown.link_url': colors['link_color']}),
+        'repr.url': colours['link_colour'], 'markdown.link_url': colours['link_colour']}),
     style='on black')
 
 
@@ -43,6 +43,7 @@ class RichView:
     def __init__(self):
         self.console = console
         self.author = ''
+        self.pager_colours = config_parser.getboolean('output', 'pager_colours')
 
     def stringify(self, row: ValuesView) -> tuple:
         """Turns each item in the SQL query result into a string
@@ -58,7 +59,7 @@ class RichView:
         # interactive shell.
 
         table = Table(box=box.SIMPLE, expand=True)
-        table.add_column('#', style='green')
+        table.add_column('ID', style='green')
         table.add_column('Title')
         table.add_column('Posted')
         table.add_column('Saved')
@@ -91,7 +92,7 @@ class RichView:
         """
         timestamp = timestamp_to_iso(item['posted_timestamp'])
         to_print = (
-            f'\n[bold {colors["op_color"]}]{item["author"]}[/bold {colors["op_color"]}] '
+            f'\n[bold {colours["op_colour"]}]{item["author"]}[/bold {colours["op_colour"]}] '
             f'[green]{item["score"]} pts[/green] [blue]{timestamp}[/blue] {item["permalink"]}\n\n'
             f'✎ {item["title"]}\n'
             )
@@ -122,11 +123,11 @@ class RichView:
                 else:
                     score = ''
                 if result['author'] == self.author:
-                    author_color = colors['op_color']
+                    author_colour = colours['op_colour']
                 else:
-                    author_color = colors['poster_color']
+                    author_colour = colours['poster_colour']
                 header = (
-                    f'\n¬ [bold {author_color}]{result["author"]}[/bold {author_color}] '
+                    f'\n¬ [bold {author_colour}]{result["author"]}[/bold {author_colour}] '
                     f'[green]{score}[/green] [blue]{timestamp}[/blue]\n'
                     )
 
@@ -147,3 +148,7 @@ class RichView:
 
     def filum_print(self, item):
         self.console.print(item)
+
+    def filum_print_pager(self, item):
+        with self.console.pager(styles=self.pager_colours):
+            self.filum_print(item)

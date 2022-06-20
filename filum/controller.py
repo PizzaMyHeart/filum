@@ -5,6 +5,7 @@ import traceback
 from rich.console import Console
 
 from filum.archiver import ArchiveUploader
+from filum.config import FilumConfig
 from filum.database import Database
 from filum.download import Download
 from filum.exceptions import ItemAlreadyExistsError
@@ -14,6 +15,9 @@ from logger.logger import create_logger
 
 logger = create_logger()
 
+config = FilumConfig()
+config_parser = config.get_parser()
+
 console = Console()
 
 
@@ -22,6 +26,7 @@ class Controller(object):
         self.database = Database()
         self.view = RichView()
         self.archive_uploader = ArchiveUploader()
+        self.max_rows_without_pager = config_parser.getint('output', 'max_rows_without_pager')
 
     def download_thread(self, url):
         return Download(url).run()
@@ -94,6 +99,9 @@ class Controller(object):
     def show_all_ancestors(self):
         results = self.database.select_all_ancestors()
         table = self.view.create_table(results)
+        if self.database.get_ancestors_length() > self.max_rows_without_pager:
+            self.view.filum_print_pager(table)
+            return
         self.view.filum_print(table)
 
     def display_thread(self, id, pager, pager_colours, cond='', where_param=''):
@@ -123,10 +131,8 @@ class Controller(object):
         tags = [row[0] for row in rows]
         tags = self.remove_null(tags)
         tags = [tag.split(', ') for tag in tags]
-        tags_flattened = [item for items in tags for item in items]
-        self.view.filum_print('[bold green]Current tags:[/bold green]')
-        for tag in set(tags_flattened):
-            self.view.filum_print(f'    - {tag}')
+        tags_flattened = set([item for items in tags for item in items])
+        self.view.filum_print(f'[bold green]Current tags:[/bold green] {", ".join(tags_flattened)}\n')
 
     def modify_tags(self, id: int, add=True, **kwargs):
         """Add or delete tags of a top-level item in the "ancestor" table
