@@ -112,11 +112,17 @@ class Controller(object):
     def get_ancestors_length(self):
         return self.database.get_ancestors_length()
 
+    def remove_null(self, list_with_null: list) -> list:
+        """Remove null values from a list"""
+        return [i for i in list_with_null if i is not None]
+
     def show_all_tags(self):
         """Display a list of existing tags"""
 
         rows = self.database.get_all_tags()
-        tags = [row[0].split(', ') for row in rows]
+        tags = [row[0] for row in rows]
+        tags = self.remove_null(tags)
+        tags = [tag.split(', ') for tag in tags]
         tags_flattened = [item for items in tags for item in items]
         self.view.filum_print('[bold green]Current tags:[/bold green]')
         for tag in set(tags_flattened):
