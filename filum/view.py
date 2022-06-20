@@ -18,15 +18,31 @@ logger = create_logger()
 config = FilumConfig()
 config_parser = config.get_parser()
 
+colors = {
+    'link_color': 'not bold not italic underline bright_cyan',
+    'op_color': 'bright_yellow',
+    'poster_color': 'bright_cyan'
+}
+
+
 console = Console(
-    theme=Theme({'markdown.block_quote': 'yellow'}),
+    theme=Theme({
+        'markdown.block_quote': 'yellow',
+        'repr.url': colors['link_color'], 'markdown.link_url': colors['link_color']}),
     style='on black')
+
+
+class FilumMarkdown(Markdown):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.hyperlinks = config_parser.getboolean('output', 'hyperlinks')
 
 
 class RichView:
     def __init__(self):
         self.console = console
-        self.hyperlinks = config_parser.getboolean('output', 'hyperlinks')
+        self.author = ''
 
     def stringify(self, row: ValuesView) -> tuple:
         """Turns each item in the SQL query result into a string
@@ -75,18 +91,19 @@ class RichView:
         """
         timestamp = timestamp_to_iso(item['posted_timestamp'])
         to_print = (
-            f'\n[bold bright_yellow]{item["author"]}[/bold bright_yellow] '
+            f'\n[bold {colors["op_color"]}]{item["author"]}[/bold {colors["op_color"]}] '
             f'[green]{item["score"]} pts[/green] [blue]{timestamp}[/blue] {item["permalink"]}\n\n'
             f'✎ {item["title"]}\n'
             )
         body: Any = ''
         if item['body']:
-            body = Markdown(item["body"], hyperlinks=self.hyperlinks)
+            body = FilumMarkdown(item["body"])
             logger.debug(item['body'])
         top_level_group = Group(
             Padding(to_print, (0, 0, 0, 2)),
             Padding(body, (0, 0, 0, 2))
         )
+        self.author = item['author']
         return top_level_group
 
     def create_thread_body(self, results: list) -> Group:
@@ -94,7 +111,7 @@ class RichView:
         def make_panels(results: list):
             for result in results:
                 logger.debug(result['text'])
-                text = Markdown(result['text'], hyperlinks=self.hyperlinks)
+                text = FilumMarkdown(result['text'])
                 timestamp = ''
                 # Padding can only accept integers not floats
                 indent = (result["depth"] + 2)*2
@@ -104,8 +121,12 @@ class RichView:
                     score = f'{result["score"]} pts'
                 else:
                     score = ''
+                if result['author'] == self.author:
+                    author_color = colors['op_color']
+                else:
+                    author_color = colors['poster_color']
                 header = (
-                    f'\n¬ [bold bright_cyan]{result["author"]}[/bold bright_cyan] '
+                    f'\n¬ [bold {author_color}]{result["author"]}[/bold {author_color}] '
                     f'[green]{score}[/green] [blue]{timestamp}[/blue]\n'
                     )
 
