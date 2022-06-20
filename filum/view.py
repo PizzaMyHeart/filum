@@ -9,10 +9,14 @@ from rich.padding import Padding
 from rich.table import Table
 from rich.theme import Theme
 
-from filum.helpers import timestamp_to_iso, sanitise_text
+from filum.config import FilumConfig
+from filum.helpers import timestamp_to_iso
 from logger.logger import create_logger
 
 logger = create_logger()
+
+config = FilumConfig()
+config_parser = config.get_parser()
 
 console = Console(
     theme=Theme({'markdown.block_quote': 'yellow'}),
@@ -22,6 +26,7 @@ console = Console(
 class RichView:
     def __init__(self):
         self.console = console
+        self.hyperlinks = config_parser.getboolean('output', 'hyperlinks')
 
     def stringify(self, row: ValuesView) -> tuple:
         """Turns each item in the SQL query result into a string
@@ -76,8 +81,8 @@ class RichView:
             )
         body: Any = ''
         if item['body']:
-            body = Markdown(item["body"])
-        print(sanitise_text(item['body']))
+            body = Markdown(item["body"], hyperlinks=self.hyperlinks)
+            logger.debug(item['body'])
         top_level_group = Group(
             Padding(to_print, (0, 0, 0, 2)),
             Padding(body, (0, 0, 0, 2))
@@ -88,7 +93,8 @@ class RichView:
         @group()
         def make_panels(results: list):
             for result in results:
-                text = Markdown(result['text'])
+                logger.debug(result['text'])
+                text = Markdown(result['text'], hyperlinks=self.hyperlinks)
                 timestamp = ''
                 # Padding can only accept integers not floats
                 indent = (result["depth"] + 2)*2

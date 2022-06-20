@@ -25,6 +25,7 @@ class FilumConfig(object):
         [output]
             pager = true
             pager_colours = true  ; Only works if the pager supports colour. Otherwise change this to false.
+            hyperlinks = false  ; Change this to true to render Markdown links in the terminal
         '''
 
         self.parser.read_string(config_content)

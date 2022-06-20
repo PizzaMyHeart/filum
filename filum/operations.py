@@ -11,7 +11,7 @@ from filum.controller import Controller
 from filum.exceptions import InvalidInputError, ItemAlreadyExistsError, WaybackMachineError
 from filum.validation import id_exists, is_valid_id, is_valid_url
 
-valid_id_message = 'Please enter a valid thread label (a positive integer). Run `filum all` to see a list of thread labels.'
+valid_id_message = 'Please enter a valid thread label (a positive integer). Run `filum all` to see a list of thread labels.'  # noqa: E501
 
 config = FilumConfig()
 config_parser = config.get_parser()
@@ -20,7 +20,6 @@ c = Controller()
 
 
 def add(url) -> None:
-    print(url)
     try:
         is_valid_url(url)
         with console.status(f'Downloading thread from {url}'):
