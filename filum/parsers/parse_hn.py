@@ -26,9 +26,10 @@ def parse_hn(soup, site):
 
     def get_parent_body(elem):
         body = elem.find(lambda tag: tag.name == 'td' and not tag.attrs)
+        body = body.prettify()
         if body.find('form'):
             body = None
-        return bs4_to_md(body.prettify())
+        return bs4_to_md(body)
 
     if title:
         title = title.contents[0]
