@@ -42,6 +42,7 @@ class FilumShell(Cmd):
             print('Please enter a valid integer.')
 
     def do_archive(self, line):
+        """Save a snapshot to the Wayback Machine: $ archive <id>"""
         try:
             args = parser.parser_archive.parse_args(line.split())
             archive(args)
@@ -105,7 +106,8 @@ def main():
         'Usage:\n'
         'filum show\nfilum add <url>\nfilum show <id>\nfilum delete <id>\n\n'
         'filum is a tool to save discussion threads from Reddit, Hacker News, and Stack Exchange on your PC. '
-        'Run "filum -h" for a full list of options.'
+        'Run "filum -h" for a full list of options.\n\n'
+        'Visit https://github.com/PizzaMyHeart/filum for more info and updates.'
     )
 
     args = parser.args

@@ -52,7 +52,7 @@ class Download:
     def get_thread(self):
         """Call the corresponding parser for each website."""
         if self.site == 'reddit':
-            return parse_reddit(self)
+            return parse_reddit(self.response, self.site)
         elif self.site == 'hn':
             return parse_hn(self.soup, self.site)
         elif self.site == 'se':
@@ -71,7 +71,7 @@ reddit_url_root = 'https://www.reddit.com/r/boardgames/comments/utkslk/tiny_epic
 
 
 def main():
-    Download(hn_url_root).process_url() \
+    Download(reddit_url_root).process_url() \
                          .get_response() \
                          .prepare_response() \
                          .get_thread()

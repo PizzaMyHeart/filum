@@ -111,8 +111,8 @@ class RichView:
         @group()
         def make_panels(results: list):
             for result in results:
-                logger.debug(result['text'])
-                text = FilumMarkdown(result['text'])
+                text = result['text']
+                text = FilumMarkdown(text)
                 timestamp = ''
                 # Padding can only accept integers not floats
                 indent = (result["depth"] + 2)*2

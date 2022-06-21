@@ -1,8 +1,8 @@
 from filum.helpers import html_to_md, current_timestamp, sanitise_text
 
 
-def parse_reddit(obj):
-    content = obj.r
+def parse_reddit(json, site):
+    content = json
     parent = content[0]['data']['children'][0]['data']
     comments = content[1]['data']['children']
 
@@ -22,7 +22,7 @@ def parse_reddit(obj):
             replies = comment['data']['replies']
 
             comment_body = comment['data']['body_html']
-            comment_body = html_to_md(comment_body)
+            comment_body = html_to_md(html_to_md(comment_body))
             comment_body = sanitise_text(comment_body)
             comment_permalink = f'https://reddit.com{comment["data"]["permalink"]}'
             comment_data.update({
@@ -57,7 +57,7 @@ def parse_reddit(obj):
         'id': parent['name'],
         'score': parent['score'],
         'permalink': parent_permalink,
-        'source': obj.site,
+        'source': site,
         'posted_timestamp': parent['created_utc'],
         'saved_timestamp': current_timestamp()
     }

@@ -203,7 +203,7 @@ def reset_config_to_default():
 def push_to_web_archive(id: int) -> None:
     is_valid_id(id)
     if confirm('Do you want to save a snapshot of this thread to the Wayback Machine?'):
-        with console.status('Saving to the Wayback Machine (this may take a while ...'):
+        with console.status('Saving to the Wayback Machine (this may take a while ...)'):
             try:
                 web_archive_url = c.push_to_web_archive(id)
                 console.print(f'📁 {web_archive_url}')

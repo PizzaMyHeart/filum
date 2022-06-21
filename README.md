@@ -4,7 +4,7 @@
 
 It's like a bookmark manager that saves actual content rather than just the link pointing to it.
 
-Like Pocket and Instapaper, it extracts text content for an uncluttered experience. Unlike Pocket and Instapaper, it works for discussion threads on Reddit, Hacker News, and Stack Exchange.
+Like Pocket and Instapaper, it extracts text content for an uncluttered experience&mdash;specifically for discussion threads on Reddit, Hacker News, and Stack Exchange.
 
 
 ## Installation
@@ -164,11 +164,12 @@ These are on my to-do list to improve.
 - The search command only takes in one search string at a time
 - Filters for searching cannot be combined, e.g. you can search either by a tag or by source
 - Look into alternatives to the Wayback Machine for archival (although archive.today makes it really painful to work with using scripts)
+- I may add support for discussion threads on other websites and forums in the future
 
 
 ## Contributing
 
-I'm not currently accepting any pull requests, but questions and suggestions are more than welcome. Feel free to open a GitHub issue.
+Not currently open to pull requests, but questions and suggestions are more than welcome. Feel free to open a GitHub issue.
 
 
 ## Disclaimer
