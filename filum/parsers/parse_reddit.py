@@ -22,8 +22,9 @@ def parse_reddit(json, site):
             replies = comment['data']['replies']
 
             comment_body = comment['data']['body_html']
+            # Unclear to me why Reddit post and comment text need to be passed through
+            # html_to_md twice.
             comment_body = html_to_md(html_to_md(comment_body))
-            print(comment_body)
             comment_permalink = f'https://reddit.com{comment["data"]["permalink"]}'
             comment_data.update({
                 id: {
@@ -47,7 +48,7 @@ def parse_reddit(json, site):
                 get_comments(replies['data']['children'])
 
     get_comments(comments)
-    body = html_to_md(parent['selftext_html']) if parent['selftext_html'] else None
+    body = html_to_md(html_to_md(parent['selftext_html'])) if parent['selftext_html'] else None
     parent_permalink = f'https://www.reddit.com{parent["permalink"]}'  # The 'www' part is important
     parent_data = {
         'title': parent['title'],

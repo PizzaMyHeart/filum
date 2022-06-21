@@ -22,7 +22,7 @@ class Database(object):
         self._conn = self.connect_to_db(db_name)
         # self._conn.set_trace_callback(print)
         self.sql = dict([
-            ('ancestors_sequential', 'SELECT *, ROW_NUMBER() OVER (ORDER BY saved_timestamp DESC) as num FROM ancestors')  # noqa: E501
+            ('ancestors_sequential', 'SELECT *, ROW_NUMBER() OVER (ORDER BY row_id DESC) as num FROM ancestors')  # noqa: E501
             ])
 
         with self._conn:
