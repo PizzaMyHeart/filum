@@ -100,8 +100,8 @@ class RichView:
         if item['body']:
             body = item['body']
             body = sanitise_text(body)
-            body = FilumMarkdown(body)
             logger.debug(body)
+            body = FilumMarkdown(body)
         top_level_group = Group(
             Padding(to_print, (0, 0, 0, 2)),
             Padding(body, (0, 0, 0, 2))
@@ -115,6 +115,7 @@ class RichView:
             for result in results:
                 text = result['text']
                 text = sanitise_text(text)
+                logger.debug(text)
                 text = FilumMarkdown(text)
                 timestamp = ''
                 # Padding can only accept integers not floats

@@ -4,7 +4,7 @@ Stack Exchange Q&A pages contain a three-level hierarchy of items:
 questions, answers, and comments.
 '''
 from filum.helpers import (bs4_to_md, current_timestamp, iso_to_timestamp,
-                           get_root_url, sanitise_text)
+                           get_root_url)
 
 
 def get_body(item):

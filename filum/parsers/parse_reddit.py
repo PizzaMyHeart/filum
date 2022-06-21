@@ -1,4 +1,4 @@
-from filum.helpers import html_to_md, current_timestamp, sanitise_text
+from filum.helpers import html_to_md, current_timestamp
 
 
 def parse_reddit(json, site):
@@ -23,6 +23,7 @@ def parse_reddit(json, site):
 
             comment_body = comment['data']['body_html']
             comment_body = html_to_md(html_to_md(comment_body))
+            print(comment_body)
             comment_permalink = f'https://reddit.com{comment["data"]["permalink"]}'
             comment_data.update({
                 id: {
@@ -47,7 +48,6 @@ def parse_reddit(json, site):
 
     get_comments(comments)
     body = html_to_md(parent['selftext_html']) if parent['selftext_html'] else None
-    body = sanitise_text(body)
     parent_permalink = f'https://www.reddit.com{parent["permalink"]}'  # The 'www' part is important
     parent_data = {
         'title': parent['title'],

@@ -14,7 +14,6 @@ def bs4_to_md(soup):
 
 
 def html_to_md(html):
-    # TODO: Show full hyperlinks (hn truncates these)
     return to_md(html)
 
 
@@ -43,7 +42,16 @@ def escape_brackets(text: str) -> str:
     # that aren't immediately preceding a pair of parentheses.
     # Creates three capture groups: one for each bracket, and
     # one for whatever is within the brackets.
-    pattern = re.compile(r'(\[)(.*)(\])(?!\()')
+    # Ignore if surrounded by backticks (indicating a code block).
+    pattern = re.compile(
+        r'(?<!`)'   # -ve lookbehind for opening backtick
+        r'(\[)'     # match opening bracket
+        r'(.*)'     # match anything sandwiched by the brackets
+        r'(\])'     # match closing bracket
+        r'(?!\()'   # -ve lookahead for opening parenthesis
+        r'(?!`)'    # -ve lookahead for closing backtick
+        )
+
     return re.sub(pattern, r'\\\1\2\\\3', text)
 
 

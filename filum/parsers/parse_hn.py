@@ -3,7 +3,7 @@ Hacker News item.
 
 '''
 
-from filum.helpers import (bs4_to_md, current_timestamp, iso_to_timestamp, sanitise_text)
+from filum.helpers import (bs4_to_md, current_timestamp, iso_to_timestamp)
 
 
 def parse_hn(soup, site):
@@ -45,7 +45,6 @@ def parse_hn(soup, site):
         title = parent.find('span', class_='onstory').a.contents[0]
         parent_body = get_comment_text(parent)
         parent_author = parent.find('a', class_='hnuser').contents[0]
-    parent_body = sanitise_text(parent_body)
     parent_timestamp = parent.find('span', class_='age').attrs['title']
     parent_timestamp = iso_to_timestamp(parent_timestamp)
 

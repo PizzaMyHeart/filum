@@ -67,7 +67,7 @@ hn_url_root = 'https://news.ycombinator.com/item?id=27336584'
 hn_url_comment = 'https://news.ycombinator.com/item?id=31451536'
 se_url_root = 'https://stats.stackexchange.com/questions/6/the-two-cultures-statistics-vs-machine-learning'
 se_url_answer = 'https://stackoverflow.com/questions/15340582/python-extract-pattern-matches/15340666#15340666'
-reddit_url_root = 'https://www.reddit.com/r/boardgames/comments/utkslk/tiny_epic_which_one_would_you_recommend/'
+reddit_url_root = 'https://www.reddit.com/r/Python/comments/vhabnp/pep_671_syntax_for_late_bound_function_default/'
 
 
 def main():
