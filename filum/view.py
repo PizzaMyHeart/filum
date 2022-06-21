@@ -16,7 +16,7 @@ from logger.logger import create_logger
 logger = create_logger()
 
 config = FilumConfig()
-config_parser = config.get_parser()
+config_parser = config.get_config()
 
 colours = {
     'link_colour': 'not bold not italic underline bright_cyan',

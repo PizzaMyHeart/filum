@@ -16,7 +16,7 @@ from logger.logger import create_logger
 logger = create_logger()
 
 config = FilumConfig()
-config_parser = config.get_parser()
+config_parser = config.get_config()
 
 console = Console()
 
@@ -162,6 +162,9 @@ class Controller(object):
         results = self.database.search(column, searchstr)
         table = self.view.create_table(results)
         self.view.filum_print(table)
+
+    def reset_config_to_default(self):
+        config.get_config(reset=True)
 
 
 if __name__ == '__main__':

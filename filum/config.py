@@ -11,88 +11,77 @@ class FilumConfig(object):
         self.config_filepath_default = Path(__file__).parent.resolve() / 'config.ini'
         self.config_filepath_current = self.set_config_filepath(self.config_filepath_default)
         self.config = configparser.ConfigParser(inline_comment_prefixes=';', allow_no_value=True)
-        self.config_output_options = {
-            '; pager: Enable automatic piping of output into the default terminal pager.': None,
-            '; pager_colours: Enable colour in pager output. Only works if the pager supports colour. Otherwise change this to false.': None,  # noqa: E501
-            '; hyperlinks: Change this to true to render Markdown links in the terminal.': None,
-            '; max_rows_without_pager: Number of table rows beyond which the table should be displayed in the pager.': None,  # noqa: E501
+        self.config_output_default_options = {
+            '; pager: enable automatic piping of output into the default terminal pager. [true (default) | false]': None,  # noqa: E501
+            '; pager_colours: enable colour in pager output. only works if the pager supports colour. otherwise change this to false. [true (default) | false]': None,  # noqa: E501
+            '; hyperlinks: change this to true to render markdown links in the terminal. [true | false (default)]': None,  # noqa: E501
+            '; max_rows_without_pager: number of table rows beyond which the table should be displayed in the pager. [10 (default) | any integer]': None,  # noqa: E501
             'pager': 'true ',
             'pager_colours': 'true',
             'hyperlinks': 'false',
             'max_rows_without_pager': '10'
         }
 
-    def get_parser(self):
+    def get_config(self, reset=False):
 
         if not self.config_filepath_current.is_file():
             logger.debug('No config.ini yet.')
-            self.create_config(self.config_output_options)
-            self.write_to_file(self.config_filepath_default)
-            self.config.read(self.config_filepath_current)
-            self.config_filepath_current = self.set_config_filepath(self.config_filepath_default)
-            return self.config
+            filepath = self.config_filepath_default
+        else:
+            filepath = self.config_filepath_current
 
-        self.config.read(self.config_filepath_current)
+        self.config.read(filepath)
 
-        if not self.config.has_section('output'):
-            logger.debug('No "output" section yet.')
+        if not self.config.has_section('output') or reset:
             self.config['output'] = {}
-            self.create_config(self.config_output_options)
-            self.write_to_file(self.config_filepath_current)
-            self.config.read(self.config_filepath_current)
-            return self.config
 
-        self.update_config_output()
+        logger.debug(f'Current output options: {self.config.items("output")}')
+        new_options_to_add = self.get_new_options()
+
+        if new_options_to_add:
+            options = self.get_updated_output_section(new_options_to_add)
+        else:
+            options = self.config_output_default_options
+
+        self._assign_to_output_section(options)
+        self.write_to_file(filepath)
+        self.config.read(self.config_filepath_current)
 
         return self.config
 
-    def update_config_output(self):
+    def get_updated_output_section(self, options: list) -> dict:
+        """Update the config options without overwriting existing values.
+
+        """
+        new_config_options = {}
+        for key, value in self.config_output_default_options.items():
+            if key in options:
+                new_config_options[key] = value
+            else:
+                new_config_options[key] = self.config['output'][key]
+
+        return new_config_options
+
+    def get_new_options(self) -> list:
         existing_keys = [key for key in self.config['output']]
-        keys_to_add = [key for key in self.config_output_options if key not in existing_keys]
+        keys_to_add = [key for key in self.config_output_default_options if key not in existing_keys]
         logger.debug(f'Existing keys: {existing_keys}')
         logger.debug(f'The following keys are new: {keys_to_add}')
-        new_config_options = {}
-        if keys_to_add:
-            for key, value in self.config_output_options.items():
-                if key in keys_to_add:
-                    new_config_options[key] = value
-                else:
-                    new_config_options[key] = self.config['output'][key]
-            print(new_config_options)
+        return keys_to_add
 
-            self.create_config(new_config_options)
-            self.write_to_file(self.config_filepath_current)
-            self.config.read(self.config_filepath_current)
-            '''
-                print(key)
-                print(self.config_output_options[key])
-                print(self.config['output'].values())
-                # self.config['output'][key] = self.config_content[key]
-                self.config.read_dict({
-                    'output': {
-                        key: self.config_output_options[key]
-                    }
-                })
-                print(self.config['output'][key])
-            self.write_to_file(self.config_filepath_current)
-            '''
-
-    def create_config(self, content):
+    def _assign_to_output_section(self, content):
         logger.debug(content)
         self.config['output'] = content
-        '''
-        for key in content.keys():
-            self.config['output'][key] = content[key]
-        '''
 
     def set_config_filepath(self, path):
         return path
 
     def write_to_file(self, path):
+        logger.debug(f'Writing to {path}')
         with open(path, 'w') as config_file:
             self.config.write(config_file)
 
 
 if __name__ == '__main__':
     config = FilumConfig()
-    config.get_parser()
+    config.get_config()

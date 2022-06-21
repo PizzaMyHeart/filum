@@ -14,7 +14,7 @@ from filum.validation import id_exists, is_valid_id, is_valid_url
 valid_id_message = 'Please enter a valid thread label (a positive integer). Run `filum all` to see a list of thread labels.'  # noqa: E501
 
 config = FilumConfig()
-config_parser = config.get_parser()
+config_parser = config.get_config()
 console = Console()
 c = Controller()
 
@@ -167,6 +167,17 @@ def tags(args):
         return
 
 
+def handle_config(args):
+    try:
+        if args.reset:
+            reset_config_to_default()
+        open_config()
+    except SystemExit:
+        return
+    except Exception as err:
+        print(err)
+
+
 def open_config():
     print('Opening config file...')
     try:
@@ -178,6 +189,14 @@ def open_config():
             subprocess.run(('nano', config.config_filepath_default))
     except Exception as err:
         print(err)
+
+
+def reset_config_to_default():
+    if confirm('Are you sure you want to reset the config file to its default?'):
+        try:
+            c.reset_config_to_default()
+        except Exception as err:
+            print(err)
 
 
 def push_to_web_archive(id: int) -> None:

@@ -10,11 +10,10 @@ class TestConfig(unittest.TestCase):
     @patch('filum.config.FilumConfig.write_to_file')
     def test_creates_config_file_if_not_exists(self, write_to_file):
         config = FilumConfig()
-        config.config_filepath_current = Path('/nonexistent/path')
-        self.assertFalse(config.config_filepath_current.is_file())
-        config.get_parser()
+        config.config_filepath_default = Path('/nonexistent/path')
+        self.assertFalse(config.config_filepath_default.is_file())
+        config.get_config()
         write_to_file.assert_called_with(config.config_filepath_default)
-        self.assertTrue(config.config_filepath_current.is_file())
 
     def test_update_config_file_if_output_section_not_exists(self):
         pass

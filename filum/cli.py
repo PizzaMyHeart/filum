@@ -5,7 +5,7 @@ import warnings
 from cmd import Cmd
 
 from filum.operations import (add, archive, show, tags, update,
-                              delete, show_without_id, open_config)
+                              delete, show_without_id, handle_config)
 from filum.parser import Parser
 
 from logger.logger import create_logger
@@ -75,9 +75,13 @@ class FilumShell(Cmd):
         except SystemExit:
             return
 
-    def do_config(self, arg):
+    def do_config(self, line):
         """Open the config file in an editor. Change settings by modifying the parameter values: $ config"""
-        open_config()
+        try:
+            args = parser.parser_config.parse_args(line.split())
+            handle_config(args)
+        except SystemExit:
+            return
 
     def do_quit(self, arg):
         """Quit the interactive session using 'quit' or CTRL-D"""
@@ -112,7 +116,7 @@ def main():
         FilumShell().cmdloop()
 
     if args.subparser == 'config':
-        open_config()
+        handle_config(args)
 
     if args.subparser == 'add':
         add(args.url[0])

@@ -58,6 +58,7 @@ class Parser(object):
     parser_tags.add_argument('--delete', action='store_true')
 
     parser_config = subparsers.add_parser('config', help='Open the config file')
+    parser_config.add_argument('--reset', action='store_true', help='Reset the config file to its defaults')
     parser_config.set_defaults(parser_config=False)
 
     args = parser.parse_args()
