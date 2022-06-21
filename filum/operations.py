@@ -171,11 +171,11 @@ def open_config():
     print('Opening config file...')
     try:
         if platform.system() == 'Darwin':       # macOS
-            subprocess.run(('open', config.config_filepath))
+            subprocess.run(('open', config.config_filepath_default))
         elif platform.system() == 'Windows':    # Windows
-            subprocess.run(['notepad', config.config_filepath])
+            subprocess.run(['notepad', config.config_filepath_default])
         else:                                   # Linux variants
-            subprocess.run(('nano', config.config_filepath))
+            subprocess.run(('nano', config.config_filepath_default))
     except Exception as err:
         print(err)
 
