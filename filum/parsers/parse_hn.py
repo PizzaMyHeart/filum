@@ -28,7 +28,7 @@ def parse_hn(soup, site):
         body = elem.find(lambda tag: tag.name == 'td' and not tag.attrs)
         body = body.prettify()
         if body.find('form'):
-            body = None
+            body = ''
         return bs4_to_md(body)
 
     if title:

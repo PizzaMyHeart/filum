@@ -26,6 +26,7 @@ def add(url) -> None:
             thread = c.download_thread(url)
             c.add_thread(thread)
         print('Thread downloaded.')
+        show_all()
     except InvalidInputError as err:
         print(err)
     except ItemAlreadyExistsError:
