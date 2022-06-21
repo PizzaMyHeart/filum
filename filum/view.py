@@ -21,7 +21,10 @@ config_parser = config.get_config()
 colours = {
     'link_colour': 'not bold not italic underline bright_cyan',
     'op_colour': 'bright_yellow',
-    'poster_colour': 'bright_cyan'
+    'poster_colour': 'bright_cyan',
+    'reddit_colour': 'bright_red',
+    'hn_colour': 'orange1',
+    'se_colour': 'sea_green1'
 }
 
 
@@ -73,17 +76,27 @@ class RichView:
         for row in rows:
             row['posted_timestamp'] = timestamp_to_iso(row['posted_timestamp'])
             row['saved_timestamp'] = timestamp_to_iso(row['saved_timestamp'])
+            colour = self.set_row_colour(row)
             table_row = (
                 row['num'],
-                row['title'],
+                f'[{colour}]{row["title"]}[/{colour}]',
                 row['posted_timestamp'],
                 row['saved_timestamp'],
                 row['score'],
-                row['source'],
+                f'[{colour}]{row["source"]}[/{colour}]',
                 row['tags']
             )
             table.add_row(*self.stringify(table_row))
         return table
+
+    def set_row_colour(self, row: dict) -> str:
+        if row['source'] == 'reddit':
+            colour = colours['reddit_colour']
+        elif row['source'] == 'hn':
+            colour = colours['hn_colour']
+        elif row['source'] == 'se':
+            colour = colours['se_colour']
+        return colour
 
     def create_thread_header(self, item: Mapping) -> Group:
         """Create a header with post information such as author, time posted, score, etc.
