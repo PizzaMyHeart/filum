@@ -23,7 +23,6 @@ def parse_reddit(json, site):
 
             comment_body = comment['data']['body_html']
             comment_body = html_to_md(html_to_md(comment_body))
-            comment_body = sanitise_text(comment_body)
             comment_permalink = f'https://reddit.com{comment["data"]["permalink"]}'
             comment_data.update({
                 id: {

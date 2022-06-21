@@ -10,7 +10,7 @@ from rich.table import Table
 from rich.theme import Theme
 
 from filum.config import FilumConfig
-from filum.helpers import timestamp_to_iso
+from filum.helpers import sanitise_text, timestamp_to_iso
 from logger.logger import create_logger
 
 logger = create_logger()
@@ -98,8 +98,10 @@ class RichView:
             )
         body: Any = ''
         if item['body']:
-            body = FilumMarkdown(item["body"])
-            logger.debug(item['body'])
+            body = item['body']
+            body = sanitise_text(body)
+            body = FilumMarkdown(body)
+            logger.debug(body)
         top_level_group = Group(
             Padding(to_print, (0, 0, 0, 2)),
             Padding(body, (0, 0, 0, 2))
@@ -112,6 +114,7 @@ class RichView:
         def make_panels(results: list):
             for result in results:
                 text = result['text']
+                text = sanitise_text(text)
                 text = FilumMarkdown(text)
                 timestamp = ''
                 # Padding can only accept integers not floats

@@ -28,7 +28,6 @@ def get_question_data(soup, url, site, question):
 
     title = [string for string in soup.find(id='question-header').stripped_strings][0]
     question_body = get_body(question)
-    question_body = sanitise_text(question_body)
     question_author = get_author(question)
     question_permalink = url + soup.find(id='question-header').h1.a.get('href')
     question_score = question.get('data-score')
@@ -70,7 +69,6 @@ def parse_se(soup, url, site):
             comment_id = comment.get('data-comment-id')
             comment_score = comment.get('data-comment-score')
             comment_body = bs4_to_md(comment.find('span', class_='comment-copy')).replace('\n', '')
-            comment_body = sanitise_text(comment_body)
             comment_author = comment.select('.comment-user')[0].string
             comment_timestamp = comment.find('span', class_='relativetime-clean').attrs['title'].split('Z')[0]
             comment_timestamp = iso_to_timestamp(comment_timestamp)
@@ -99,7 +97,6 @@ def parse_se(soup, url, site):
         answer_id = answer.get('data-answerid')
         answer_score = answer.get('data-score')
         answer_body = get_body(answer)
-        answer_body = sanitise_text(answer_body)
         answer_author = get_author(answer)
         answer_timestamp = answer.time.attrs['datetime']
         answer_timestamp = iso_to_timestamp(answer_timestamp)

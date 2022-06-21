@@ -27,8 +27,10 @@ def parse_hn(soup, site):
     def get_parent_body(elem):
         body = elem.find(lambda tag: tag.name == 'td' and not tag.attrs)
         body = body.prettify()
+        '''
         if body.find('form'):
             body = ''
+        '''
         return bs4_to_md(body)
 
     if title:
@@ -55,7 +57,6 @@ def parse_hn(soup, site):
         comment_timestamp = iso_to_timestamp(comment_timestamp)
         permalink = 'https://news.ycombinator.com/item?id=' + comment_id
         comment_body = get_comment_text(child)
-        comment_body = sanitise_text(comment_body)
         children_data.update({
             comment_id: {
                 'author': author,
