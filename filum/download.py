@@ -14,7 +14,6 @@ from filum.parsers.parse_se import parse_se
 class Download:
     def __init__(self, url):
         self.url = url
-        self.item_permalink = url   # Copy of `url` that doesn't get mutated.
 
     def process_url(self):
         """Given a URL, sets the .site attribute."""
@@ -34,6 +33,9 @@ class Download:
         """Makes an HTTP GET request and saves the response object as an attribute."""
 
         self.response = get_http_response(self.url)
+        # Unlike self.url, self.item_permalink will not be mutated.
+        # Also to ensure the final redirected url is saved to the database.
+        self.item_permalink = self.response.url
         return self
 
     def parse_html(self, raw: str):
