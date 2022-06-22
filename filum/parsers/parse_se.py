@@ -60,7 +60,7 @@ def parse_se(soup, site, url, item_permalink):
         answer_id = url.split('#')[-1]
     if '/a/' in url:
         root_is_answer = True
-        answer_id = url.split('/')[-2]
+        answer_id = url.split('/')[4]
     url = get_root_url(url)
     question = soup.find(id='question')
 

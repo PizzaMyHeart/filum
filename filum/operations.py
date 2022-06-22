@@ -46,7 +46,7 @@ def update(id: int) -> None:
                 is_valid_url(url)
                 thread = c.download_thread(url)
                 c.update_thread(thread)
-            print(f'Thread updated. ({url})')
+            print(f'Thread no. {id} updated. ({url})')
             show_all()
     except InvalidInputError as err:
         print(err)
