@@ -21,7 +21,11 @@ def get_author(item):
             author = item.find_all('div', class_='user-details')[-1].a.string
     else:
         author = item.find_all('div', class_='user-details')[-1].span.string
-    return author.strip()
+    if author:
+        author = author.strip()
+    else:
+        author = ''
+    return author
 
 
 def get_question_data(soup, url, item_permalink, site, question):

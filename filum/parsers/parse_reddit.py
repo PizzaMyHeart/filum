@@ -55,7 +55,7 @@ def parse_reddit(json, site, item_permalink):
             if 'author_fullname' in comment['data'].keys():
                 comment_data[id]['author_id'] = comment['data']['author_fullname']
             else:
-                comment_data[id]['author_id'] = None
+                comment_data[id]['author_id'] = ''
 
             if len(replies) == 0:
                 continue
