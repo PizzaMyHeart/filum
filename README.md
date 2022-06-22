@@ -8,7 +8,7 @@ Like Pocket and Instapaper, it extracts text content for an uncluttered experien
 
 Fully supported on Linux and mostly works on Windows (use WSL for the ideal experience). Not tested on MacOS.
 
-[![asciicast](https://asciinema.org/a/503560.png)](https://asciinema.org/a/503560)
+[![asciicast](https://asciinema.org/a/503560.svg)](https://asciinema.org/a/503560)
 
 ![A table rendered in the terminal](https://raw.githubusercontent.com/PizzaMyHeart/filum/main/img/table.png)
 
