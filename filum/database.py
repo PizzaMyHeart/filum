@@ -83,9 +83,8 @@ class Database(object):
                 self._conn.executemany(sql, (values,))
                 self._conn.commit()
             except IntegrityError as err:
-                # print(err)
                 if 'UNIQUE' in str(err):
-                    raise ItemAlreadyExistsError
+                    raise ItemAlreadyExistsError(thread['title'])
 
     def update_ancestor(self, thread: dict) -> int:
         """Update a row in the 'ancestors' table.

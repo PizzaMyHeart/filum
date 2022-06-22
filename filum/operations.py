@@ -22,7 +22,7 @@ c = Controller()
 def add(url) -> None:
     try:
         is_valid_url(url)
-        with console.status(f'Downloading thread from {url}'):
+        with console.status(f'[light_green]Downloading thread from[/light_green] {url}'):
             thread = c.download_thread(url)
             c.add_thread(thread)
         print('Thread downloaded.')

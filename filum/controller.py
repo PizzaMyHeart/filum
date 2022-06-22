@@ -50,9 +50,11 @@ class Controller(object):
             self.database.insert_row(thread['parent_data'], 'ancestors')
             for comment in thread['comment_data']:
                 self.database.insert_row(thread['comment_data'][comment], 'descendants')
-        except ItemAlreadyExistsError:
-            print('This item already exists in your database.')
-            raise ItemAlreadyExistsError
+        except ItemAlreadyExistsError as err:
+            console.print(
+                f'\n[bold red]This item already exists in your database.[/bold red]\n'
+                f'→ [bold cyan]{err.title}[/bold cyan]')
+            raise ItemAlreadyExistsError(err.title)  # This should probably raise a new exception instead.
         except Exception:
             traceback.print_exc()
 

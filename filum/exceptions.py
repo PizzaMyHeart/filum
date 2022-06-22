@@ -29,8 +29,8 @@ class InvalidThreadId(InvalidInputError):
 class ItemAlreadyExistsError(Exception):
     """Custom exception that is raised when attempting
     to add an item with a permalink that already exists in the database."""
-
-    pass
+    def __init__(self, title):
+        self.title = title
 
 # Custom exceptions to handle unsuccessful HTTP requests
 
