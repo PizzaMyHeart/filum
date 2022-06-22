@@ -11,7 +11,7 @@ from filum.controller import Controller
 from filum.exceptions import InvalidInputError, ItemAlreadyExistsError, WaybackMachineError
 from filum.validation import id_exists, is_valid_id, is_valid_url
 
-valid_id_message = 'Please enter a valid thread label (a positive integer). Run `filum all` to see a list of thread labels.'  # noqa: E501
+valid_id_message = 'Please enter a valid thread label (a positive integer). Run `filum show` to see a list of thread labels.'  # noqa: E501
 
 config = FilumConfig()
 config_parser = config.get_config()
@@ -112,7 +112,7 @@ def delete(id: int) -> None:
         is_valid_id(id)
         if not id_exists(id):
             return
-        if confirm('Are you sure you want to delete this thread? [y/n] '):
+        if confirm(f'Are you sure you want to delete thread no. {id}? [y/n] '):
             c.delete(id)
             print(f'Thread no. {id} deleted.')
             show_all()

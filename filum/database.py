@@ -50,7 +50,7 @@ class Database(object):
                 'CREATE TABLE IF NOT EXISTS ancestors'
                 '(row_id INTEGER PRIMARY KEY AUTOINCREMENT,'
                 'id TEXT, title TEXT, body TEXT, posted_timestamp INTEGER, saved_timestamp INTEGER, '
-                'score INTEGER, permalink TEXT UNIQUE, author TEXT, source TEXT, '
+                'score INTEGER, item_permalink TEXT UNIQUE, parent_permalink TEXT, author TEXT, source TEXT, '
                 'web_archive_url TEXT, tags TEXT);')
             try:
                 self._conn.execute(sql)
@@ -94,17 +94,17 @@ class Database(object):
         is used later to delete the associated descendants."""
 
         with self._conn:
-            sql = 'UPDATE ancestors SET saved_timestamp = ?, score = ? WHERE permalink = ?'
+            sql = 'UPDATE ancestors SET saved_timestamp = ?, score = ? WHERE item_permalink = ?'
             try:
                 self._conn.execute(sql, (
                     current_timestamp(),
                     thread['score'],
-                    thread['permalink']
+                    thread['item_permalink']
                 )
                 )
                 id: int = self._conn.execute(
-                            ('SELECT ROW_NUMBER() OVER (ORDER BY saved_timestamp DESC) FROM ancestors WHERE permalink = ?'),  # noqa: E501
-                            (thread['permalink'], )
+                            ('SELECT ROW_NUMBER() OVER (ORDER BY saved_timestamp DESC) FROM ancestors WHERE item_permalink = ?'),  # noqa: E501
+                            (thread['item_permalink'], )
                             ) \
                     .fetchone()[0]
             except OperationalError as err:
@@ -115,8 +115,8 @@ class Database(object):
         """Returns the a column value from the 'ancestors' table."""
         with self._conn:
             sql = f'WITH a AS ({self.sql["ancestors_sequential"]}) SELECT {column} FROM a WHERE num = ?'
-            permalink = self._conn.execute(sql, (id, )).fetchone()[0]
-            return permalink
+            value = self._conn.execute(sql, (id, )).fetchone()[0]
+            return value
 
     def select_all_ancestors(self):
         with self._conn:
@@ -250,11 +250,11 @@ class Database(object):
 
     # Non-core features. These functions add the relevant column if it does not exist.
     @create_column_if_not_exists
-    def update_web_archive_link(self, permalink: str, web_archive_url: str, column, table) -> None:
+    def update_web_archive_link(self, item_permalink: str, web_archive_url: str, column, table) -> None:
         """Given an ancestor item's permalink, update its web archive URL.
 
         Args:
-            permalink: The permalink of the saved item
+            item_permalink: The permalink of the saved item
             web_archive_url: The URL of the item saved in the web archive
             column: The name of the column that stores web_archive_url
             table: The name of the containing table
@@ -264,9 +264,9 @@ class Database(object):
         """
 
         with self._conn:
-            sql = 'UPDATE ancestors SET web_archive_url = ? WHERE permalink = ?'
+            sql = 'UPDATE ancestors SET web_archive_url = ? WHERE item_permalink = ?'
             try:
-                self._conn.execute(sql, (web_archive_url, permalink))
+                self._conn.execute(sql, (web_archive_url, item_permalink))
             except OperationalError as err:
                 print(err)
 

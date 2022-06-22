@@ -14,6 +14,7 @@ from filum.parsers.parse_se import parse_se
 class Download:
     def __init__(self, url):
         self.url = url
+        self.item_permalink = url   # Copy of `url` that doesn't get mutated.
 
     def process_url(self):
         """Given a URL, sets the .site attribute."""
@@ -52,11 +53,11 @@ class Download:
     def get_thread(self):
         """Call the corresponding parser for each website."""
         if self.site == 'reddit':
-            return parse_reddit(self.response, self.site)
+            return parse_reddit(self.response, self.site, self.item_permalink)
         elif self.site == 'hn':
-            return parse_hn(self.soup, self.site)
+            return parse_hn(self.soup, self.site, self.item_permalink)
         elif self.site == 'se':
-            return parse_se(self.soup, self.url, self.site)
+            return parse_se(self.soup, self.site, self.url, self.item_permalink)
 
     def run(self):
         """Wrapper function to run the Download methods in order. Returns a dict."""

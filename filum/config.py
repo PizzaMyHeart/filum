@@ -15,11 +15,11 @@ class FilumConfig(object):
             '; pager: enable automatic piping of output into the default terminal pager. [true (default) | false]': None,  # noqa: E501
             '; pager_colours: enable colour in pager output. only works if the pager supports colour. otherwise change this to false. [true (default) | false]': None,  # noqa: E501
             '; hyperlinks: change this to true to render markdown links in the terminal. [true | false (default)]': None,  # noqa: E501
-            '; max_rows_without_pager: number of table rows beyond which the table should be displayed in the pager. [10 (default) | any integer]': None,  # noqa: E501
+            '; max_rows_without_pager: number of table items beyond which the table should be displayed in the pager. [20 (default) | any integer]': None,  # noqa: E501
             'pager': 'true ',
             'pager_colours': 'true',
             'hyperlinks': 'false',
-            'max_rows_without_pager': '10'
+            'max_rows_without_pager': '20'
         }
 
     def get_config(self, reset=False):

@@ -64,7 +64,7 @@ class Controller(object):
 
     def _get_ancestor_id(self, id):
         ancestor_id = dict(self.database.select_one_ancestor(id))
-        print(ancestor_id['id'])
+        # print(ancestor_id['id'])
 
     def push_to_web_archive(self, id: int) -> str:
         """Saves a snapshot of a thread to the Wayback Machine.
@@ -78,14 +78,14 @@ class Controller(object):
         permalink = self.get_permalink(id)
         web_archive_url = self.archive_uploader.save_snapshot(permalink)
         self.database.update_web_archive_link(
-            permalink=permalink,
+            item_permalink=permalink,
             web_archive_url=web_archive_url,
             column='web_archive_url',
             table='ancestors')
         return web_archive_url
 
     def get_permalink(self, id: int) -> str:
-        return self.database.select_one_value_from_ancestors(id, 'permalink')
+        return self.database.select_one_value_from_ancestors(id, 'item_permalink')
 
     def get_web_archive_url(self, id: int) -> str:
         return self.database.select_one_value_from_ancestors(id, 'web_archive_url')
@@ -107,7 +107,6 @@ class Controller(object):
     def display_thread(self, id, pager, pager_colours, cond='', where_param=''):
         ancestor_query = self.database.select_one_ancestor(id, cond=cond, where_param=where_param)
         top_level = self.view.create_thread_header(ancestor_query)
-
         descendants_query = self.database.select_all_descendants(id, cond=cond, where_param=where_param)
         indented = self.view.create_thread_body(descendants_query)
 

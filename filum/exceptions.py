@@ -20,7 +20,7 @@ class InvalidThreadId(InvalidInputError):
     """Invalid thread ID"""
     def __init__(self):
         self.message = ('Please enter a valid thread ID (positive integer). '
-                        'Run `filum all` to see a list of thread IDs.')
+                        'Run `filum show` to see a list of thread IDs.')
         super().__init__(self.message)
 
 # Custom exceptions for database operations

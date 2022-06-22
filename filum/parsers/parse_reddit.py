@@ -1,7 +1,7 @@
-from filum.helpers import html_to_md, current_timestamp
+from filum.helpers import add_comment_author_to_title, html_to_md, current_timestamp
 
 
-def parse_reddit(json, site):
+def parse_reddit(json, site, item_permalink):
     content = json
     parent = content[0]['data']['children'][0]['data']
     comments = content[1]['data']['children']
@@ -50,13 +50,26 @@ def parse_reddit(json, site):
     get_comments(comments)
     body = html_to_md(html_to_md(parent['selftext_html'])) if parent['selftext_html'] else None
     parent_permalink = f'https://www.reddit.com{parent["permalink"]}'  # The 'www' part is important
+    title = parent['title']
+    author = parent['author']
+    id = parent['name']
+    score = parent['score']
+    if len(comments) == 1:
+        # For cases when the user intends to save a specific comment rather than the
+        # whole thread.
+        # The JSON object returned from a child permalink (as opposed to the root)
+        # contains only one item in [0][data][children].
+        title = add_comment_author_to_title(author, title)
+        id = comments[0]['data']['id']
+        score = comments[0]['data']['score']
     parent_data = {
-        'title': parent['title'],
+        'title': title,
         'body': body,
-        'author': parent['author'],
-        'id': parent['name'],
-        'score': parent['score'],
-        'permalink': parent_permalink,
+        'author': author,
+        'id': id,
+        'score': score,
+        'item_permalink': item_permalink,
+        'parent_permalink': parent_permalink,
         'source': site,
         'posted_timestamp': parent['created_utc'],
         'saved_timestamp': current_timestamp()

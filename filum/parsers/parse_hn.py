@@ -3,10 +3,10 @@ Hacker News item.
 
 '''
 
-from filum.helpers import (bs4_to_md, current_timestamp, iso_to_timestamp)
+from filum.helpers import (add_comment_author_to_title, bs4_to_md, current_timestamp, iso_to_timestamp)
 
 
-def parse_hn(soup, site):
+def parse_hn(soup, site, item_permalink):
     parent = soup.find('table', class_='fatitem')
     parent_id = parent.find('tr', class_='athing').attrs['id']
     parent_permalink = 'https://news.ycombinator.com/item?id=' + parent_id
@@ -26,11 +26,10 @@ def parse_hn(soup, site):
 
     def get_parent_body(elem):
         body = elem.find(lambda tag: tag.name == 'td' and not tag.attrs)
-        body = body.prettify()
-        '''
-        if body.find('form'):
+        if body:
+            body = body.prettify()
+        else:
             body = ''
-        '''
         return bs4_to_md(body)
 
     if title:
@@ -45,6 +44,8 @@ def parse_hn(soup, site):
         title = parent.find('span', class_='onstory').a.contents[0]
         parent_body = get_comment_text(parent)
         parent_author = parent.find('a', class_='hnuser').contents[0]
+        parent_id = children[0].attrs['id']
+        title = add_comment_author_to_title(parent_author, title)
     parent_timestamp = parent.find('span', class_='age').attrs['title']
     parent_timestamp = iso_to_timestamp(parent_timestamp)
 
@@ -74,7 +75,8 @@ def parse_hn(soup, site):
         'id': parent_id,
         'score': parent_score,
         'source': site,
-        'permalink': parent_permalink,
+        'item_permalink': item_permalink,
+        'parent_permalink': parent_permalink,
         'posted_timestamp': parent_timestamp,
         'saved_timestamp': current_timestamp()
     }

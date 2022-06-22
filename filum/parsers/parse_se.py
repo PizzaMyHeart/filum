@@ -3,7 +3,7 @@
 Stack Exchange Q&A pages contain a three-level hierarchy of items:
 questions, answers, and comments.
 '''
-from filum.helpers import (bs4_to_md, current_timestamp, iso_to_timestamp,
+from filum.helpers import (add_comment_author_to_title, bs4_to_md, current_timestamp, iso_to_timestamp,
                            get_root_url)
 
 
@@ -24,7 +24,7 @@ def get_author(item):
     return author.strip()
 
 
-def get_question_data(soup, url, site, question):
+def get_question_data(soup, url, item_permalink, site, question):
 
     title = [string for string in soup.find(id='question-header').stripped_strings][0]
     question_body = get_body(question)
@@ -41,7 +41,8 @@ def get_question_data(soup, url, site, question):
         'author': question_author,
         'id': question_id,
         'score': question_score,
-        'permalink': question_permalink,
+        'item_permalink': item_permalink,
+        'parent_permalink': question_permalink,
         'source': site,
         'posted_timestamp': question_timestamp,
         'saved_timestamp': current_timestamp()
@@ -50,17 +51,20 @@ def get_question_data(soup, url, site, question):
     return question_data
 
 
-def parse_se(soup, url, site):
+def parse_se(soup, site, url, item_permalink):
     'Wrapper function'
     soup = soup.find(id='content')
     root_is_answer = False
     if '#' in url:
         root_is_answer = True
         answer_id = url.split('#')[-1]
+    if '/a/' in url:
+        root_is_answer = True
+        answer_id = url.split('/')[-2]
     url = get_root_url(url)
     question = soup.find(id='question')
 
-    question_data = get_question_data(soup, url, site, question)
+    question_data = get_question_data(soup, url, item_permalink, site, question)
 
     children_data = {}
 
@@ -101,6 +105,11 @@ def parse_se(soup, url, site):
         answer_timestamp = answer.time.attrs['datetime']
         answer_timestamp = iso_to_timestamp(answer_timestamp)
         answer_permalink = url + '/a/' + answer_id
+
+        if root_is_answer:
+            question_data['title'] = add_comment_author_to_title(answer_author, question_data['title'])
+            question_data['score'] = answer_score
+            question_data['id'] = answer_id
 
         children_data.update({
             answer_id: {

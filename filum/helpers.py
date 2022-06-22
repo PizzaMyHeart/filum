@@ -60,6 +60,15 @@ def sanitise_text(text: str) -> str:
     return escape_brackets(text)
 
 
+def add_comment_author_to_title(author: str, title: str) -> str:
+    """Append comment author's name to title.
+
+    If the top-level saved item is not the root node,
+    then append the author's name to indicate it is a comment.
+    """
+    return f'{author} on: {title}'
+
+
 def get_root_url(url):
     """Return the first part of the URL until and including '.com'"""
     p = re.compile(r'https://.+\.com')

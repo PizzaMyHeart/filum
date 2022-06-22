@@ -22,7 +22,7 @@ colours = {
     'link_colour': 'not bold not italic underline bright_cyan',
     'op_colour': 'bright_yellow',
     'poster_colour': 'bright_cyan',
-    'reddit_colour': 'bright_red',
+    'reddit_colour': 'deep_pink2',
     'hn_colour': 'orange1',
     'se_colour': 'sea_green1'
 }
@@ -104,10 +104,16 @@ class RichView:
         See https://rich.readthedocs.io/en/stable/group.html.
         """
         timestamp = timestamp_to_iso(item['posted_timestamp'])
+        item_permalink = item["item_permalink"]
+        if item_permalink == item['parent_permalink']:
+            item_permalink = ''
+        else:
+            item_permalink = f'  » {item["item_permalink"]}\n'
         to_print = (
+            f'\n¶ [bold underline violet]{item["title"]}[/bold underline violet]\n\n'
+            f'{item_permalink}'
             f'\n[bold {colours["op_colour"]}]{item["author"]}[/bold {colours["op_colour"]}] '
-            f'[green]{item["score"]} pts[/green] [blue]{timestamp}[/blue] {item["permalink"]}\n\n'
-            f'✎ {item["title"]}\n'
+            f'[green]{item["score"]} pts[/green] [blue]{timestamp}[/blue] {item["parent_permalink"]}\n'
             )
         body: Any = ''
         if item['body']:
@@ -145,9 +151,8 @@ class RichView:
                     author_colour = colours['poster_colour']
                 header = (
                     f'\n¬ [bold {author_colour}]{result["author"]}[/bold {author_colour}] '
-                    f'[green]{score}[/green] [blue]{timestamp}[/blue]\n'
+                    f'[green]{score}[/green] [blue]{timestamp}[/blue]'
                     )
-
                 yield Padding(header, (0, 2, 0, indent))
                 yield Padding(text, (0, 2, 0, indent + 2))
 
