@@ -167,23 +167,18 @@ class Database(object):
 
     def delete_ancestor(self, id: int) -> None:
         with self._conn:
-            sql_ancestors = '''
-                                WITH a AS (
-                                    SELECT id, ROW_NUMBER() OVER (ORDER BY saved_timestamp DESC) AS num FROM ancestors
-                                )
-                                DELETE FROM ancestors WHERE id IN (SELECT id FROM a WHERE num = ?)
-                                '''
+            sql_ancestors = (
+                f'WITH A AS ({self.sql["ancestors_sequential"]})'
+                'DELETE FROM ancestors WHERE id IN (SELECT id FROM a WHERE num = ?)'
+            )
             self._conn.execute(sql_ancestors, (id,))
 
     def delete_descendants(self, id: int) -> None:
         with self._conn:
-            sql_descendants = '''
-                                WITH a AS (
-                                    SELECT id, ROW_NUMBER() OVER (ORDER BY saved_timestamp DESC) AS num FROM ancestors
-                                )
-                                DELETE FROM descendants
-                                WHERE ancestor_id IN (SELECT id FROM a WHERE num = ?);
-                                '''
+            sql_descendants = (
+                f'WITH A AS ({self.sql["ancestors_sequential"]})'
+                'DELETE FROM descendants WHERE ancestor_id IN (SELECT id FROM a WHERE num = ?)'
+            )
             self._conn.execute(sql_descendants, (id,))
 
     def get_all_tags(self):
