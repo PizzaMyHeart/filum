@@ -178,7 +178,7 @@ If you find any bugs (of which there will be many), please file it in a GitHub i
 
 ## Contributing
 
-Not currently open to pull requests, but questions and suggestions are more than welcome. Feel free to open a GitHub issue.
+Not currently accepting pull requests while I clean up the spaghet, but questions and suggestions are more than welcome. Feel free to open a GitHub issue.
 
 
 ## Disclaimer
