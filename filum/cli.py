@@ -107,6 +107,8 @@ def main():
         'filum show\nfilum add <url>\nfilum show <id>\nfilum delete <id>\n\n'
         'filum is a tool to save discussion threads from Reddit, Hacker News, and Stack Exchange on your PC. '
         'Run "filum -h" for a full list of options.\n\n'
+        'To enable colour output, run `filum config` and set '
+        'pager_colours to "true"\n\n'
         'Visit https://github.com/PizzaMyHeart/filum for more info and updates.'
     )
 

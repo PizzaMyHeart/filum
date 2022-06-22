@@ -6,6 +6,7 @@ It's like a bookmark manager that saves actual content rather than just the link
 
 Like Pocket and Instapaper, it extracts text content for an uncluttered experience&mdash;specifically for discussion threads on Reddit, Hacker News, and Stack Exchange.
 
+Fully supported on Linux and mostly works on Windows (use WSL for the ideal experience). Not tested on MacOS.
 
 ## Installation
 
@@ -94,7 +95,7 @@ Example:
 
 ### Add tags to a saved thread
 
-`$ filum tags <id> <tag 1> <tag 2> ...`
+`$ filum tags <id> <tag 1>,<tag 2>,...`
 
 Example: 
 
@@ -102,7 +103,7 @@ Example:
 
 ### Delete tags from a saved thread
 
-`$ filum tags <id> <tag 1> <tag 2> ... --delete`
+`$ filum tags <id> <tag 1>,<tag 2>, ... --delete`
 
 Example: 
 
@@ -139,9 +140,9 @@ Show the URL of a Wayback Machine snapshot: `$ filum archive --url`
 Visit a Wayback Machine snapshot: `$ filum archive --open`
 
 
-## Interactive prompt
+## Interactive mode
 
-Run `$ filum -i` to start a prompt where you can use `filum` subcommands without specifying the `filum` keyword.
+Run `$ filum -i` to start an interpreter where you can use `filum` subcommands without specifying the `filum` keyword.
 
 
 ## Configuration options
@@ -158,13 +159,15 @@ Run `$ filum -i` to start a prompt where you can use `filum` subcommands without
 
 ## Known limitations
 
-These are on my to-do list to improve.
+These are on my to-do list to improve. 
 
 - Reddit comment sub-threads that are hidden under a comment fold (with a "load more comments" link) are ignored
 - The search command only takes in one search string at a time
 - Filters for searching cannot be combined, e.g. you can search either by a tag or by source
 - Look into alternatives to the Wayback Machine for archival (although archive.today makes it really painful to work with using scripts)
 - I may add support for discussion threads on other websites and forums in the future
+
+If you find any bugs (of which there will be many), please file it in a GitHub issue.
 
 
 ## Contributing

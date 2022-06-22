@@ -14,14 +14,16 @@ class ArchiveUploader:
         response = get_http_response(url)
         if response.status_code != 200:
             raise WaybackMachineError
-        link = self._get_archived_link(response)
+        # link = self._get_archived_link(response)  # Maybe unnecessary
+        link = response.url
         return link
 
     def _get_archived_link(self, response: object) -> str:
         """Helper function that takes the HTTP response object from the GET request to save
         a page to the Wayback Machine, and returns the corresponding Memento URL.
         """
-
+        if not response.headers.get('link'):
+            raise WaybackMachineError
         for i in [i for i in response.headers['link'].split(', <')]:
             if 'rel="memento"' in i:
                 memento_string = i

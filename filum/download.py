@@ -14,12 +14,14 @@ from filum.parsers.parse_se import parse_se
 class Download:
     def __init__(self, url):
         self.url = url
+        self.reddit_url = None
 
     def process_url(self):
         """Given a URL, sets the .site attribute."""
 
         # Reddit's unofficial API - add a '.json' suffix to any url
         if 'reddit.com' in self.url:
+            self.reddit_url = self.url  # Save a copy of the original Reddit URL
             self.url += '.json'
             self.site = 'reddit'
         elif 'news.ycombinator.com' in self.url:
@@ -35,7 +37,10 @@ class Download:
         self.response = get_http_response(self.url)
         # Unlike self.url, self.item_permalink will not be mutated.
         # Also to ensure the final redirected url is saved to the database.
-        self.item_permalink = self.response.url
+        if self.reddit_url:
+            self.item_permalink = self.reddit_url
+        else:
+            self.item_permalink = self.response.url
         return self
 
     def parse_html(self, raw: str):
