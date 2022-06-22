@@ -7,9 +7,23 @@ def parse_reddit(json, site, item_permalink):
     comments = content[1]['data']['children']
 
     comment_data = {}
+    body = html_to_md(html_to_md(parent['selftext_html'])) if parent['selftext_html'] else None
+    parent_permalink = f'https://www.reddit.com{parent["permalink"]}'  # The 'www' part is important
+    title = parent['title']
+    author = parent['author']
+    parent_id = parent['name']
+    score = parent['score']
+    if len(comments) == 1:
+        # For cases when the user intends to save a specific comment rather than the
+        # whole thread.
+        # The JSON object returned from a child permalink (as opposed to the root)
+        # contains only one item in [0][data][children].
+        title = add_comment_author_to_title(comments[0]['data']['author'], title)
+        parent_id = comments[0]['data']['id']
+        score = comments[0]['data']['score']
 
-    def get_comments(comments_dict):
-        for comment in comments_dict:
+    def get_comments(comments: dict):
+        for comment in comments:
             id = comment['data']['name']  # Used as dict key for comments
             if comment['kind'] == 'more':
                 # These are comments that are hidden under the fold. There is usually a link saying
@@ -30,7 +44,8 @@ def parse_reddit(json, site, item_permalink):
                 id: {
                     'author': comment['data']['author'],
                     'text': comment_body,
-                    'ancestor_id': parent['name'],
+                    # 'ancestor_id': parent['name'],
+                    'ancestor_id': parent_id,
                     'depth': depth,
                     'score': comment['data']['score'],
                     'timestamp': comment['data']['created_utc'],
@@ -46,27 +61,12 @@ def parse_reddit(json, site, item_permalink):
                 continue
             else:
                 get_comments(replies['data']['children'])
-
     get_comments(comments)
-    body = html_to_md(html_to_md(parent['selftext_html'])) if parent['selftext_html'] else None
-    parent_permalink = f'https://www.reddit.com{parent["permalink"]}'  # The 'www' part is important
-    title = parent['title']
-    author = parent['author']
-    id = parent['name']
-    score = parent['score']
-    if len(comments) == 1:
-        # For cases when the user intends to save a specific comment rather than the
-        # whole thread.
-        # The JSON object returned from a child permalink (as opposed to the root)
-        # contains only one item in [0][data][children].
-        title = add_comment_author_to_title(author, title)
-        id = comments[0]['data']['id']
-        score = comments[0]['data']['score']
     parent_data = {
         'title': title,
         'body': body,
         'author': author,
-        'id': id,
+        'id': parent_id,
         'score': score,
         'item_permalink': item_permalink,
         'parent_permalink': parent_permalink,
@@ -79,5 +79,4 @@ def parse_reddit(json, site, item_permalink):
         'parent_data': parent_data,
         'comment_data': comment_data
     }
-
     return thread
